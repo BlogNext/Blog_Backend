@@ -15,7 +15,7 @@ type BlogTypeController struct {
 func (c *BlogTypeController) GetList() {
 	b_t_s := new(backend.BlogTypeService)
 	result := b_t_s.List()
-	help.Gin200SuccessResponse(c.Ctx,"成功",result)
+	help.Gin200SuccessResponse(c.Ctx, "成功", result)
 
 	return
 }
@@ -41,7 +41,7 @@ func (c *BlogTypeController) UpdateType() {
 	//定义获取方法参数
 	type updateRequest struct {
 		Id    int64  `form:"id" binding:"required"`
-		Title string `form:"title"`
+		Title string `form:"title"  binding:"required"`
 	}
 	var update_request updateRequest
 

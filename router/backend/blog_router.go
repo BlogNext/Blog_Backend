@@ -22,9 +22,16 @@ func RegisterBlogRouter(router *gin.Engine) {
 	}
 
 	//后台博客类型路由
-	blog_router := router.Group("/blog_type")
+	blog_type_router := router.Group("/blog_type")
 	{
 		blog_type_controller := controller.NewController(new(backend.BlogTypeController))
-		blog_router.Any("/:action", blog_type_controller)
+		blog_type_router.Any("/:action", blog_type_controller)
+	}
+
+	//后台博客路由
+	blog_router := router.Group("/blog")
+	{
+		blog_controller := controller.NewController(new(backend.BlogController))
+		blog_router.Any("/:action", blog_controller)
 	}
 }
