@@ -13,7 +13,7 @@ type BlogTypeService struct {
 }
 
 //获取列表类型接口
-func (s *BlogTypeService) List() (blog_type_model_list []model.BlogTypeModel) {
+func (s *BlogTypeService) List() (blog_type_model_list []map[string]interface{}) {
 
 	content := mysql.GetDefaultDBConnect()
 
@@ -23,12 +23,24 @@ func (s *BlogTypeService) List() (blog_type_model_list []model.BlogTypeModel) {
 
 	defer rows.Close()
 
-	blog_type_model_list = make([]model.BlogTypeModel, 0)
-
+	blog_type_model_list = make([]map[string]interface{}, 0)
+	
 	for rows.Next() {
-		var blog_type_model model.BlogTypeModel
-		db.ScanRows(rows, &blog_type_model)
-		blog_type_model_list = append(blog_type_model_list, blog_type_model)
+
+		var id int64
+		var title string
+		var create_time int64
+		var update_time int64
+		rows.Scan(&id, &title, &create_time, &update_time)
+
+		item := make(map[string]interface{})
+
+		item["id"] = id
+		item["title"] = title
+		item["create_time"] = create_time
+		item["update_time"] = update_time
+
+		blog_type_model_list = append(blog_type_model_list, item)
 	}
 
 	return
