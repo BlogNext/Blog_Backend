@@ -1,0 +1,26 @@
+version: '3'
+services:
+  golang-build:
+    container_name: golang_common_build
+    #指定构建的Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
+      #工作目录空间
+    working_dir: /go/src/FlashFeiFei/my-gin
+    volumes:
+      #映射可执行文件,编译后的可执行文件，映射出来
+      - /home/liangyu/my_golang_work_dir/bin/:/go/bin
+      #将pkg目录映射出来，公共
+      - /home/liangyu/my_golang_work_dir/pkg/:/go/pkg
+      #jenkins执行的时候，   ./是项目的路径
+      - ./:/go/src/FlashFeiFei/my-gin
+    command: [go, install, -v, ./...]
+    #设置环境变量
+    environment:
+      - GOPROXY=https://mirrors.aliyun.com/goproxy/
+    networks:
+      - go_build
+networks:
+  go_build:
+    driver: bridge
