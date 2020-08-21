@@ -3,14 +3,13 @@ package controller
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/validate"
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"log"
-	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
@@ -21,14 +20,12 @@ import (
 func NewController(exec_controller Controller) func(*gin.Context) {
 
 	return func(context *gin.Context) {
-
 		//通过反射创建一个新的controller，为什么要这样做？
 		//因为如果不这么做，所有用户都公用一个controller，又因为gin.context是指针，所以用户第二次请求会覆盖第一次请求的context
 		exec_controller_type := reflect.TypeOf(exec_controller) //获取controller的指针的reflect.Type
 		trueType := exec_controller_type.Elem()                 //获取controller的真实类型
 		ptrValue := reflect.New(trueType)                       //获取controller的真实值
 		controller := ptrValue.Interface().(Controller)         //底层的“值” =>  转interface{} => 再转具体类型 Controller
-
 		//捕获异常 try/catch
 		defer func() {
 
@@ -89,27 +86,11 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 
 		call_method := value.MethodByName(action)
 		log.Println("执行方法", action)
+
 		if !call_method.IsValid() {
 			//没有找到action参数，通过请求类型去执行具体对应的方法
-			switch method := context.Request.Method; method {
-			case http.MethodGet:
-				controller.Get()
-			case http.MethodPost:
-				controller.Post()
-			case http.MethodDelete:
-				controller.Delete()
-			case http.MethodHead:
-				controller.Head()
-			case http.MethodPatch:
-				controller.Patch()
-			case http.MethodPut:
-				controller.Put()
-			case http.MethodOptions:
-				controller.Options()
-			default:
-				panic(errors.New(fmt.Sprintf("还不支持的方法: %s", method)))
-			}
-			return
+			method := context.Request.Method
+			panic(errors.New(fmt.Sprintf("还不支持的方法: %s", method)))
 
 		}
 		//调用方法

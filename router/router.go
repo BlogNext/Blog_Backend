@@ -1,8 +1,8 @@
 package router
 
 import (
+	"github.com/blog_backend/router/backend"
 	"github.com/gin-gonic/gin"
-	"github.com/blog_backend/router/oauth"
 )
 
 type MyRouter struct {
@@ -12,7 +12,7 @@ type MyRouter struct {
 func (mr *MyRouter) registerRouter() {
 	mr.router_list = make([]RegisterRouter, 1)
 	//路由注册
-	mr.router_list[0] = oauth.RegisterOauthRouter
+	mr.router_list[0] = backend.RegisterBlogRouter
 }
 
 func (mr *MyRouter) RunRouter() *gin.Engine {
