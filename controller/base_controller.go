@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"log"
+	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
@@ -89,8 +90,25 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 
 		if !call_method.IsValid() {
 			//没有找到action参数，通过请求类型去执行具体对应的方法
-			method := context.Request.Method
-			panic(errors.New(fmt.Sprintf("还不支持的方法: %s", method)))
+			switch method := context.Request.Method; method {
+			case http.MethodGet:
+				controller.Get()
+			case http.MethodPost:
+				controller.Post()
+			case http.MethodDelete:
+				controller.Delete()
+			case http.MethodHead:
+				controller.Head()
+			case http.MethodPatch:
+				controller.Patch()
+			case http.MethodPut:
+				controller.Put()
+			case http.MethodOptions:
+				controller.Options()
+			default:
+				panic(errors.New(fmt.Sprintf("还不支持的方法: %s", method)))
+			}
+			return
 
 		}
 		//调用方法

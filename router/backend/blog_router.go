@@ -25,6 +25,6 @@ func RegisterBlogRouter(router *gin.Engine) {
 	blog_router := router.Group("/blog_type")
 	{
 		blog_type_controller := controller.NewController(new(backend.BlogTypeController))
-		blog_router.Any("/:action", blog_type_controller)
+		blog_router.Any("/*action", blog_type_controller)
 	}
 }
