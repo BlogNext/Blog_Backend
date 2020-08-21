@@ -2,9 +2,11 @@ package mysql
 
 import (
 	"errors"
+	"github.com/blog_backend/common-lib/db"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	"github.com/blog_backend/common-lib/db"
+	"log"
+	"os"
 )
 
 //db连接信息
@@ -26,6 +28,8 @@ func InitDBConnect(db_info ...db.DBInfo) {
 	for _, item := range db_info {
 		if _, ok := db_map[item.Key]; !ok {
 			connect_db, err := gorm.Open("mysql", item.Dsn)
+			connect_db.LogMode(true)
+			connect_db.SetLogger(log.New(os.Stdout, "\r\n", 0))
 			if err != nil {
 				panic(err)
 			}
@@ -42,6 +46,6 @@ func GetDBConnect(key string) *gorm.DB {
 	panic(errors.New("找不到连接: " + key))
 }
 
-func GetDefaultDBConnect() *gorm.DB{
+func GetDefaultDBConnect() *gorm.DB {
 	return GetDBConnect("default")
 }
