@@ -17,3 +17,5 @@
 go.sum
 .idea
 user_system.exe
+./config/db.yml
+./config/server.yml
