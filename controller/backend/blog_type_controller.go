@@ -33,5 +33,13 @@ func (c *BlogTypeController) Post() {
 
 //修改一个类型
 func (c *BlogTypeController) Put() {
+	//获取参数
+	title := c.Ctx.PostForm("title")
 
+	//调用服务
+	b_t_s := new(backend.BlogTypeService)
+	b_t_s.Update(4, title)
+
+	//网络响应
+	help.Gin200SuccessResponse(c.Ctx, "添加成功", nil)
 }
