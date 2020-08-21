@@ -1,10 +1,10 @@
 package model
 
-type BlogType struct {
+type BlogTypeModel struct {
 	BaseModel
 	Title string `gorm:"cloumn:title"`
 }
 
-func (BlogType) TableName() string {
+func (BlogTypeModel) TableName() string {
 	return "blog_type"
 }

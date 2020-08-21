@@ -34,7 +34,6 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 
 				switch err.(type) {
 				case exception.MyException:
-					log.Println("asfasdfasdf")
 					//自定义异常，返回200,自定义的错误码
 					help.Gin200ErrorResponse(context, err.(exception.MyException).GetErrorCode(), err.(exception.MyException).Error(), nil)
 				default:

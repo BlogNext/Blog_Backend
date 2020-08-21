@@ -1,6 +1,6 @@
 package model
 
-type Blog struct {
+type BlogModel struct {
 	BaseModel
 	BlogTypeId int64  `gorm:"cloumn:blog_type_id"`
 	Title      string `gorm:"cloumn:title"`
@@ -8,6 +8,6 @@ type Blog struct {
 	Content    string `gorm:"cloumn:content"`
 }
 
-func (Blog) TableName() string {
+func (BlogModel) TableName() string {
 	return "blog"
 }
