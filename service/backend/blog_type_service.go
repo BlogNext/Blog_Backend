@@ -13,15 +13,26 @@ type BlogTypeService struct {
 }
 
 //获取列表类型接口
-func (s *BlogTypeService) List() (blog_type_model_list []model.BlogTypeModel){
+func (s *BlogTypeService) List() (blog_type_model_list []model.BlogTypeModel) {
 
-	db := mysql.GetDefaultDBConnect()
+	content := mysql.GetDefaultDBConnect()
 
-	db.Find(&blog_type_model_list)
+	db := content.Model(&model.BlogTypeModel{})
+	db.Select("id, title, create_time, update_time")
+	rows, _ := db.Rows()
+
+	defer rows.Close()
+
+	blog_type_model_list = make([]model.BlogTypeModel, 0)
+
+	for rows.Next() {
+		var blog_type_model model.BlogTypeModel
+		db.ScanRows(rows, &blog_type_model)
+		blog_type_model_list = append(blog_type_model_list, blog_type_model)
+	}
 
 	return
 }
-
 
 //添加
 func (s *BlogTypeService) Add(title string) {
