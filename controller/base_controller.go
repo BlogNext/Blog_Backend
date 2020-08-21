@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"log"
-	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
@@ -89,27 +88,10 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 
 		if !call_method.IsValid() {
 			//没有找到action参数，通过请求类型去执行具体对应的方法
-			switch method := context.Request.Method; method {
-			case http.MethodGet:
-				controller.Get()
-			case http.MethodPost:
-				controller.Post()
-			case http.MethodDelete:
-				controller.Delete()
-			case http.MethodHead:
-				controller.Head()
-			case http.MethodPatch:
-				controller.Patch()
-			case http.MethodPut:
-				controller.Put()
-			case http.MethodOptions:
-				controller.Options()
-			default:
-				panic(errors.New(fmt.Sprintf("还不支持的方法: %s", method)))
-			}
-			return
-
+			method := context.Request.Method
+			panic(errors.New(fmt.Sprintf("还不支持的方法: %s", method)))
 		}
+
 		//调用方法
 		call_method.Call(param)
 		return
@@ -120,14 +102,7 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 type Controller interface {
 	Init(ctx *gin.Context)          //ctx是gin的Context controller是当前执行的控制器,初始化
 	Prepare() exception.MyException //解析
-	Get()
-	Post()
-	Delete()
-	Put()
-	Head()
-	Patch()
-	Options()
-	Finish() //这个函数是在执行完相应的 HTTP Method 方法之后执行的，默认是空，用户可以在子 struct 中重写这个函数，执行例如数据库关闭，清理数据之类的工作。
+	Finish()                        //这个函数是在执行完相应的 HTTP Method 方法之后执行的，默认是空，用户可以在子 struct 中重写这个函数，执行例如数据库关闭，清理数据之类的工作。
 }
 
 type BaseController struct {
@@ -142,42 +117,6 @@ func (c *BaseController) Init(ctx *gin.Context) {
 //做一些鉴权操作等
 func (c *BaseController) Prepare() exception.MyException {
 	return nil
-}
-
-func (c *BaseController) Post() {
-	help.Gin200SuccessResponse(c.Ctx, "Post请求成功", nil)
-	return
-}
-
-//默认执行的Get方法
-func (c *BaseController) Get() {
-	help.Gin200SuccessResponse(c.Ctx, "Get请求成功", nil)
-	return
-}
-
-func (c *BaseController) Delete() {
-	help.Gin200SuccessResponse(c.Ctx, "Delete请求成功", nil)
-	return
-}
-
-func (c *BaseController) Put() {
-	help.Gin200SuccessResponse(c.Ctx, "Put请求成功", nil)
-	return
-}
-
-func (c *BaseController) Head() {
-	help.Gin200SuccessResponse(c.Ctx, "Head请求成功", nil)
-	return
-}
-
-func (c *BaseController) Patch() {
-	help.Gin200SuccessResponse(c.Ctx, "Path请求成功", nil)
-	return
-}
-
-func (c *BaseController) Options() {
-	help.Gin200SuccessResponse(c.Ctx, "Options请求成功", nil)
-	return
 }
 
 func (c *BaseController) Finish() {

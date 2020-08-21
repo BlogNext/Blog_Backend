@@ -2,9 +2,9 @@ package backend
 
 import (
 	"github.com/blog_backend/controller"
+	"github.com/blog_backend/exception"
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/service/backend"
-	"log"
 )
 
 type BlogTypeController struct {
@@ -12,12 +12,16 @@ type BlogTypeController struct {
 }
 
 //列表接口
-func (c *BlogTypeController) Get() {
-	log.Println("asdfasdf")
+func (c *BlogTypeController) GetList() {
+	b_t_s := new(backend.BlogTypeService)
+	result := b_t_s.List()
+	help.Gin200SuccessResponse(c.Ctx,"成功",result)
+
+	return
 }
 
 //添加一个类型
-func (c *BlogTypeController) Post() {
+func (c *BlogTypeController) AddType() {
 	//获取参数
 	title := c.Ctx.PostForm("title")
 
@@ -32,14 +36,27 @@ func (c *BlogTypeController) Post() {
 }
 
 //修改一个类型
-func (c *BlogTypeController) Put() {
-	//获取参数
-	title := c.Ctx.PostForm("title")
+func (c *BlogTypeController) UpdateType() {
+
+	//定义获取方法参数
+	type updateRequest struct {
+		Id    int64  `form:"id" binding:"required"`
+		Title string `form:"title"`
+	}
+	var update_request updateRequest
+
+	err := c.Ctx.ShouldBind(&update_request)
+	if err != nil {
+		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
+		return
+	}
 
 	//调用服务
 	b_t_s := new(backend.BlogTypeService)
-	b_t_s.Update(4, title)
+	b_t_s.Update(update_request.Id, update_request.Title)
 
 	//网络响应
-	help.Gin200SuccessResponse(c.Ctx, "添加成功", nil)
+	help.Gin200SuccessResponse(c.Ctx, "修改成功", nil)
+
+	return
 }

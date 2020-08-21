@@ -13,9 +13,15 @@ type BlogTypeService struct {
 }
 
 //获取列表类型接口
-func (s *BlogTypeService) List() {
+func (s *BlogTypeService) List() (blog_type_model_list []model.BlogTypeModel){
 
+	db := mysql.GetDefaultDBConnect()
+
+	db.Find(&blog_type_model_list)
+
+	return
 }
+
 
 //添加
 func (s *BlogTypeService) Add(title string) {
@@ -29,8 +35,10 @@ func (s *BlogTypeService) Add(title string) {
 	if db.NewRecord(*blog_type_model) {
 		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("保存失败:%s", db.Error.Error())))
 	}
+
 }
 
+//修改
 func (s *BlogTypeService) Update(id int64, title string) {
 	db := mysql.GetDefaultDBConnect()
 	blog_type_model := new(model.BlogTypeModel)
@@ -41,6 +49,7 @@ func (s *BlogTypeService) Update(id int64, title string) {
 	}
 
 	blog_type_model.Title = title
+	blog_type_model.UpdateTime = time.Now().Unix()
 
 	db.Save(blog_type_model)
 
