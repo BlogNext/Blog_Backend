@@ -15,6 +15,7 @@ require (
 	github.com/jinzhu/gorm v1.9.12
 	github.com/prometheus/common v0.4.0
 	github.com/spf13/viper v1.6.2
+	github.com/thoas/go-funk v0.7.0
 	golang.org/x/tools v0.0.0-20190328211700-ab21143f2384
 	gopkg.in/go-playground/validator.v9 v9.29.1
 )

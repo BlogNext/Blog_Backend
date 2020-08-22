@@ -22,10 +22,11 @@ func (c *BlogController) AddBlog() {
 
 	//定义获取方法参数
 	type addRequest struct {
-		BlogTypeId int64  `form:"blog_type_id" binding:"required"`
-		Title      string `form:"title"  binding:"required"`
-		Abstract   string `form:"abstract"  binding:"required"`
-		Content    string `form:"content"  binding:"required"`
+		BlogTypeId  int64  `form:"blog_type_id" binding:"required"`
+		Title       string `form:"title"  binding:"required"`
+		Abstract    string `form:"abstract"  binding:"required"`
+		Content     string `form:"content"  binding:"required"`
+		CoverPlanId int64  `form:"cover_plan_id"`
 	}
 
 	var add_request addRequest
@@ -38,7 +39,7 @@ func (c *BlogController) AddBlog() {
 
 	//调用服务
 	b_s := new(backend.BlogService)
-	b_s.AddBlog(add_request.BlogTypeId, add_request.Title, add_request.Abstract, add_request.Content)
+	b_s.AddBlog(add_request.BlogTypeId, add_request.CoverPlanId, add_request.Title, add_request.Abstract, add_request.Content)
 
 	//网络响应
 	help.Gin200SuccessResponse(c.Ctx, "添加成功", nil)
@@ -50,11 +51,12 @@ func (c *BlogController) AddBlog() {
 func (c *BlogController) UpdateBlog() {
 	//定义获取方法参数
 	type updateRequest struct {
-		ID         int64  `form:"id" binding:"required"`
-		BlogTypeId int64  `form:"blog_type_id" binding:"required"`
-		Title      string `form:"title"  binding:"required"`
-		Abstract   string `form:"abstract"  binding:"required"`
-		Content    string `form:"content"  binding:"required"`
+		ID          int64  `form:"id" binding:"required"`
+		BlogTypeId  int64  `form:"blog_type_id" binding:"required"`
+		Title       string `form:"title"  binding:"required"`
+		Abstract    string `form:"abstract"  binding:"required"`
+		Content     string `form:"content"  binding:"required"`
+		CoverPlanId int64  `form:"cover_plan_id"`
 	}
 
 	var update_request updateRequest
@@ -67,7 +69,8 @@ func (c *BlogController) UpdateBlog() {
 
 	//调用服务
 	b_s := new(backend.BlogService)
-	b_s.UpdateBlog(update_request.ID, update_request.BlogTypeId, update_request.Title, update_request.Abstract, update_request.Content)
+	b_s.UpdateBlog(update_request.ID, update_request.BlogTypeId, update_request.CoverPlanId,
+		update_request.Title, update_request.Abstract, update_request.Content)
 
 	//网络响应
 	help.Gin200SuccessResponse(c.Ctx, "更新成功", nil)

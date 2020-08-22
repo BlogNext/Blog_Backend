@@ -17,6 +17,40 @@ const (
 	UPLOAD_ROOT_PATH = "upload"
 )
 
+//获取附件
+func GetAttachmentImages(ids []int64) (full_attachment_extend []model.FullAttachmentExtend) {
+	attachment_list := getAttachmentByIds(ids)
+	if attachment_list == nil {
+		return
+	}
+
+	full_attachment_extend = make([]model.FullAttachmentExtend, len(attachment_list))
+
+	for index, attachment_model := range attachment_list {
+		full_attachment_extend[index] = model.FullAttachmentExtend{
+			AttachmentModel: attachment_model,
+			FullUrl:         "sadfsd",
+			Url:             attachment_model.Path,
+		}
+	}
+
+	return
+}
+
+//获取附件
+func getAttachmentByIds(ids []int64) (attachment_list []model.AttachmentModel) {
+
+	if ids == nil {
+		return
+	}
+
+	db := mysql.GetDefaultDBConnect()
+	db.Where("id IN (?)", ids).Find(&attachment_list)
+
+	return
+}
+
+//附件服务
 type AttachmentService struct {
 }
 
