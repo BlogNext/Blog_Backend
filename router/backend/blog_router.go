@@ -21,17 +21,22 @@ func RegisterBlogRouter(router *gin.Engine) {
 		_ = zh_translations.RegisterDefaultTranslations(v, trans)
 	}
 
-	//后台博客类型路由
-	blog_type_router := router.Group("/blog_type")
+	//后端公共的路由
+	blackend_router := router.Group("/blackend")
 	{
-		blog_type_controller := controller.NewController(new(backend.BlogTypeController))
-		blog_type_router.Any("/:action", blog_type_controller)
+		//后台博客类型路由
+		blog_type_router := blackend_router.Group("/blog_type")
+		{
+			blog_type_controller := controller.NewController(new(backend.BlogTypeController))
+			blog_type_router.Any("/:action", blog_type_controller)
+		}
+
+		//后台博客路由
+		blog_router := blackend_router.Group("/blog")
+		{
+			blog_controller := controller.NewController(new(backend.BlogController))
+			blog_router.Any("/:action", blog_controller)
+		}
 	}
 
-	//后台博客路由
-	blog_router := router.Group("/blog")
-	{
-		blog_controller := controller.NewController(new(backend.BlogController))
-		blog_router.Any("/:action", blog_controller)
-	}
 }
