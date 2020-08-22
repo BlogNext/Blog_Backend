@@ -13,7 +13,7 @@ services:
     - ./:/go/src/github.com/blog_backend
     - /home/xiaochen/BlogNext/code/Blog_Backend/upload:/go/bin/upload
     - /home/xiaochen/BlogNext/code/Blog_Backend/config/:/go/bin/config
-    command: [go, install, -v, ./...]
+    command: /bin/bash -c "go install -v ./ && /go/bin/blog_backend"
     ports:
     - "8083:8083"
     #设置环境变量
