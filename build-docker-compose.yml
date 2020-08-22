@@ -7,10 +7,10 @@ services:
       context: .
       dockerfile: Dockerfile
       #工作目录空间
-    working_dir: /go/src/Blog_Backend/my-gin
+    working_dir: /go/src/github.com/blog_backend
     volumes:
     #jenkins执行的时候，   ./是项目的路径
-    - ./:/go/src/Blog_Backend/my-gin
+    - ./:/go/src/github.com/blog_backend
     - /home/xiaochen/BlogNext/code/Blog_Backend/upload:/go/bin/upload
     - /home/xiaochen/BlogNext/code/Blog_Backend/config/:/go/bin/config
     command: [go, install, -v, ./...]
