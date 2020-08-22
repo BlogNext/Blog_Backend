@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/blog_backend/controller"
 	"github.com/blog_backend/exception"
+	"github.com/blog_backend/help"
 	"github.com/blog_backend/model"
 	"github.com/blog_backend/service/common"
 	"strconv"
@@ -31,4 +32,7 @@ func (a *AttachmentController) UploadBlog() {
 			}
 		}
 	}
+
+	help.Gin200SuccessResponse(a.Ctx,"上传成功",nil)
+	return 
 }
