@@ -19,3 +19,4 @@ go.sum
 user_system.exe
 config/db.yaml
 config/server.yaml
+upload/

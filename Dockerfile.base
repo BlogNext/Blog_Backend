@@ -1,6 +1,6 @@
 FROM golang:1.13
 
-WORKDIR /go/src/FlashFeiFei/my-gin
+WORKDIR /go/src/Blog_Backend/my-gin
 #设置golang mod的阿里云代理
 ENV GOPROXY https://mirrors.aliyun.com/goproxy/
 
