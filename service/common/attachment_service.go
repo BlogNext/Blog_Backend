@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/blog_backend/common-lib/config"
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
@@ -26,10 +27,14 @@ func GetAttachmentImages(ids []int64) (full_attachment_extend []model.FullAttach
 
 	full_attachment_extend = make([]model.FullAttachmentExtend, len(attachment_list))
 
+	server_config, _ := config.GetConfig("server")
+	server_info := server_config.GetStringMap("servier")
+	domain := server_info["domain"].(string)
+
 	for index, attachment_model := range attachment_list {
 		full_attachment_extend[index] = model.FullAttachmentExtend{
 			AttachmentModel: attachment_model,
-			FullUrl:         "sadfsd",
+			FullUrl:         strings.Join([]string{domain, attachment_model.Path}, "/"),
 			Url:             attachment_model.Path,
 		}
 	}
