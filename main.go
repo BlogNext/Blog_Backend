@@ -48,7 +48,6 @@ func init() {
 func main() {
 
 	router := new(my_router.MyRouter)
-	
 	//goin的性能分析
 	//ginpprof.Wrapper(router)
 
