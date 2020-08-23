@@ -60,10 +60,10 @@ type AttachmentService struct {
 }
 
 //保存到数据库
-func (s *AttachmentService) saveToDB(dst string, module int64) {
+func (s *AttachmentService) saveToDB(dst string, module int64) (attachment_model *model.AttachmentModel) {
 
 	db := mysql.GetDefaultDBConnect()
-	attachment_model := new(model.AttachmentModel)
+	attachment_model = new(model.AttachmentModel)
 	attachment_model.Path = dst
 	attachment_model.CreateTime = time.Now().Unix()
 	attachment_model.UpdateTime = time.Now().Unix()
@@ -74,10 +74,12 @@ func (s *AttachmentService) saveToDB(dst string, module int64) {
 	if db.NewRecord(*attachment_model) {
 		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("新增失败:%s", db.Error.Error())))
 	}
+
+	return attachment_model
 }
 
 //上传博客的文件
-func (s *AttachmentService) UploadBlog(Ctx *gin.Context) {
+func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend []model.FullAttachmentExtend){
 	multipart_form, _ := Ctx.MultipartForm()
 	files := multipart_form.File["upload_blog_images"]
 
@@ -87,6 +89,11 @@ func (s *AttachmentService) UploadBlog(Ctx *gin.Context) {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.MkdirAll(dir, os.ModePerm)
 	}
+
+	var attachment_ids []int64
+
+	//保存成功的文件
+	attachment_ids = make([]int64, len(files))
 
 	for index, file := range files {
 
@@ -100,7 +107,14 @@ func (s *AttachmentService) UploadBlog(Ctx *gin.Context) {
 		}
 
 		//保存到数据库
-		s.saveToDB(dst, model.ATTACHMENT_BLOG_Module)
+		attachment_model := s.saveToDB(dst, model.ATTACHMENT_BLOG_Module)
+
+		attachment_ids = append(attachment_ids, int64(attachment_model.ID))
 	}
 
+
+	//获取文件列表
+	full_attachment_extend = GetAttachmentImages(attachment_ids)
+
+	return
 }

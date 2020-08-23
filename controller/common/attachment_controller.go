@@ -16,6 +16,9 @@ type AttachmentController struct {
 
 func (a *AttachmentController) UploadBlog() {
 	form, _ := a.Ctx.MultipartForm()
+
+	var upload_resule interface{}
+
 	if modules, ok := form.Value["modules"]; ok {
 
 		attachment_service := new(common.AttachmentService)
@@ -25,7 +28,7 @@ func (a *AttachmentController) UploadBlog() {
 			switch int_module, _ := strconv.ParseInt(module, 10, 64); int_module {
 			case model.ATTACHMENT_BLOG_Module:
 				//博客图片
-				attachment_service.UploadBlog(a.Ctx)
+				upload_resule = attachment_service.UploadBlog(a.Ctx)
 				break;
 			default:
 				panic(exception.NewException(exception.VALIDATE_ERR, fmt.Sprintf("没有支持的模块%d", int_module)))
@@ -33,6 +36,6 @@ func (a *AttachmentController) UploadBlog() {
 		}
 	}
 
-	help.Gin200SuccessResponse(a.Ctx,"上传成功",nil)
-	return 
+	help.Gin200SuccessResponse(a.Ctx,"上传成功",upload_resule)
+	return
 }
