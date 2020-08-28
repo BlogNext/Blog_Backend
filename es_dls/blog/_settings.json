@@ -1,0 +1,24 @@
+{
+  "xiaochen_blog_next_blog" : {
+    "settings" : {
+      "index" : {
+        "number_of_shards" : "1",
+        "provided_name" : "xiaochen_blog_next_blog",
+        "creation_date" : "1598605933523",
+        "analysis" : {
+          "analyzer" : {
+            "my_ik_synonym" : {
+              "type" : "custom",
+              "tokenizer" : "ik_max_word"
+            }
+          }
+        },
+        "number_of_replicas" : "1",
+        "uuid" : "wNrWjLMGRvKvvJd1TdLfCA",
+        "version" : {
+          "created" : "7080199"
+        }
+      }
+    }
+  }
+}

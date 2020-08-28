@@ -1,11 +1,38 @@
 {
-  "xiaochen_blog_next_zh_blog" : {
-    "aliases" : { },
+  "xiaochen_blog_next_blog" : {
     "mappings" : {
       "properties" : {
         "abstract" : {
           "type" : "text",
           "analyzer" : "my_ik_synonym"
+        },
+        "attachment_info" : {
+          "properties" : {
+            "create_time" : {
+              "type" : "integer"
+            },
+            "full_url" : {
+              "type" : "text",
+              "index" : false
+            },
+            "id" : {
+              "type" : "integer"
+            },
+            "module" : {
+              "type" : "integer"
+            },
+            "path" : {
+              "type" : "text",
+              "index" : false
+            },
+            "update_time" : {
+              "type" : "integer"
+            },
+            "url" : {
+              "type" : "text",
+              "index" : false
+            }
+          }
         },
         "blog_type_object" : {
           "properties" : {
@@ -40,26 +67,6 @@
         },
         "update_time" : {
           "type" : "integer"
-        }
-      }
-    },
-    "settings" : {
-      "index" : {
-        "number_of_shards" : "1",
-        "provided_name" : "xiaochen_blog_next_zh_blog",
-        "creation_date" : "1598603226702",
-        "analysis" : {
-          "analyzer" : {
-            "my_ik_synonym" : {
-              "type" : "custom",
-              "tokenizer" : "ik_max_word"
-            }
-          }
-        },
-        "number_of_replicas" : "1",
-        "uuid" : "aHhTechWQI2YxIR5keZZTQ",
-        "version" : {
-          "created" : "7080199"
         }
       }
     }
