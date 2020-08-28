@@ -1,0 +1,60 @@
+//PUT xiaochen_blog_next_zh_blog
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "my_ik_synonym": {
+          "type": "custom",
+          "tokenizer": "ik_max_word"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "my_ik_synonym",
+        "search_analyzer": "my_ik_synonym"
+      },
+      "abstract": {
+        "type": "text",
+        "analyzer": "my_ik_synonym",
+        "search_analyzer": "my_ik_synonym"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "my_ik_synonym",
+        "search_analyzer": "my_ik_synonym"
+      },
+      "create_time": {
+        "type": "integer"
+      },
+      "update_time": {
+        "type": "integer"
+      },
+      "blog_type_object": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "text",
+            "analyzer": "my_ik_synonym",
+            "search_analyzer": "my_ik_synonym"
+          },
+          "create_time": {
+            "type": "integer"
+          },
+          "update_time": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
