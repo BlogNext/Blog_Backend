@@ -11,4 +11,5 @@ require (
 	github.com/jinzhu/gorm v1.9.12
 	github.com/spf13/viper v1.6.2
 	github.com/thoas/go-funk v0.7.0
+	github.com/olivere/elastic/v7 v7.0.19
 )
