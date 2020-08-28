@@ -1,58 +1,65 @@
-//PUT xiaochen_blog_next_zh_blog
 {
-  "settings": {
-    "analysis": {
-      "analyzer": {
-        "my_ik_synonym": {
-          "type": "custom",
-          "tokenizer": "ik_max_word"
+  "xiaochen_blog_next_zh_blog" : {
+    "aliases" : { },
+    "mappings" : {
+      "properties" : {
+        "abstract" : {
+          "type" : "text",
+          "analyzer" : "my_ik_synonym"
+        },
+        "blog_type_object" : {
+          "properties" : {
+            "create_time" : {
+              "type" : "integer"
+            },
+            "id" : {
+              "type" : "integer"
+            },
+            "title" : {
+              "type" : "text",
+              "analyzer" : "my_ik_synonym"
+            },
+            "update_time" : {
+              "type" : "integer"
+            }
+          }
+        },
+        "content" : {
+          "type" : "text",
+          "analyzer" : "my_ik_synonym"
+        },
+        "create_time" : {
+          "type" : "integer"
+        },
+        "id" : {
+          "type" : "integer"
+        },
+        "title" : {
+          "type" : "text",
+          "analyzer" : "my_ik_synonym"
+        },
+        "update_time" : {
+          "type" : "integer"
         }
       }
-    }
-  },
-  "mappings": {
-    "properties": {
-      "id": {
-        "type": "integer"
-      },
-      "content": {
-        "type": "text",
-        "analyzer": "my_ik_synonym",
-        "search_analyzer": "my_ik_synonym"
-      },
-      "abstract": {
-        "type": "text",
-        "analyzer": "my_ik_synonym",
-        "search_analyzer": "my_ik_synonym"
-      },
-      "title": {
-        "type": "text",
-        "analyzer": "my_ik_synonym",
-        "search_analyzer": "my_ik_synonym"
-      },
-      "create_time": {
-        "type": "integer"
-      },
-      "update_time": {
-        "type": "integer"
-      },
-      "blog_type_object": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "title": {
-            "type": "text",
-            "analyzer": "my_ik_synonym",
-            "search_analyzer": "my_ik_synonym"
-          },
-          "create_time": {
-            "type": "integer"
-          },
-          "update_time": {
-            "type": "integer"
+    },
+    "settings" : {
+      "index" : {
+        "number_of_shards" : "1",
+        "provided_name" : "xiaochen_blog_next_zh_blog",
+        "creation_date" : "1598603226702",
+        "analysis" : {
+          "analyzer" : {
+            "my_ik_synonym" : {
+              "type" : "custom",
+              "tokenizer" : "ik_max_word"
+            }
           }
+        },
+        "number_of_replicas" : "1",
+        "uuid" : "aHhTechWQI2YxIR5keZZTQ",
+        "version" : {
+          "created" : "7080199"
         }
       }
     }
