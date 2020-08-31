@@ -7,7 +7,7 @@ import (
 
 //blog文档
 type BlogEntity struct {
-	entity.BaseEntity
+	*entity.BaseEntity
 	//文章标题
 	Title string `json:"title"`
 	//文章摘要
@@ -16,14 +16,13 @@ type BlogEntity struct {
 	Content string `json:"content"`
 
 	//附件信息
-	AttachmentInfo attachment.AttachmentDoc `json:"attachment_info"`
+	AttachmentInfo *attachment.AttachmentDoc `json:"attachment_info"`
 
-	BlogTypeObject BlogTypeDoc `json:"blog_type_object"`
+	BlogTypeObject *BlogTypeDoc `json:"blog_type_object"`
 }
-
 
 //blog_type文档
 type BlogTypeDoc struct {
-	entity.BaseEntity
-	Title      string `json:"title"`
+	*entity.BaseEntity
+	Title string `json:"title"`
 }
