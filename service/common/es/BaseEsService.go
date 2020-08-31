@@ -1,6 +1,7 @@
 package es
 
 import (
+	"context"
 	"github.com/blog_backend/common-lib/config"
 	"github.com/olivere/elastic/v7"
 	"log"
@@ -8,7 +9,8 @@ import (
 )
 
 type BaseEsService struct {
-	client *elastic.Client
+	//es连接的客户端
+	Client *elastic.Client
 }
 
 func NewBaseEsService(host string, username string, password string) *BaseEsService {
@@ -32,7 +34,34 @@ func NewBaseEsService(host string, username string, password string) *BaseEsServ
 	}
 
 	s := new(BaseEsService)
-	s.client = client
+	s.Client = client
 
 	return s
+}
+
+//更新一个文档
+func (b *BaseEsService) UpdateDoc(index, doc_id string, doc interface{}) (*elastic.UpdateResponse, error) {
+	res, err := b.Client.Update().Index(index).Id(doc_id).Doc(doc).Do(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+//删除一个文档
+func (b *BaseEsService) DeleteDoc(index, doc_id string) (*elastic.DeleteResponse, error) {
+	res, err := b.Client.Delete().Index(index).Id(doc_id).Do(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+//获取一个文档
+func (b *BaseEsService) GetDoc(index, doc_id string) (*elastic.GetResult, error) {
+	res, err := b.Client.Get().Index(index).Id(doc_id).Do(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }

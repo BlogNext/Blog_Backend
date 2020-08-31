@@ -1,11 +1,11 @@
-package blog
+package es
 
 import (
-	"context"
-	"github.com/olivere/elastic/v7"
-	"log"
-	"os"
-	"testing"
+"context"
+"github.com/olivere/elastic/v7"
+"log"
+"os"
+"testing"
 )
 
 var client *elastic.Client
@@ -49,3 +49,4 @@ func TestIndexExists(t *testing.T) {
 
 	t.Log("xiaochen_blog_next_blog存在")
 }
+
