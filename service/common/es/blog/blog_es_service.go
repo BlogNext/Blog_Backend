@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/service/common/es"
 	"log"
 )
@@ -24,7 +25,7 @@ func (b *BlogEsService) ImportData() {
 }
 
 //删除blog文档
-func (b *BlogEsService) DeleteDoc(blog_doc *BlogDoc) {
+func (b *BlogEsService) DeleteDoc(blog_doc *blog.BlogEntity) {
 	_, err := b.BaseEsService.DeleteDoc(es.BLOG_INDEX, blog_doc.DocID)
 	if err != nil {
 		panic(err)
@@ -32,7 +33,7 @@ func (b *BlogEsService) DeleteDoc(blog_doc *BlogDoc) {
 }
 
 //添加一个doc,返回文档在es中的唯一标识
-func (b *BlogEsService) AddDoc(blog_doc *BlogDoc) string {
+func (b *BlogEsService) AddDoc(blog_doc *blog.BlogEntity) string {
 
 	if blog_doc == nil {
 		panic(errors.New("blog_doc为空"))
@@ -48,7 +49,7 @@ func (b *BlogEsService) AddDoc(blog_doc *BlogDoc) string {
 }
 
 //更新一个文档的内容
-func (b *BlogEsService) UpdateDoc(blog_doc *BlogDoc) {
+func (b *BlogEsService) UpdateDoc(blog_doc *blog.BlogEntity) {
 	if blog_doc == nil {
 		panic(errors.New("blog_doc为空"))
 	}

@@ -8,6 +8,11 @@ import (
 	"os"
 )
 
+
+const (
+	BLOG_INDEX = "xiaochen_blog_next_blog"
+)
+
 type BaseEsService struct {
 	//es连接的客户端
 	Client *elastic.Client

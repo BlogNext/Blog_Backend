@@ -1,13 +1,13 @@
 package blog
 
 import (
-	"github.com/blog_backend/service/common/es"
-	"github.com/blog_backend/service/common/es/attachment"
+	"github.com/blog_backend/entity"
+	"github.com/blog_backend/entity/attachment"
 )
 
 //blog文档
-type BlogDoc struct {
-	es.BaseDoc
+type BlogEntity struct {
+	entity.BaseEntity
 	//文章标题
 	Title string `json:"title"`
 	//文章摘要
@@ -24,6 +24,6 @@ type BlogDoc struct {
 
 //blog_type文档
 type BlogTypeDoc struct {
-	es.BaseDoc
+	entity.BaseEntity
 	Title      string `json:"title"`
 }

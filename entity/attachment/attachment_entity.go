@@ -1,10 +1,10 @@
 package attachment
 
-import "github.com/blog_backend/service/common/es"
+import "github.com/blog_backend/entity"
 
 //附件的doc
 type AttachmentDoc struct {
-	es.BaseDoc
+	entity.BaseEntity
 	//静态资源全路径
 	FullUrl string `json:"full_url"`
 	//静态资源功能性标识
