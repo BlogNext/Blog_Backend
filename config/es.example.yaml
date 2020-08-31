@@ -1,0 +1,5 @@
+es:
+  default:
+    host: http://106.12.76.73:9200/
+    username: elastic
+    password password10000
