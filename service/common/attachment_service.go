@@ -8,6 +8,7 @@ import (
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
 	"github.com/gin-gonic/gin"
+	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -26,13 +27,14 @@ func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.Att
 		return
 	}
 
+	log.Println(fmt.Sprintf("附件长度=%d", len(attachment_list)))
 	attachment_entity_list = make([]*attachment.AttachmentEntity, len(attachment_list))
 
 	server_config, _ := config.GetConfig("server")
 	server_info := server_config.GetStringMap("servier")
 	domain := server_info["domain"].(string)
 
-	for _, attachment_model := range attachment_list {
+	for index, attachment_model := range attachment_list {
 		attachment_entity := new(attachment.AttachmentEntity)
 		attachment_entity.ID = uint64(attachment_model.ID)
 		attachment_entity.CreateTime = uint64(attachment_model.CreateTime)
@@ -41,9 +43,12 @@ func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.Att
 		attachment_entity.Path = attachment_model.Path
 		attachment_entity.Url = attachment_model.Path
 		attachment_entity.FullUrl = strings.Join([]string{domain, attachment_model.Path}, "/")
+		log.Println(attachment_entity)
 
-		attachment_entity_list = append(attachment_entity_list,attachment_entity)
+		attachment_entity_list[index] = attachment_entity
 	}
+
+	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", attachment_entity_list[0], attachment_entity_list[0], attachment_entity_list[0]))
 
 	return
 }
@@ -85,7 +90,7 @@ func (s *AttachmentService) saveToDB(dst string, module int64) (attachment_model
 }
 
 //上传博客的文件
-func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend []model.FullAttachmentExtend) {
+func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend []*attachment.AttachmentEntity) {
 	multipart_form, _ := Ctx.MultipartForm()
 	files := multipart_form.File["upload_blog_images"]
 
@@ -96,10 +101,10 @@ func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend
 		os.MkdirAll(dir, os.ModePerm)
 	}
 
-	var attachment_ids []int64
+	var attachment_ids []uint64
 
 	//保存成功的文件
-	attachment_ids = make([]int64, len(files))
+	attachment_ids = make([]uint64, len(files))
 
 	for index, file := range files {
 
@@ -115,7 +120,7 @@ func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend
 		//保存到数据库
 		attachment_model := s.saveToDB(dst, model.ATTACHMENT_BLOG_Module)
 
-		attachment_ids = append(attachment_ids, int64(attachment_model.ID))
+		attachment_ids = append(attachment_ids, uint64(attachment_model.ID))
 	}
 
 	//获取文件列表

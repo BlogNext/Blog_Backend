@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"github.com/blog_backend/common-lib/db/mysql"
+	"github.com/blog_backend/entity/attachment"
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
@@ -110,6 +111,7 @@ func (s *BlogService) GetList() (result []*blog.BlogEntity) {
 		blog_entity.Title = title
 		blog_entity.CreateTime = create_time
 		blog_entity.UpdateTime = update_time
+		blog_entity.CoverPlanId = cover_plan_id
 
 		//博客类型实体
 		blog_type_entity := new(blog.BlogTypeEntity)
@@ -117,7 +119,6 @@ func (s *BlogService) GetList() (result []*blog.BlogEntity) {
 		blog_type_entity.Title = blog_type_title
 
 		blog_entity.BlogTypeObject = blog_type_entity
-
 		cover_plan_ids = append(cover_plan_ids, cover_plan_id)
 
 		result = append(result, blog_entity)
@@ -138,18 +139,19 @@ func (s *BlogService) paddingListAttachemtInfo(cover_plan_ids []uint64, result [
 	if attachment_list != nil {
 		//转化成map
 		log.Println(attachment_list)
-		attachment_list_map := funk.ToMap(attachment_list, "BaseEntity.ID").(map[uint]model.FullAttachmentExtend)
+		log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", attachment_list, attachment_list, attachment_list))
+
+		attachment_list_map := funk.ToMap(attachment_list, "ID").(map[uint64]*attachment.AttachmentEntity)
 		log.Println(attachment_list_map)
 		log.Println("哗啦啦")
 		//填充图片信息
 		for _, item := range result {
-			log.Println(attachment_list_map[uint(item["CoverPlanId"].(int64))])
+			log.Println(attachment_list_map[item.CoverPlanId])
 
-			if attachment_item, ok := attachment_list_map[uint(item["CoverPlanId"].(int64))]; ok {
-
-				item["AttachmentInfo"] = attachment_item
+			if attachment_item, ok := attachment_list_map[item.CoverPlanId]; ok {
+				item.AttachmentInfo = attachment_item
 			} else {
-				item["AttachmentInfo"] = nil
+				item.AttachmentInfo = nil
 			}
 
 		}
