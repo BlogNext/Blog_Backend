@@ -8,6 +8,8 @@ import (
 //blog文档
 type BlogEntity struct {
 	entity.BaseEntity
+
+	BlogTypeId uint64 `json:"blog_type_id"`
 	//文章标题
 	Title string `json:"title"`
 	//文章摘要
