@@ -20,8 +20,46 @@ type BlogService struct {
 }
 
 //模型转化成BlogEntity实体
-func (s *BlogService) changeToBlogEntity(blog_id []uint) []*blog.BlogEntity {
-	return nil
+func (s *BlogService) changeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
+
+	blog_entity := new(blog.BlogEntity)
+	blog_entity.ID = uint64(blog_model.ID)
+	blog_entity.CreateTime = uint64(blog_model.CreateTime)
+	blog_entity.UpdateTime = uint64(blog_model.UpdateTime)
+	blog_entity.BlogTypeId = uint64(blog_model.BlogTypeId)
+	blog_entity.CoverPlanId = uint64(blog_model.CoverPlanId)
+	blog_entity.Title = blog_model.Title
+	blog_entity.Abstract = blog_model.Abstract
+	blog_entity.Content = blog_model.Content
+	blog_entity.DocID = blog_model.DocID
+
+	blog_entity_list := []*blog.BlogEntity{blog_entity}
+	//填充别的实体信息
+
+	s.paddingAttachemtInfo([]uint64{blog_entity.CoverPlanId}, blog_entity_list)
+	s.paddingBlogTypeInfo([]uint64{blog_entity.BlogTypeId}, blog_entity_list)
+
+	return blog_entity_list[0]
+}
+
+//导入数据到es中
+func (s *BlogService) ImportDataToEs() {
+
+	var blog_list []model.BlogModel
+
+	db := mysql.GetDefaultDBConnect()
+	db.Find(&blog_list)
+
+	if blog_list == nil {
+		return
+	}
+
+	for _, blog_model := range blog_list {
+		//es中添加文件
+		blog_doc := s.changeToBlogEntity(&blog_model)
+		es_blog_service := es_blog.NewBlogEsService("", "", "")
+		es_blog_service.AddDoc(blog_doc)
+	}
 }
 
 //添加博客
@@ -42,12 +80,6 @@ func (s *BlogService) AddBlog(blog_type_id, cover_plan_id int64, title, abstract
 	if db.NewRecord(*blog_model) {
 		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("保存失败:%s", db.Error.Error())))
 	}
-
-	//es中添加文件
-	blog_doc := new(blog.BlogEntity)
-	blog_doc.ID = uint64(blog_model.ID)
-	es_blog_service := es_blog.NewBlogEsService("", "", "")
-	es_blog_service.AddDoc(blog_doc)
 }
 
 //更新博客
