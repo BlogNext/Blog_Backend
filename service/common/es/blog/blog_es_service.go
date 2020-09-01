@@ -19,11 +19,6 @@ func NewBlogEsService(host string, username string, password string) *BlogEsServ
 	}
 }
 
-//导入blog数据
-func (b *BlogEsService) ImportData() {
-
-}
-
 //删除blog文档
 func (b *BlogEsService) DeleteDoc(blog_doc *blog.BlogEntity) {
 	_, err := b.BaseEsService.DeleteDoc(es.BLOG_INDEX, blog_doc.DocID)
