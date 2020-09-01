@@ -12,7 +12,6 @@ type BlogController struct {
 }
 
 func (c *BlogController) GetList() {
-	
 	b_s := new(backend.BlogService)
 	result := b_s.GetList()
 	help.Gin200SuccessResponse(c.Ctx, "成功", result)
