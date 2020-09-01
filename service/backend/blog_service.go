@@ -22,6 +22,7 @@ type BlogService struct {
 //模型转化成BlogEntity实体
 func (s *BlogService) changeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 
+
 	blog_entity := new(blog.BlogEntity)
 	blog_entity.ID = uint64(blog_model.ID)
 	blog_entity.CreateTime = uint64(blog_model.CreateTime)
@@ -33,11 +34,20 @@ func (s *BlogService) changeToBlogEntity(blog_model *model.BlogModel) *blog.Blog
 	blog_entity.Content = blog_model.Content
 	blog_entity.DocID = blog_model.DocID
 
+	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity, blog_entity, blog_entity))
+
 	blog_entity_list := []*blog.BlogEntity{blog_entity}
 	//填充别的实体信息
 
+	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
+
 	s.paddingAttachemtInfo([]uint64{blog_entity.CoverPlanId}, blog_entity_list)
+
+	log.Println("附件填充完毕",fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
+
 	s.paddingBlogTypeInfo([]uint64{blog_entity.BlogTypeId}, blog_entity_list)
+
+	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
 
 	return blog_entity_list[0]
 }
@@ -54,12 +64,18 @@ func (s *BlogService) ImportDataToEs() {
 		return
 	}
 
+	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_list, blog_list, blog_list))
+
 	for _, blog_model := range blog_list {
 		//es中添加文件
 		blog_doc := s.changeToBlogEntity(&blog_model)
+
+		log.Println("导入的es文档是：",fmt.Sprintf("v = %v,t = %T, p = %p", blog_doc, blog_doc, blog_doc))
+
 		es_blog_service := es_blog.NewBlogEsService("", "", "")
 		es_blog_service.AddDoc(blog_doc)
 	}
+
 }
 
 //添加博客

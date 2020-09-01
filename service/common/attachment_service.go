@@ -27,6 +27,10 @@ func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.Att
 		return
 	}
 
+	if len(attachment_list) <= 0 {
+		return
+	}
+
 	log.Println(fmt.Sprintf("附件长度=%d", len(attachment_list)))
 	attachment_entity_list = make([]*attachment.AttachmentEntity, len(attachment_list))
 

@@ -77,3 +77,12 @@ func (c *BlogController) UpdateBlog() {
 
 	return
 }
+
+//导入数据到es中
+func (c *BlogController) ImportData() {
+	b_s := new(backend.BlogService)
+	b_s.ImportDataToEs()
+
+	help.Gin200SuccessResponse(c.Ctx,"导入完毕",nil)
+	return
+}
