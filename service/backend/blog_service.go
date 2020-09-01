@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"github.com/blog_backend/common-lib/db/mysql"
+	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
 	"github.com/blog_backend/service/common"
@@ -61,7 +62,7 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 }
 
 //列表页
-func (s *BlogService) GetList() (result []map[string]interface{}) {
+func (s *BlogService) GetList() (result []*blog.BlogEntity) {
 	db := mysql.GetDefaultDBConnect()
 
 	//连表表名
@@ -89,34 +90,37 @@ func (s *BlogService) GetList() (result []map[string]interface{}) {
 		Joins(fmt.Sprintf("INNER JOIN %s ON %s.blog_type_id = %s.id", blog_type_table_name, blog_table_name, blog_type_table_name)).
 		Select(strings.Join(select_felid, ", ")).Rows()
 
-	result = make([]map[string]interface{}, 0)
+	result = make([]*blog.BlogEntity, 0)
 
-	cover_plan_ids := make([]int64, 0)
+	cover_plan_ids := make([]uint64, 0)
 
 	for rows.Next() {
-		var id int64
-		var blog_type_id int64
-		var cover_plan_id int64
+		var id uint64
+		var blog_type_id uint64
+		var cover_plan_id uint64
 		var title string
-		var create_time int64
-		var update_time int64
+		var create_time uint64
+		var update_time uint64
 		var blog_type_title string
 		rows.Scan(&id, &blog_type_id, &cover_plan_id, &title, &create_time, &update_time, &blog_type_title)
 
-		item := make(map[string]interface{})
-		item["ID"] = id
-		item["BlogTypeId"] = blog_type_id
-		item["CoverPlanId"] = cover_plan_id
-		item["Title"] = title
-		item["CreateTime"] = create_time
-		item["UpdateTime"] = update_time
-		blog_type_info := make(map[string]interface{})
-		blog_type_info["Title"] = blog_type_title
-		item["BlogTypeInfo"] = blog_type_info
+		//博客实体
+		blog_entity := new(blog.BlogEntity)
+		blog_entity.ID = id
+		blog_entity.Title = title
+		blog_entity.CreateTime = create_time
+		blog_entity.UpdateTime = update_time
+
+		//博客类型实体
+		blog_type_entity := new(blog.BlogTypeEntity)
+		blog_type_entity.ID = blog_type_id
+		blog_type_entity.Title = blog_type_title
+
+		blog_entity.BlogTypeObject = blog_type_entity
 
 		cover_plan_ids = append(cover_plan_ids, cover_plan_id)
 
-		result = append(result, item)
+		result = append(result, blog_entity)
 	}
 
 	//填充信息
@@ -126,7 +130,7 @@ func (s *BlogService) GetList() (result []map[string]interface{}) {
 }
 
 //填充附件信息
-func (s *BlogService) paddingListAttachemtInfo(cover_plan_ids []int64, result []map[string]interface{}) {
+func (s *BlogService) paddingListAttachemtInfo(cover_plan_ids []uint64, result []*blog.BlogEntity) {
 
 	//获取图片的ids,填充图片信息
 	attachment_list := common.GetAttachmentImages(cover_plan_ids)
@@ -134,7 +138,7 @@ func (s *BlogService) paddingListAttachemtInfo(cover_plan_ids []int64, result []
 	if attachment_list != nil {
 		//转化成map
 		log.Println(attachment_list)
-		attachment_list_map := funk.ToMap(attachment_list, "ID").(map[uint]model.FullAttachmentExtend)
+		attachment_list_map := funk.ToMap(attachment_list, "BaseEntity.ID").(map[uint]model.FullAttachmentExtend)
 		log.Println(attachment_list_map)
 		log.Println("哗啦啦")
 		//填充图片信息

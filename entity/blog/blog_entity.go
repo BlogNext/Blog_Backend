@@ -16,13 +16,13 @@ type BlogEntity struct {
 	Content string `json:"content"`
 
 	//附件信息
-	AttachmentInfo *attachment.AttachmentDoc `json:"attachment_info"`
+	AttachmentInfo *attachment.AttachmentEntity `json:"attachment_info"`
 
-	BlogTypeObject *BlogTypeDoc `json:"blog_type_object"`
+	BlogTypeObject *BlogTypeEntity `json:"blog_type_object"`
 }
 
 //blog_type文档
-type BlogTypeDoc struct {
+type BlogTypeEntity struct {
 	*entity.BaseEntity
 	Title string `json:"title"`
 }

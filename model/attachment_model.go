@@ -15,10 +15,3 @@ type AttachmentModel struct {
 func (AttachmentModel) TableName() string {
 	return "attachment"
 }
-
-//AttachmentModel的扩展
-type FullAttachmentExtend struct {
-	AttachmentModel
-	FullUrl string //全路径
-	Url    string //相对路径
-}

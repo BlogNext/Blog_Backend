@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/blog_backend/common-lib/config"
 	"github.com/blog_backend/common-lib/db/mysql"
+	"github.com/blog_backend/entity/attachment"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
 	"github.com/gin-gonic/gin"
@@ -19,31 +20,36 @@ const (
 )
 
 //获取附件
-func GetAttachmentImages(ids []int64) (full_attachment_extend []model.FullAttachmentExtend) {
+func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.AttachmentEntity) {
 	attachment_list := getAttachmentByIds(ids)
 	if attachment_list == nil {
 		return
 	}
 
-	full_attachment_extend = make([]model.FullAttachmentExtend, len(attachment_list))
+	attachment_entity_list = make([]*attachment.AttachmentEntity, len(attachment_list))
 
 	server_config, _ := config.GetConfig("server")
 	server_info := server_config.GetStringMap("servier")
 	domain := server_info["domain"].(string)
 
-	for index, attachment_model := range attachment_list {
-		full_attachment_extend[index] = model.FullAttachmentExtend{
-			AttachmentModel: attachment_model,
-			FullUrl:         strings.Join([]string{domain, attachment_model.Path}, "/"),
-			Url:             attachment_model.Path,
-		}
+	for _, attachment_model := range attachment_list {
+		attachment_entity := new(attachment.AttachmentEntity)
+		attachment_entity.ID = uint64(attachment_model.ID)
+		attachment_entity.CreateTime = uint64(attachment_model.CreateTime)
+		attachment_entity.UpdateTime = uint64(attachment_model.UpdateTime)
+		attachment_entity.Module = attachment_model.Module
+		attachment_entity.Path = attachment_model.Path
+		attachment_entity.Url = attachment_model.Path
+		attachment_entity.FullUrl = strings.Join([]string{domain, attachment_model.Path}, "/")
+
+		attachment_entity_list = append(attachment_entity_list,attachment_entity)
 	}
 
 	return
 }
 
 //获取附件
-func getAttachmentByIds(ids []int64) (attachment_list []model.AttachmentModel) {
+func getAttachmentByIds(ids []uint64) (attachment_list []model.AttachmentModel) {
 
 	if ids == nil {
 		return
@@ -79,7 +85,7 @@ func (s *AttachmentService) saveToDB(dst string, module int64) (attachment_model
 }
 
 //上传博客的文件
-func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend []model.FullAttachmentExtend){
+func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend []model.FullAttachmentExtend) {
 	multipart_form, _ := Ctx.MultipartForm()
 	files := multipart_form.File["upload_blog_images"]
 
@@ -111,7 +117,6 @@ func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend
 
 		attachment_ids = append(attachment_ids, int64(attachment_model.ID))
 	}
-
 
 	//获取文件列表
 	full_attachment_extend = GetAttachmentImages(attachment_ids)
