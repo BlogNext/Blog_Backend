@@ -1,25 +1,27 @@
-# user-system-backend
-用户系统，cas单点登录，oauth2.0
-
-- gin 1.6版本
-
-# oauth2.0只完成的
-
-- authorization code grant 预授权码模式
-- implicati Grant token颁发之简化模式
-- client credential grant 以后可以考虑要
-
-## 实现方案
-- 采用jwt实现
-- token和refreshToken的数据其实是一样的,区别在于token有过期时间，refreshToken没有过期时间
+# Blog_backend
 
 
-# gin1.6的一些改造
-- v10的验证器，做了中文提示
-- 简单的反射封装了一下路由到控制器
-- validate提取出来
-- 封装了一些业务的异常处理
+技术栈
 
-# 一张好看的流程图
+- gin 框架（自己封装了下，多了一些工具类，和路由转发）
+- mysql
+- es
 
-![image](./一张好看的流程图.jpg)
+
+## 目录结构说明
+
+- common-lib 一些工具包
+- config 配置文件包
+- controller 自己封装的一层控制器
+- entity 实体类定义，穿插接口、与服务之间
+- es_dls elastic的__setting 和__mapping的定义
+- exception 框架的一些自定义异常
+- help 也是一些工具包，和common-lib差不多，都已经乱了，放哪都可以
+- model  orm定义
+- router 自己封装的一层路由
+- service 服务
+- sql  sql文件
+- validate gin的验证类，为了定义一些公用的验证，提示中文信息的工具
+- upload 项目上传的静态文件
+
+
