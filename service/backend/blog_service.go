@@ -170,7 +170,7 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 
 	_ = es_blog_service.UpdateDoc(blog_doc)
 
-	
+
 
 }
 
