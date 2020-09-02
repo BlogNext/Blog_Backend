@@ -80,9 +80,22 @@ func (c *BlogController) UpdateBlog() {
 
 //导入数据到es中
 func (c *BlogController) ImportData() {
+
+	type importRequest struct {
+		Password string `form:"password" binding:"required"`
+	}
+
+	var import_request importRequest
+
+	err := c.Ctx.ShouldBind(&import_request)
+	if err != nil {
+		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, "不要乱动这个方法，这个方法不对外提供的，请联系ly", nil)
+		return
+	}
+
 	b_s := new(backend.BlogService)
 	b_s.ImportDataToEs()
 
-	help.Gin200SuccessResponse(c.Ctx,"导入完毕",nil)
+	help.Gin200SuccessResponse(c.Ctx, "导入完毕", nil)
 	return
 }

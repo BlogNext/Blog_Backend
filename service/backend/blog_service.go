@@ -22,7 +22,6 @@ type BlogService struct {
 //模型转化成BlogEntity实体
 func (s *BlogService) changeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 
-
 	blog_entity := new(blog.BlogEntity)
 	blog_entity.ID = uint64(blog_model.ID)
 	blog_entity.CreateTime = uint64(blog_model.CreateTime)
@@ -43,7 +42,7 @@ func (s *BlogService) changeToBlogEntity(blog_model *model.BlogModel) *blog.Blog
 
 	s.paddingAttachemtInfo([]uint64{blog_entity.CoverPlanId}, blog_entity_list)
 
-	log.Println("附件填充完毕",fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
+	log.Println("附件填充完毕", fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
 
 	s.paddingBlogTypeInfo([]uint64{blog_entity.BlogTypeId}, blog_entity_list)
 
@@ -70,16 +69,33 @@ func (s *BlogService) ImportDataToEs() {
 		//es中添加文件
 		blog_doc := s.changeToBlogEntity(&blog_model)
 
-		log.Println("导入的es文档是：",fmt.Sprintf("v = %v,t = %T, p = %p", blog_doc, blog_doc, blog_doc))
+		log.Println("导入的es文档是：", fmt.Sprintf("v = %v,t = %T, p = %p", blog_doc, blog_doc, blog_doc))
 
-		es_blog_service := es_blog.NewBlogEsService("", "", "")
-		es_blog_service.AddDoc(blog_doc)
+		es_blog_service, err := es_blog.NewBlogEsService("", "", "")
+
+		if err != nil {
+			log.Println("连接es失败结束同步")
+			break
+		}
+		log.Println("连接:es成功")
+
+		doc := es_blog_service.AddDoc(blog_doc)
+
+		blog_model.DocID = doc.Id
+
+		db_error := db.Save(blog_model)
+
+		if db_error.Error != nil {
+			panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("更新失败error:%s", db_error.Error.Error())))
+		}
 	}
 
 }
 
 //添加博客
 func (s *BlogService) AddBlog(blog_type_id, cover_plan_id int64, title, abstract, content string) {
+
+	//数据入库
 	db := mysql.GetDefaultDBConnect()
 
 	blog_model := new(model.BlogModel)
@@ -96,6 +112,27 @@ func (s *BlogService) AddBlog(blog_type_id, cover_plan_id int64, title, abstract
 	if db.NewRecord(*blog_model) {
 		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("保存失败:%s", db.Error.Error())))
 	}
+
+	//创建es文档
+	blog_doc := s.changeToBlogEntity(blog_model) //文档转化
+
+	es_blog_service, err := es_blog.NewBlogEsService("", "", "")
+
+	if err != nil {
+		log.Println("连接es失败结束同步，es入库失败")
+		return
+	}
+
+	doc := es_blog_service.AddDoc(blog_doc)
+
+	blog_model.DocID = doc.Index   //文档保存
+
+	db_error := db.Save(blog_model)
+
+	if db_error.Error != nil {
+		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("更新失败error:%s", db_error.Error.Error())))
+	}
+
 }
 
 //更新博客
@@ -120,6 +157,21 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 	if db.Error != nil {
 		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("更新失败error:%s", db.Error.Error())))
 	}
+
+	//更新es文档
+	blog_doc := s.changeToBlogEntity(blog_model) //文档转化
+
+	es_blog_service, err := es_blog.NewBlogEsService("", "", "")
+
+	if err != nil {
+		log.Println("连接es失败结束同步，es入库失败")
+		return
+	}
+
+	_ = es_blog_service.UpdateDoc(blog_doc)
+
+	
+
 }
 
 //列表页

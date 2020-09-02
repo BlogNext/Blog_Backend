@@ -20,6 +20,9 @@ func loadConfig() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//es配置可有可无
+	_ = config.LoadConfig("es","config","yaml")
 }
 
 func loadDB() {
