@@ -2,8 +2,10 @@ package blog
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/service/common/es"
 	"github.com/olivere/elastic/v7"
@@ -70,4 +72,50 @@ func (b *BlogEsService) UpdateDoc(blog_doc *blog.BlogEntity) *elastic.UpdateResp
 	}
 
 	return doc
+}
+
+//更新文档
+//keyword 搜索的关键字
+//per_page 每页多少条
+//page 第几页
+func (b *BlogEsService) SearchBlog(keyword string, per_page, page int) (result *entity.ListResponseEntity) {
+
+	search_serivce := b.Client.Search().Index(es.BLOG_INDEX).From((page - 1) * per_page).Size(per_page).Pretty(true)
+
+	multi_match_query := elastic.NewMultiMatchQuery(keyword, []string{"title", "abstract", "content"}...)
+
+	search_response, err := search_serivce.Query(multi_match_query).Do(context.Background())
+
+	if err != nil {
+		log.Println("searchBlog：es搜索错误：", err)
+		result = nil
+		return result
+	}
+
+	//构建结果返回
+	result = new(entity.ListResponseEntity)
+	result.SetPerPage(per_page)
+
+	var blog_entity_list []*blog.BlogEntity
+
+	if search_response.TotalHits() > 0 {
+
+		result.SetCount(search_response.TotalHits())
+
+		blog_entity_list = make([]*blog.BlogEntity, len(search_response.Hits.Hits))
+
+		for index, hit := range search_response.Hits.Hits {
+
+			t := new(blog.BlogEntity)
+			err := json.Unmarshal(hit.Source, t)
+			if err != nil {
+				panic("es解析失败：" + err.Error())
+			}
+
+			blog_entity_list[index] = t
+		}
+	}
+
+	result.SetList(blog_entity_list)
+	return
 }

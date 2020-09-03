@@ -5,6 +5,7 @@ import (
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/service/backend"
+	"github.com/blog_backend/service/common/es/blog"
 )
 
 type BlogController struct {
@@ -97,5 +98,34 @@ func (c *BlogController) ImportData() {
 	b_s.ImportDataToEs()
 
 	help.Gin200SuccessResponse(c.Ctx, "导入完毕", nil)
+	return
+}
+
+//搜素
+func (c *BlogController) SearchBlog() {
+
+	type searchRequest struct {
+		//搜索维度
+		Dimension string `form:"dimension"`
+		Keyword   string `form:"keyword" binding:"required"`
+		PerPage   int    `form:"per_page" binding:"required"`
+		Page      int    `form:"page" binding:"required"`
+	}
+
+	var search_request searchRequest
+
+	err := c.Ctx.ShouldBind(&search_request)
+
+	if err != nil {
+		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
+		return
+	}
+
+	es_b_s, _ := blog.NewBlogEsService("","","")
+
+	result := es_b_s.SearchBlog(search_request.Keyword, search_request.PerPage, search_request.Page)
+
+	help.Gin200SuccessResponse(c.Ctx, "请求成功过", result)
+
 	return
 }
