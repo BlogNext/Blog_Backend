@@ -9,14 +9,14 @@ type ListResponseEntity struct {
 	//总共可以分多少页
 	PageCount int `json:"page_count"`
 	//前端传过来的参数
-	Param interface{} `json:"param"`
+	Param interface{} `json:"param,omitempty"`
 	//列表的过滤项
-	Filter interface{} `json:"filter"`
+	Filter interface{} `json:"filter,omitempty"`
 	//列表数据
 	List interface{} `json:"list"`
 
 	//额外的一些数据
-	Extra interface{} `json:"extra"`
+	Extra interface{} `json:"extra,omitempty"`
 }
 
 func (lre *ListResponseEntity) SetCount(count int64) {
