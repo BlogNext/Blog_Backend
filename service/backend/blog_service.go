@@ -116,7 +116,7 @@ func (s *BlogService) AddBlog(blog_type_id, cover_plan_id int64, title, abstract
 
 	doc := es_blog_service.AddDoc(blog_doc)
 
-	blog_model.DocID = doc.Index //文档保存
+	blog_model.DocID = doc.Id //文档保存
 
 	db_error := db.Save(blog_model)
 
