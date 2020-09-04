@@ -2,6 +2,7 @@ package es
 
 import (
 	"context"
+	"errors"
 	"github.com/blog_backend/exception"
 	"github.com/olivere/elastic/v7"
 	"log"
@@ -82,6 +83,81 @@ func (bs *BaseEsService) Finish() {
 	es_default_connet_pool.Put(bs.Client)
 }
 
+//删除一个文档
+func (bs *BaseEsService) DeleteDoc(index, doc_id string) (*elastic.DeleteResponse, error) {
+	//构建一个命令
+	commend := BuildDeleteDocCommend(index, doc_id)
+	//设置命令
+	bs.SetExecCommend(commend)
+	//运行命令
+	resule, err := RunCommend(bs)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resule.(*elastic.DeleteResponse), nil
+}
+
+//添加一个文档
+func (bs *BaseEsService) AddDoc(index string, doc interface{}) (*elastic.IndexResponse, error) {
+	if doc == nil {
+		return nil, errors.New("blog_doc为空")
+	}
+
+	//构建一个命令
+	commend := BuildAddDocCommend(index, doc)
+	//设置命令
+	bs.SetExecCommend(commend)
+	//运行命令
+	resule, err := RunCommend(bs)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resule.(*elastic.IndexResponse), nil
+}
+
+//更新一个文档
+func (bs *BaseEsService) UpdateDoc(index, doc_id string, doc interface{}) (*elastic.UpdateResponse, error) {
+	if doc == nil {
+		return nil, errors.New("blog_doc为空")
+	}
+
+	//构建一个命令
+	commend := BuildUpdateDocCommend(index, doc_id, doc)
+	//设置命令
+	bs.SetExecCommend(commend)
+	//运行命令
+	resule, err := RunCommend(bs)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resule.(*elastic.UpdateResponse), nil
+}
+
+//搜索文档
+func (bs *BaseEsService) SearchDoc(callback func() Commend) (*elastic.SearchResult, error) {
+
+	commend := BuildCallbackCommend(callback)
+
+	//设置命令
+	bs.SetExecCommend(commend)
+
+	//运行命令
+	commend_result, err := RunCommend(bs)
+	if err != nil {
+		return nil, err
+	}
+
+	return commend_result.(*elastic.SearchResult), nil
+}
+
+//一些命令的回调
+
 //更新一个文档
 func BuildUpdateDocCommend(index, doc_id string, doc interface{}) Commend {
 	return func(client *elastic.Client) (i interface{}, err error) {
@@ -126,7 +202,6 @@ func BuildGetDocCoCommend(index, doc_id string) Commend {
 		return res, nil
 	}
 }
-
 
 //构建一个回调命令
 func BuildCallbackCommend(callback func() Commend) Commend {
