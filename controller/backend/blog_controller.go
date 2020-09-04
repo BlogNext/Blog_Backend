@@ -121,7 +121,7 @@ func (c *BlogController) SearchBlog() {
 		return
 	}
 
-	es_b_s, _ := blog.NewBlogEsService()
+	es_b_s := new(blog.BlogEsService)
 
 	result := es_b_s.SearchBlog(search_request.Keyword, search_request.PerPage, search_request.Page)
 

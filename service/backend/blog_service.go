@@ -71,12 +71,8 @@ func (s *BlogService) ImportDataToEs() {
 
 		log.Println("导入的es文档是：", fmt.Sprintf("v = %v,t = %T, p = %p", blog_doc, blog_doc, blog_doc))
 
-		es_blog_service, err := es_blog.NewBlogEsService()
+		es_blog_service := new(es_blog.BlogEsService)
 
-		if err != nil {
-			log.Println("连接es失败结束同步")
-			break
-		}
 		log.Println("连接:es成功")
 
 		doc := es_blog_service.AddDoc(blog_doc)
@@ -116,16 +112,11 @@ func (s *BlogService) AddBlog(blog_type_id, cover_plan_id int64, title, abstract
 	//创建es文档
 	blog_doc := s.changeToBlogEntity(blog_model) //文档转化
 
-	es_blog_service, err := es_blog.NewBlogEsService()
-
-	if err != nil {
-		log.Println("连接es失败结束同步，es入库失败")
-		return
-	}
+	es_blog_service := new(es_blog.BlogEsService)
 
 	doc := es_blog_service.AddDoc(blog_doc)
 
-	blog_model.DocID = doc.Index   //文档保存
+	blog_model.DocID = doc.Index //文档保存
 
 	db_error := db.Save(blog_model)
 
@@ -161,16 +152,10 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 	//更新es文档
 	blog_doc := s.changeToBlogEntity(blog_model) //文档转化
 
-	es_blog_service, err := es_blog.NewBlogEsService()
+	es_blog_service := new(es_blog.BlogEsService)
 
-	if err != nil {
-		log.Println("连接es失败结束同步，es入库失败")
-		return
-	}
 
 	_ = es_blog_service.UpdateDoc(blog_doc)
-
-
 
 }
 
