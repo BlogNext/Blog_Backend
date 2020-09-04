@@ -39,7 +39,7 @@ func (b *BlogEsService) AddDoc(blog_doc *blog.BlogEntity) *elastic.IndexResponse
 	}
 
 	//构建一个命令
-	commend := es.BuildAddDocCommend(es.BLOG_INDEX, blog_doc.DocID)
+	commend := es.BuildAddDocCommend(es.BLOG_INDEX, blog_doc)
 	//设置命令
 	b.SetExecCommend(commend)
 	//运行命令
