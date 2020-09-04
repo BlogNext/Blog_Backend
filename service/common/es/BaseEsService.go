@@ -2,23 +2,22 @@ package es
 
 import (
 	"context"
-	"fmt"
-	"github.com/blog_backend/common-lib/config"
 	"github.com/olivere/elastic/v7"
 	"log"
-	"os"
 )
 
 const (
 	BLOG_INDEX = "xiaochen_blog_next_blog"
 )
 
+
+//es基础服务对象
 type BaseEsService struct {
 	//es连接的客户端
 	Client *elastic.Client
 }
 
-func NewBaseEsService(host string, username string, password string) (s *BaseEsService, err error) {
+func NewBaseEsService() (s *BaseEsService, err error) {
 
 	//异常捕获一下
 	defer func() {
@@ -29,35 +28,9 @@ func NewBaseEsService(host string, username string, password string) (s *BaseEsS
 		}
 	}()
 
-	if len(host) <= 0 || len(username) <= 0 || len(password) <= 0 {
-		es_config, err := config.GetConfig("es")
-		if err != nil {
-			panic(err)
-		}
-
-		log.Println("获取es配置")
-
-		es_default_info := es_config.GetStringMap("es")
-		log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", es_default_info, es_default_info, es_default_info))
-		host = es_default_info["default"].(map[string]interface{})["host"].(string)
-		username = es_default_info["default"].(map[string]interface{})["username"].(string)
-		password = es_default_info["default"].(map[string]interface{})["password"].(string)
-	}
-
-	log.Println("es连接信息", "地址:"+host, "用户名:"+username, "密码："+password)
-
-	client, err := elastic.NewClient(
-		elastic.SetURL(host),
-		elastic.SetBasicAuth(username, password),
-		elastic.SetTraceLog(log.New(os.Stdout, "blog_next", 0)), //跟踪请求和响应细节
-	)
-
-	if err != nil {
-		panic(err)
-	}
-
+	client := es_default_connet_pool.Get()
 	s = new(BaseEsService)
-	s.Client = client
+	s.Client = client.(*elastic.Client)
 
 	return s, nil
 }

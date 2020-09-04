@@ -16,11 +16,11 @@ type BlogEsService struct {
 	*es.BaseEsService
 }
 
-func NewBlogEsService(host string, username string, password string) (*BlogEsService, error) {
+func NewBlogEsService() (*BlogEsService, error) {
 
 	log.Println("创建blog_es_service")
 
-	base_es_service, err := es.NewBaseEsService(host, username, password)
+	base_es_service, err := es.NewBaseEsService()
 
 	if err != nil {
 		return nil, err
