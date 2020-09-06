@@ -9,7 +9,6 @@ import (
 	"gorm.io/plugin/dbresolver"
 	"log"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -18,16 +17,13 @@ import (
 //不需要加锁,因为只是在main入口函数导入而已
 var g_db *gorm.DB
 
-func InitDBConnect(db_info ...db.DBInfo) {
+func InitDBConnect(db_info map[string]db.DBInfo) {
 	if len(db_info) == 0 {
 		return
 	}
 
 	log.Println(fmt.Sprintf("v=%v ,t=%t, p=%p", db_info, db_info, db_info))
-	//mysql主从配置先写死吧。。没得时间封装
-	if !strings.EqualFold(db_info[0].Key, "sources") {
-		panic("mysql第一个必须是主连接配置(sources),当前是" + db_info[0].Key)
-	}
+
 
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
@@ -39,7 +35,7 @@ func InitDBConnect(db_info ...db.DBInfo) {
 	)
 
 	//主数据库
-	myGdb, err := gorm.Open(gmysql.Open(db_info[0].Dsn), &gorm.Config{
+	myGdb, err := gorm.Open(gmysql.Open(db_info["sources"].Dsn), &gorm.Config{
 		Logger: newLogger,
 	})
 
@@ -49,8 +45,8 @@ func InitDBConnect(db_info ...db.DBInfo) {
 
 	//从数据库
 	myGdb.Use(dbresolver.Register(dbresolver.Config{
-		Sources:  []gorm.Dialector{gmysql.Open(db_info[0].Dsn)},
-		Replicas: []gorm.Dialector{gmysql.Open(db_info[1].Dsn)},
+		Sources:  []gorm.Dialector{gmysql.Open(db_info["sources"].Dsn)},
+		Replicas: []gorm.Dialector{gmysql.Open(db_info["replicas"].Dsn)},
 		// sources/replicas 负载均衡策略
 		Policy: dbresolver.RandomPolicy{},
 	}).SetConnMaxIdleTime(time.Hour).

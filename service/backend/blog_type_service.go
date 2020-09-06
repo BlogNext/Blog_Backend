@@ -78,10 +78,10 @@ func (s *BlogTypeService) Update(id int64, title string) {
 	blog_type_model.Title = title
 	blog_type_model.UpdateTime = time.Now().Unix()
 
-	db.Save(blog_type_model)
+	result := db.Save(blog_type_model)
 
-	if db.Error != nil {
-		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("更新失败error:%s", db.Error.Error())))
+	if result.Error != nil {
+		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("更新失败error:%s", result.Error.Error())))
 	}
 }
 

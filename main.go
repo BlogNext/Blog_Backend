@@ -29,16 +29,14 @@ func loadDB() {
 	db_config, _ := config.GetConfig("db")
 	db_map := db_config.GetStringMap("mysql")
 	db_map_size := len(db_map)
-	db_info_list := make([]db.DBInfo, db_map_size)
-	i := 0
+	db_info_list := make(map[string]db.DBInfo, db_map_size)
 	for key, item := range db_map {
-		db_info_list[i] = db.DBInfo{
+		db_info_list[key] = db.DBInfo{
 			Key: key,
 			Dsn: item.(map[string]interface{})["dsn"].(string),
 		}
-		i++
 	}
-	mysql.InitDBConnect(db_info_list...)
+	mysql.InitDBConnect(db_info_list)
 }
 
 func init() {

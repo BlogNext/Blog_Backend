@@ -143,10 +143,11 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 	blog_model.UpdateTime = time.Now().Unix()
 	blog_model.CoverPlanId = cover_plan_id
 
-	db.Save(blog_model)
+	log.Println(fmt.Sprintf("更新的博客数据: v= %v, t= %T, p=%p", blog_model, blog_model, blog_model))
+	result :=db.Save(blog_model)
 
-	if db.Error != nil {
-		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("更新失败error:%s", db.Error.Error())))
+	if result.Error != nil {
+		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("更新失败error:%s", result.Error.Error())))
 	}
 
 	//更新es文档
