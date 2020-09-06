@@ -9,7 +9,10 @@ require (
 	github.com/go-playground/validator/v10 v10.2.0
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/jinzhu/gorm v1.9.12
+	github.com/olivere/elastic/v7 v7.0.19
 	github.com/spf13/viper v1.6.2
 	github.com/thoas/go-funk v0.7.0
-	github.com/olivere/elastic/v7 v7.0.19
+	gorm.io/driver/mysql v1.0.1
+	gorm.io/gorm v1.20.0
+	gorm.io/plugin/dbresolver v0.2.1
 )

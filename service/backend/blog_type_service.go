@@ -18,8 +18,9 @@ type BlogTypeService struct {
 //获取列表类型接口
 func (s *BlogTypeService) List() (blog_type_model_list []map[string]interface{}) {
 
+	log.Println("查询方法")
 	content := mysql.GetDefaultDBConnect()
-
+	log.Println("查询方法",content)
 	db := content.Model(&model.BlogTypeModel{})
 	db.Select("id, title, create_time, update_time")
 	rows, _ := db.Rows()
@@ -56,10 +57,10 @@ func (s *BlogTypeService) Add(title string) {
 	blog_type_model.Title = title
 	blog_type_model.CreateTime = time.Now().Unix()
 	blog_type_model.UpdateTime = time.Now().Unix()
-	db.Create(blog_type_model)
+	sql_exec_result := db.Create(blog_type_model)
 
-	if db.NewRecord(*blog_type_model) {
-		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("保存失败:%s", db.Error.Error())))
+	if sql_exec_result.Error != nil {
+		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("保存失败:%s", sql_exec_result.Error)))
 	}
 
 }
@@ -70,7 +71,7 @@ func (s *BlogTypeService) Update(id int64, title string) {
 	blog_type_model := new(model.BlogTypeModel)
 	db.Where("id = ?", id).First(blog_type_model)
 
-	if db.NewRecord(*blog_type_model) {
+	if blog_type_model.ID <= 0 {
 		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("找不到记录:%d", id)))
 	}
 

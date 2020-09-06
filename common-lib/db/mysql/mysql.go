@@ -1,51 +1,71 @@
 package mysql
 
 import (
-	"errors"
+	"fmt"
 	"github.com/blog_backend/common-lib/db"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	gmysql "gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"gorm.io/plugin/dbresolver"
 	"log"
 	"os"
+	"strings"
+	"time"
 )
 
 //db连接信息
 //不同的key，连接不同的数据库，主从
 //不需要加锁,因为只是在main入口函数导入而已
-var db_map map[string]*gorm.DB
-
-func init() {
-	if db_map == nil {
-		db_map = make(map[string]*gorm.DB)
-	}
-}
+var g_db *gorm.DB
 
 func InitDBConnect(db_info ...db.DBInfo) {
 	if len(db_info) == 0 {
 		return
 	}
 
-	for _, item := range db_info {
-		if _, ok := db_map[item.Key]; !ok {
-			connect_db, err := gorm.Open("mysql", item.Dsn)
-			connect_db.LogMode(true)
-			connect_db.SetLogger(log.New(os.Stdout, "\r\n", 0))
-			if err != nil {
-				panic(err)
-			}
-			db_map[item.Key] = connect_db
-		}
+	log.Println(fmt.Sprintf("v=%v ,t=%t, p=%p", db_info, db_info, db_info))
+	//mysql主从配置先写死吧。。没得时间封装
+	if !strings.EqualFold(db_info[0].Key, "sources") {
+		panic("mysql第一个必须是主连接配置(sources),当前是" + db_info[0].Key)
 	}
-}
 
-//获取db
-func GetDBConnect(key string) *gorm.DB {
-	if connect_db, ok := db_map[key]; ok {
-		return connect_db
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold: time.Second, // 慢 SQL 阈值
+			LogLevel:      logger.Info, // Log level
+			Colorful:      false,       // 禁用彩色打印
+		},
+	)
+
+	//主数据库
+	myGdb, err := gorm.Open(gmysql.Open(db_info[0].Dsn), &gorm.Config{
+		Logger: newLogger,
+	})
+
+	if err != nil {
+		panic(err)
 	}
-	panic(errors.New("找不到连接: " + key))
+
+	//从数据库
+	myGdb.Use(dbresolver.Register(dbresolver.Config{
+		Sources:  []gorm.Dialector{gmysql.Open(db_info[0].Dsn)},
+		Replicas: []gorm.Dialector{gmysql.Open(db_info[1].Dsn)},
+		// sources/replicas 负载均衡策略
+		Policy: dbresolver.RandomPolicy{},
+	}).SetConnMaxIdleTime(time.Hour).
+		SetConnMaxLifetime(24 * time.Hour).
+		SetMaxIdleConns(100).
+		SetMaxOpenConns(200))
+
+	if err != nil {
+		panic(err)
+	}
+
+	g_db = myGdb
+	log.Println(fmt.Sprintf("g_db初始化完成 v=%v ,t=%T, p=%p", g_db, g_db, g_db))
 }
 
 func GetDefaultDBConnect() *gorm.DB {
-	return GetDBConnect("default")
+	return g_db
 }

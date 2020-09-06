@@ -103,10 +103,10 @@ func (s *BlogService) AddBlog(blog_type_id, cover_plan_id int64, title, abstract
 	blog_model.CreateTime = time.Now().Unix()
 	blog_model.UpdateTime = time.Now().Unix()
 
-	db.Create(blog_model)
+	sql_exec_result := db.Create(blog_model)
 
-	if db.NewRecord(*blog_model) {
-		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("保存失败:%s", db.Error.Error())))
+	if sql_exec_result.Error != nil {
+		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("新增失败:%s", sql_exec_result.Error)))
 	}
 
 	//创建es文档
@@ -132,7 +132,7 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 	blog_model := new(model.BlogModel)
 	db.Where("id = ?", id).First(blog_model)
 
-	if db.NewRecord(*blog_model) {
+	if blog_model.ID <= 0 {
 		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("找不到记录:%d", id)))
 	}
 
@@ -153,7 +153,6 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 	blog_doc := s.changeToBlogEntity(blog_model) //文档转化
 
 	es_blog_service := new(es_blog.BlogEsService)
-
 
 	_ = es_blog_service.UpdateDoc(blog_doc)
 

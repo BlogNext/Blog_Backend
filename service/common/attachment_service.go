@@ -84,10 +84,10 @@ func (s *AttachmentService) saveToDB(dst string, module int64) (attachment_model
 	attachment_model.UpdateTime = time.Now().Unix()
 	attachment_model.Module = module
 
-	db.Create(attachment_model)
+	sql_exec_result := db.Create(attachment_model)
 
-	if db.NewRecord(*attachment_model) {
-		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("新增失败:%s", db.Error.Error())))
+	if sql_exec_result.Error != nil {
+		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("新增失败:%s",sql_exec_result.Error)))
 	}
 
 	return attachment_model
