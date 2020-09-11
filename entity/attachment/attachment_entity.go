@@ -13,4 +13,6 @@ type AttachmentEntity struct {
 	Path string `json:"path"`
 	//相对路径，和path是一样的作用
 	Url string `json:"url"`
+	//文件类型
+	FileType int64 `json:"file_type"`
 }

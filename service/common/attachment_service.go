@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -75,7 +76,7 @@ type AttachmentService struct {
 }
 
 //保存到数据库
-func (s *AttachmentService) saveToDB(dst string, module int64) (attachment_model *model.AttachmentModel) {
+func (s *AttachmentService) saveToDB(dst string, module, file_type int64) (attachment_model *model.AttachmentModel) {
 
 	db := mysql.GetDefaultDBConnect()
 	attachment_model = new(model.AttachmentModel)
@@ -83,11 +84,12 @@ func (s *AttachmentService) saveToDB(dst string, module int64) (attachment_model
 	attachment_model.CreateTime = time.Now().Unix()
 	attachment_model.UpdateTime = time.Now().Unix()
 	attachment_model.Module = module
+	attachment_model.FileType = file_type
 
 	sql_exec_result := db.Create(attachment_model)
 
 	if sql_exec_result.Error != nil {
-		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("新增失败:%s",sql_exec_result.Error)))
+		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("新增失败:%s", sql_exec_result.Error)))
 	}
 
 	return attachment_model
@@ -96,7 +98,9 @@ func (s *AttachmentService) saveToDB(dst string, module int64) (attachment_model
 //上传博客的文件
 func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend []*attachment.AttachmentEntity) {
 	multipart_form, _ := Ctx.MultipartForm()
-	files := multipart_form.File["upload_blog_images"]
+	files := multipart_form.File["upload_blog_images[]"]
+	modules := multipart_form.Value["modules[]"]
+	file_types := multipart_form.Value["file_type[]"]
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -116,13 +120,34 @@ func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend
 
 		dst := strings.Join([]string{dir, file_rename}, "/")
 
-		err := Ctx.SaveUploadedFile(file, dst)
+		//验证modules和file_types是否合法
+		attachment_model := new(model.AttachmentModel)
+
+		var module int64
+		var file_type int64
+
+		module, err := strconv.ParseInt(modules[index], 10, 64)
+		if err != nil {
+			panic(exception.NewException(exception.VALIDATE_ERR, "modules参数无法转化成整形"))
+		}
+
+		file_type, err = strconv.ParseInt(file_types[index], 10, 64)
+
+		if err != nil {
+			panic(exception.NewException(exception.VALIDATE_ERR, "file_type参数无法转化成整形"))
+		}
+
+		attachment_model.CheckValidModule(module)
+		attachment_model.CheckValidFileType(file_type)
+
+		//上传文件
+		err = Ctx.SaveUploadedFile(file, dst)
 		if err != nil {
 			panic(err)
 		}
 
 		//保存到数据库
-		attachment_model := s.saveToDB(dst, model.ATTACHMENT_BLOG_Module)
+		attachment_model = s.saveToDB(dst, module, file_type)
 
 		attachment_ids = append(attachment_ids, uint64(attachment_model.ID))
 	}
