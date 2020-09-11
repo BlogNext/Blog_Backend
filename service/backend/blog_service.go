@@ -141,10 +141,12 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 	blog_model.Abstract = abstract
 	blog_model.Content = content
 	blog_model.UpdateTime = time.Now().Unix()
-	blog_model.CoverPlanId = cover_plan_id
+	if cover_plan_id != 0 {
+		blog_model.CoverPlanId = cover_plan_id
+	}
 
 	log.Println(fmt.Sprintf("更新的博客数据: v= %v, t= %T, p=%p", blog_model, blog_model, blog_model))
-	result :=db.Save(blog_model)
+	result := db.Save(blog_model)
 
 	if result.Error != nil {
 		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("更新失败error:%s", result.Error.Error())))
@@ -152,6 +154,8 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 
 	//更新es文档
 	blog_doc := s.changeToBlogEntity(blog_model) //文档转化
+
+	log.Println("转化为es的文档为",fmt.Sprintf("v=%v, t=%T ,p=%p", blog_doc, blog_doc, blog_doc))
 
 	es_blog_service := new(es_blog.BlogEsService)
 

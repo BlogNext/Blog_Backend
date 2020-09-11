@@ -48,6 +48,7 @@ func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.Att
 		attachment_entity.Path = attachment_model.Path
 		attachment_entity.Url = attachment_model.Path
 		attachment_entity.FullUrl = strings.Join([]string{domain, attachment_model.Path}, "/")
+		attachment_entity.FileType = attachment_model.FileType
 		log.Println(attachment_entity)
 
 		attachment_entity_list[index] = attachment_entity
