@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"github.com/blog_backend/controller"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/service/backend"
@@ -9,7 +8,7 @@ import (
 )
 
 type BlogController struct {
-	controller.BaseController
+	BackendController
 }
 
 func (c *BlogController) GetList() {

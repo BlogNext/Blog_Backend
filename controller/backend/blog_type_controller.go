@@ -1,14 +1,13 @@
 package backend
 
 import (
-	"github.com/blog_backend/controller"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/service/backend"
 )
 
 type BlogTypeController struct {
-	controller.BaseController
+	BackendController
 }
 
 //列表接口
