@@ -1,4 +1,4 @@
-FROM golang:1.13
+FROM golang:1.14.9-buster
 
 WORKDIR /go/src/Blog_Backend/my-gin
 #设置golang mod的阿里云代理
