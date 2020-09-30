@@ -5,7 +5,7 @@ import (
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/service/backend"
-	"github.com/blog_backend/service/common/es/blog"
+	"github.com/blog_backend/service/front"
 )
 
 type BlogController struct {
@@ -104,12 +104,16 @@ func (c *BlogController) ImportData() {
 //搜素
 func (c *BlogController) SearchBlog() {
 
+	//非必填字段
+	var search_level string
+	search_level = c.Ctx.DefaultQuery("search_level", front.ES_SEARCH_LEVEL)
+
+	//必填字段
 	type searchRequest struct {
 		//搜索维度
-		Dimension string `form:"dimension"`
-		Keyword   string `form:"keyword" binding:"required"`
-		PerPage   int    `form:"per_page" binding:"required"`
-		Page      int    `form:"page" binding:"required"`
+		Keyword string `form:"keyword" binding:"required"`
+		PerPage int    `form:"per_page" binding:"required"`
+		Page    int    `form:"page" binding:"required"`
 	}
 
 	var search_request searchRequest
@@ -121,9 +125,9 @@ func (c *BlogController) SearchBlog() {
 		return
 	}
 
-	es_b_s := new(blog.BlogEsService)
+	b_s := new(front.BlogService)
 
-	result := es_b_s.SearchBlog(search_request.Keyword, search_request.PerPage, search_request.Page)
+	result := b_s.SearchBlog(search_level, search_request.Keyword, search_request.PerPage, search_request.Page)
 
 	help.Gin200SuccessResponse(c.Ctx, "请求成功过", result)
 

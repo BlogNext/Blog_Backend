@@ -20,7 +20,7 @@ type BlogService struct {
 }
 
 //模型转化成BlogEntity实体
-func (s *BlogService) changeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
+func (s *BlogService) ChangeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 
 	blog_entity := new(blog.BlogEntity)
 	blog_entity.ID = uint64(blog_model.ID)
@@ -51,6 +51,46 @@ func (s *BlogService) changeToBlogEntity(blog_model *model.BlogModel) *blog.Blog
 	return blog_entity_list[0]
 }
 
+//模型转化为BlogEntity实体List操作
+func (s *BlogService) ChangeToBlogEntityFormList(blog_model_list []*model.BlogModel) []*blog.BlogEntity {
+	number := len(blog_model_list)
+
+	if number <= 0 {
+		return nil
+	}
+
+	blog_entity_list := make([]*blog.BlogEntity, number)
+
+	cover_plan_ids := make([]uint64, number)
+
+	blog_type_ids := make([]uint64, number)
+
+	for index, item := range blog_model_list {
+		blog_entity := new(blog.BlogEntity)
+		blog_entity.ID = uint64(item.ID)
+		blog_entity.CreateTime = uint64(item.CreateTime)
+		blog_entity.UpdateTime = uint64(item.UpdateTime)
+		blog_entity.BlogTypeId = uint64(item.BlogTypeId)
+		blog_entity.CoverPlanId = uint64(item.CoverPlanId)
+		blog_entity.Title = item.Title
+		blog_entity.Abstract = item.Abstract
+		blog_entity.Content = item.Content
+		blog_entity.DocID = item.DocID
+
+		cover_plan_ids[index] = blog_entity.CoverPlanId
+		blog_type_ids[index] = blog_entity.BlogTypeId
+
+		blog_entity_list[index] = blog_entity
+	}
+
+	s.paddingAttachemtInfo(cover_plan_ids, blog_entity_list)
+
+	s.paddingBlogTypeInfo(blog_type_ids, blog_entity_list)
+
+	return blog_entity_list
+
+}
+
 //导入数据到es中
 func (s *BlogService) ImportDataToEs() {
 
@@ -67,7 +107,7 @@ func (s *BlogService) ImportDataToEs() {
 
 	for _, blog_model := range blog_list {
 		//es中添加文件
-		blog_doc := s.changeToBlogEntity(&blog_model)
+		blog_doc := s.ChangeToBlogEntity(&blog_model)
 
 		log.Println("导入的es文档是：", fmt.Sprintf("v = %v,t = %T, p = %p", blog_doc, blog_doc, blog_doc))
 
@@ -110,7 +150,7 @@ func (s *BlogService) AddBlog(blog_type_id, cover_plan_id int64, title, abstract
 	}
 
 	//创建es文档
-	blog_doc := s.changeToBlogEntity(blog_model) //文档转化
+	blog_doc := s.ChangeToBlogEntity(blog_model) //文档转化
 
 	es_blog_service := new(es_blog.BlogEsService)
 
@@ -153,9 +193,9 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 	}
 
 	//更新es文档
-	blog_doc := s.changeToBlogEntity(blog_model) //文档转化
+	blog_doc := s.ChangeToBlogEntity(blog_model) //文档转化
 
-	log.Println("转化为es的文档为",fmt.Sprintf("v=%v, t=%T ,p=%p", blog_doc, blog_doc, blog_doc))
+	log.Println("转化为es的文档为", fmt.Sprintf("v=%v, t=%T ,p=%p", blog_doc, blog_doc, blog_doc))
 
 	es_blog_service := new(es_blog.BlogEsService)
 
