@@ -28,7 +28,9 @@
 - upload 项目上传的静态文件
 
 
+### docker部署和本地运行遇到的问题
 
+- 2020/09/30 docker go版本 golang:1.15.2，本地windows 1.4, 请求带有中文参数，中文需要urlencode
 ## 迭代日志
 
 - 2020/05/24 项目docker自动部署
