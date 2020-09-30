@@ -6,6 +6,8 @@
 - gin 框架（自己封装了下，多了一些工具类，和路由转发）
 - mysql
 - es
+- docker
+- docker-compose
 - canal或maxwell实现，各种数据源同步(未实现)
 
 
@@ -29,6 +31,8 @@
 
 ## 迭代日志
 
+- 2020/05/24 项目docker自动部署
+- 2020/06/02 妈蛋老子找错orm包了，好多山寨包呀，修改为gorm.io/gorm
 - 2020/07/20 添加es进入,ik分词实现搜索es搜索(埋点触发es同步,未来可加入canal或maxwell)
 - 2020/09/30 blog搜索添加降级功能，es挂了之后降为mysql搜索
 
