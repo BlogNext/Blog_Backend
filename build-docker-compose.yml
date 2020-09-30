@@ -1,4 +1,4 @@
-sversion: '3.7'
+version: '3.7'
 services:
   blog_next_backend:
     container_name: blog_next_backend
