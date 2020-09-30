@@ -14,10 +14,6 @@ services:
     - /home/xiaochen/BlogNext/code/Blog_Backend/upload:/go/bin/upload
     - /home/xiaochen/BlogNext/code/Blog_Backend/config/:/go/bin/config
     command: /bin/bash -c "go install -v ./ && /go/bin/blog_backend"
-    deploy:
-      resources:
-        limits:
-          memory: 500M
     ports:
     - "8083:8083"
     #设置环境变量
