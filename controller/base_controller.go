@@ -45,13 +45,7 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 			controller.Finish() //做一些释放资源的操作
 		}()
 
-		controller.Init(context)               //控制器初始化,类似构造函数
-		base_exception := controller.Prepare() //一些钩子吧,在真正执行到控制器请求前在做一下操作，例如权限认证等
-
-		if base_exception != nil {
-			help.Gin200ErrorResponse(context, base_exception.GetErrorCode(), base_exception.Error(), nil)
-			return //结束请求
-		}
+		controller.Init(context) //控制器初始化,类似构造函数
 
 		var param []reflect.Value         // 反射调用方法所需要的参数
 		action := context.Param("action") //获取执行控制器的方法
@@ -81,15 +75,28 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 			action_split[index] = help.StrFirstToUpper(item) //首字母大写
 		}
 
-		action = strings.Join(action_split, "") //拼接方法
+		method := strings.Join(action_split, "") //拼接方法
 
-		call_method := value.MethodByName(action)
-		log.Println("执行方法", action)
+		call_method := value.MethodByName(method)
+		log.Println("执行方法", method)
 
 		if !call_method.IsValid() {
 			//没有找到action参数，通过请求类型去执行具体对应的方法
 			method := context.Request.Method
 			panic(errors.New(fmt.Sprintf("还不支持的方法: %s", method)))
+		}
+
+		//一些钩子吧,在真正执行到控制器请求前在做一下操作，例如权限认证等
+		base_exception := controller.Prepare()
+
+		prefixPath := strings.Split(context.FullPath(),":")[0]
+
+		//转化成uri路径
+		controller.SetMyFullPath(prefixPath + method)
+
+		if base_exception != nil {
+			help.Gin200ErrorResponse(context, base_exception.GetErrorCode(), base_exception.Error(), nil)
+			return //结束请求
 		}
 
 		//调用方法
@@ -100,13 +107,18 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 
 //参考beego
 type Controller interface {
+	//控制器的生命周期
 	Init(ctx *gin.Context)          //ctx是gin的Context controller是当前执行的控制器,初始化
 	Prepare() exception.MyException //解析
 	Finish()                        //这个函数是在执行完相应的 HTTP Method 方法之后执行的，默认是空，用户可以在子 struct 中重写这个函数，执行例如数据库关闭，清理数据之类的工作。
+
+	//控制器的一些属性
+	SetMyFullPath(path string) //设置访问的路由
 }
 
 type BaseController struct {
-	Ctx *gin.Context //gin框架的Context
+	Ctx        *gin.Context //gin框架的Context
+	UniqFullPath string       //路由全路径,真正的路由地址，接口地址uri;转化成自己唯一的路由路径,因为自己做的url 支持 '-','_'两个解析
 }
 
 //初始化函数
@@ -121,6 +133,10 @@ func (c *BaseController) Prepare() exception.MyException {
 
 func (c *BaseController) Finish() {
 	//可以做一些释放资源的操作
+}
+
+func (c *BaseController) SetMyFullPath(uniqFullPath string) {
+	c.UniqFullPath = uniqFullPath
 }
 
 //一些重写方法,重写验证的方法，当验证出错的时候，如果是自定义的异常，则按标准的json格式返回

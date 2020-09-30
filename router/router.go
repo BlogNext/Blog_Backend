@@ -33,7 +33,6 @@ func (mr *MyRouter) RunRouter() *gin.Engine {
 		register_router(router)
 	}
 
-
 	return router
 }
 
