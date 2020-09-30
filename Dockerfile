@@ -1,1 +1,1 @@
-FROM golang:1.14.9-buster
+FROM golang:1.15.2
