@@ -12,8 +12,24 @@ type BlogController struct {
 }
 
 func (c *BlogController) GetList() {
+
+	//必填字段
+	type searchRequest struct {
+		PerPage int `form:"per_page" binding:"required"`
+		Page    int `form:"page" binding:"required"`
+	}
+
+	var search_request searchRequest
+
+	err := c.Ctx.ShouldBind(&search_request)
+
+	if err != nil {
+		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
+		return
+	}
+
 	b_s := new(backend.BlogService)
-	result := b_s.GetList()
+	result := b_s.GetList(search_request.PerPage, search_request.Page)
 	help.Gin200SuccessResponse(c.Ctx, "成功", result)
 	return
 }

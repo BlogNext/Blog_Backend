@@ -44,10 +44,11 @@ func (b *BlogService) SearchBlogMysqlLevel(keyword string, per_page, page int) (
 	var count int64
 
 	db := mysql.GetDefaultDBConnect()
-	db.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%").
-		Limit(per_page).Offset((page - 1) * per_page).Find(&blog_model_list).Count(&count)
+	db = db.Table(model.BlogModel{}.TableName()).Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
+	db.Count(&count)
+	db.Limit(per_page).Offset((page - 1) * per_page).Find(&blog_model_list)
 
-	log.Println("总数:", count, "数据:", blog_model_list,"数据长度:",len(blog_model_list))
+	log.Println("总数:", count, "数据:", blog_model_list, "数据长度:", len(blog_model_list))
 
 	//转化为传输层的对象
 	bs := new(backend.BlogService)
@@ -55,8 +56,9 @@ func (b *BlogService) SearchBlogMysqlLevel(keyword string, per_page, page int) (
 
 	//构建结果返回
 	result = new(entity.ListResponseEntity)
-	result.SetPerPage(per_page)
+
 	result.SetCount(count)
+	result.SetPerPage(per_page)
 	result.SetList(blog_entity_list)
 
 	return result

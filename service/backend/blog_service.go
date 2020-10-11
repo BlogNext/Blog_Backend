@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"github.com/blog_backend/common-lib/db/mysql"
+	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/attachment"
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/exception"
@@ -204,7 +205,7 @@ func (s *BlogService) UpdateBlog(id, blog_type_id, cover_plan_id int64, title, a
 }
 
 //列表页
-func (s *BlogService) GetList() (result []*blog.BlogEntity) {
+func (s *BlogService) GetList(per_page, page int) (result *entity.ListResponseEntity) {
 	db := mysql.GetDefaultDBConnect()
 
 	blog_table_name := model.BlogModel{}.TableName()
@@ -216,10 +217,19 @@ func (s *BlogService) GetList() (result []*blog.BlogEntity) {
 		blog_felid[index] = fmt.Sprintf("%s.%s", blog_table_name, felid)
 	}
 
+	var count int64
 	//sql
-	rows, _ := db.Table(blog_table_name).Select(strings.Join(blog_felid, ", ")).Rows()
+	db = db.Table(blog_table_name)
 
-	result = make([]*blog.BlogEntity, 0)
+	db.Count(&count)
+
+	rows, err := db.Select(strings.Join(blog_felid, ", ")).Limit(per_page).Offset((page - 1) * per_page).Rows()
+
+	if err != nil {
+		return nil
+	}
+
+	query_result := make([]*blog.BlogEntity, 0)
 
 	cover_plan_ids := make([]uint64, 0)
 	blog_type_ids := make([]uint64, 0)
@@ -241,16 +251,24 @@ func (s *BlogService) GetList() (result []*blog.BlogEntity) {
 		blog_entity.Title = title
 		blog_entity.CreateTime = create_time
 		blog_entity.UpdateTime = update_time
+		log.Println("blog_entity")
+		log.Println(blog_entity)
 
 		cover_plan_ids = append(cover_plan_ids, cover_plan_id)
 		blog_type_ids = append(blog_type_ids, blog_type_id)
 
-		result = append(result, blog_entity)
+		query_result = append(query_result, blog_entity)
 	}
 
 	//填充信息
-	s.paddingAttachemtInfo(cover_plan_ids, result) //填充附件信息
-	s.paddingBlogTypeInfo(blog_type_ids, result)   //博客类型实体
+	s.paddingAttachemtInfo(cover_plan_ids, query_result) //填充附件信息
+	s.paddingBlogTypeInfo(blog_type_ids, query_result)   //博客类型实体
+
+	//构建结果返回
+	result = new(entity.ListResponseEntity)
+	result.SetCount(count)
+	result.SetPerPage(per_page)
+	result.SetList(query_result)
 
 	return
 }

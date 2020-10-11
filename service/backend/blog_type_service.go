@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"github.com/blog_backend/common-lib/db/mysql"
+	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
@@ -16,18 +17,22 @@ type BlogTypeService struct {
 }
 
 //获取列表类型接口
-func (s *BlogTypeService) List() (blog_type_model_list []map[string]interface{}) {
+func (s *BlogTypeService) List(per_page, page int) (result *entity.ListResponseEntity) {
 
 	log.Println("查询方法")
 	content := mysql.GetDefaultDBConnect()
-	log.Println("查询方法",content)
+	log.Println("查询方法", content)
+
+	var count int64
 	db := content.Model(&model.BlogTypeModel{})
-	db.Select("id, title, create_time, update_time")
-	rows, _ := db.Rows()
+	db.Count(&count)
+
+	rows, _ := db.Select("id, title, create_time, update_time").
+		Limit(per_page).Offset((page - 1) * per_page).Rows()
 
 	defer rows.Close()
 
-	blog_type_model_list = make([]map[string]interface{}, 0)
+	blog_type_model_list := make([]map[string]interface{}, 0)
 
 	for rows.Next() {
 
@@ -46,6 +51,11 @@ func (s *BlogTypeService) List() (blog_type_model_list []map[string]interface{})
 
 		blog_type_model_list = append(blog_type_model_list, item)
 	}
+
+	result = new(entity.ListResponseEntity)
+	result.SetCount(count)
+	result.SetPerPage(per_page)
+	result.SetList(blog_type_model_list)
 
 	return
 }
