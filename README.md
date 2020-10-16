@@ -44,15 +44,22 @@
 
 [maxwell官网](http://maxwells-daemon.io/quickstart/)
 
-- docker部署
+- docker部署maxwells参考 maxwell-docker-compose.yml
 
 ```cassandraql
 解释下对应的sql
-#创建用户mawell ‘%’标识任何ip都能连,密码
+//创建用户mawell ‘%’标识任何ip都能连,密码
 mysql> CREATE USER 'maxwell'@'%' IDENTIFIED BY 'XXXXXX';
-#授权数据库给maxwell用户
+//授权数据库给maxwell用户
 mysql> GRANT ALL ON maxwell.* TO 'maxwell'@'%';
-#未用户赋予slave从库权限
+//未用户赋予slave从库权限
 mysql> GRANT SELECT, REPLICATION CLIENT, REPLICATION SLAVE ON *.* TO 'maxwell'@'%';
+```
+
+##测试
+```cassandraql
+//监听redis maxwell的订阅频道
+SUBSCRIBE maxwell
+
 ```
 

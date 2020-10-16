@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  maxwell:
+    container_name: maxwell
+    image: zendesk/maxwell:v1.27.1
+    #schema_databas数据库以存储架构和位置要和GRANT ALL ON maxwell.* TO 'maxwell'@'%';对应
+    command: bin/maxwell --user=数据库账号 --password=数据库密码 --host=数据库连接 --port=数据库端口 --schema_databas=数据库 --producer=redis --redis_host=redis --redis_port=6379 --redis_auth=redis密码
+    networks:
+      - blog_next
+networks:
+  blog_next:
+    external: true
