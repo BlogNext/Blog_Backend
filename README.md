@@ -8,7 +8,8 @@
 - es
 - docker
 - docker-compose
-- canal或maxwell实现，各种数据源同步(未实现)
+- maxwell实现，各种数据源同步(未实现)
+- redis
 
 
 ## 目录结构说明
@@ -35,6 +36,23 @@
 
 - 2020/05/24 项目docker自动部署
 - 2020/06/02 妈蛋老子找错orm包了，好多山寨包呀，修改为gorm.io/gorm
-- 2020/07/20 添加es进入,ik分词实现搜索es搜索(埋点触发es同步,未来可加入canal或maxwell)
+- 2020/07/20 添加es进入,ik分词实现搜索es搜索(埋点触发es同步,未来可加入maxwell)
 - 2020/09/30 blog搜索添加降级功能，es挂了之后降为mysql搜索
+
+
+## MAXWELL和redis部署
+
+[maxwell官网](http://maxwells-daemon.io/quickstart/)
+
+- docker部署
+
+```cassandraql
+解释下对应的sql
+#创建用户mawell ‘%’标识任何ip都能连,密码
+mysql> CREATE USER 'maxwell'@'%' IDENTIFIED BY 'XXXXXX';
+#授权数据库给maxwell用户
+mysql> GRANT ALL ON maxwell.* TO 'maxwell'@'%';
+#未用户赋予slave从库权限
+mysql> GRANT SELECT, REPLICATION CLIENT, REPLICATION SLAVE ON *.* TO 'maxwell'@'%';
+```
 
