@@ -50,7 +50,7 @@
 解释下对应的sql
 //创建用户mawell ‘%’标识任何ip都能连,密码
 mysql> CREATE USER 'maxwell'@'%' IDENTIFIED BY 'XXXXXX';
-//授权数据库给maxwell用户
+//授权maxwell数据库给maxwell用户,maxwell数据库用于记录一些maxwell作为模拟mysql slave的信息
 mysql> GRANT ALL ON maxwell.* TO 'maxwell'@'%';
 //未用户赋予slave从库权限
 mysql> GRANT SELECT, REPLICATION CLIENT, REPLICATION SLAVE ON *.* TO 'maxwell'@'%';
