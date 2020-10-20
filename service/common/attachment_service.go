@@ -11,6 +11,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -117,7 +118,12 @@ func (s *AttachmentService) UploadBlog(Ctx *gin.Context) (full_attachment_extend
 
 	for index, file := range files {
 
-		file_rename := fmt.Sprintf("%d.%d.%d", time.Now().UnixNano(), rand.Int63(), index)
+		log.Println(file.Header)
+		log.Println(file.Header.Get("Content-Type"))
+		log.Println(file.Filename)
+		log.Println(path.Ext(file.Filename))
+		file_rename := fmt.Sprintf("%d-%d-%d%s", time.Now().UnixNano(), rand.Int63(), index, path.Ext(file.Filename))
+		log.Println(file_rename)
 
 		dst := strings.Join([]string{dir, file_rename}, "/")
 
