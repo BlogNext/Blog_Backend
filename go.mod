@@ -3,6 +3,7 @@ module github.com/blog_backend
 go 1.14
 
 require (
+	github.com/FlashFeiFei/yuque v1.0.0 // indirect
 	github.com/gin-gonic/gin v1.6.0
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
