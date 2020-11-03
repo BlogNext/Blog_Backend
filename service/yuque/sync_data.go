@@ -1,0 +1,125 @@
+package yuque
+
+import (
+	"errors"
+	"github.com/FlashFeiFei/yuque/response"
+	"github.com/blog_backend/common-lib/db/mysql"
+	"github.com/blog_backend/model"
+	"gorm.io/gorm"
+)
+
+//webhook数据同步
+func SyncData(serializer *response.ResponseDocDetailSerializer) {
+
+	//同步用户
+	syncUserData(serializer.Data.User)
+
+	//同步知识库
+	syncBlogType(serializer.Data.Book)
+
+	//同步博客
+	syncBlog(serializer.Data)
+}
+
+//同步用户
+func syncUserData(user *response.UserSerializer) {
+	db := mysql.GetDefaultDBConnect()
+	user_yuque_model := new(model.UsereYuQueModel)
+	query_result := db.First(user_yuque_model, user.ID)
+	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	if find {
+		//找不到用户，创建用户
+
+		db.Transaction(func(tx *gorm.DB) error {
+			//创建用户
+			user_model := new(model.UsereModel)
+			user_model.NickName = user.Name
+			result := tx.Create(user_model)
+			if result.Error != nil {
+				return result.Error
+			}
+
+			//创建语雀用户
+			user_yuque_model.ID = uint(user.ID)
+			user_yuque_model.Login = user.Login
+			user_yuque_model.Name = user.Name
+			user_yuque_model.AvatarUrl = user.AvatarUrl
+			user_yuque_model.Description = user.Description
+			user_yuque_model.UserId = int64(user_model.ID)
+			result = tx.Create(user_yuque_model)
+			if result.Error != nil {
+				return result.Error
+			}
+
+			return nil
+		})
+
+	} else {
+		//找到用户，更新用户
+
+		//更新用户
+		db.Transaction(func(tx *gorm.DB) error {
+
+			//更新用户
+			user_model := new(model.UsereModel)
+			query_result = tx.First(user_model, user_yuque_model.UserId)
+			find = errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+			if find {
+				return query_result.Error
+			}
+			user_model.NickName = user.Name
+			result := tx.Save(user_model)
+			if result.Error != nil {
+				return result.Error
+			}
+
+			//更新语雀用户
+			user_yuque_model.Login = user.Login
+			user_yuque_model.Name = user.Name
+			user_yuque_model.AvatarUrl = user.AvatarUrl
+			user_yuque_model.Description = user.Description
+			result = tx.Save(user_model)
+
+			if result.Error != nil {
+				return result.Error
+			}
+
+			return nil
+		})
+
+	}
+}
+
+//同步知识库（博客类型）
+func syncBlogType(book *response.BookSerializer) {
+	db := mysql.GetDefaultDBConnect()
+	blog_type_model := new(model.BlogTypeModel)
+	query_result := db.Where("yuque_id = ?", book.ID).First(blog_type_model)
+	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	if find {
+		//找不到博客类型
+		blog_type_model.YuqueId = book.ID
+		blog_type_model.YuqueName = book.Name
+		blog_type_model.YuqueType = book.Type
+		
+		result := db.Create(blog_type_model)
+		if result.Error != nil {
+			panic(result.Error)
+		}
+	} else {
+		//找到博客类型
+		blog_type_model.YuqueName = book.Name
+		blog_type_model.YuqueType = book.Type
+		result := db.Save(blog_type_model)
+
+		if result.Error != nil {
+			panic(result.Error)
+		}
+
+	}
+}
+
+//同步博客
+func syncBlog(doc *response.DocDetailSerializer) {
+
+}

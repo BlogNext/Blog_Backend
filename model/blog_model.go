@@ -2,7 +2,8 @@ package model
 
 type BlogModel struct {
 	BaseModel
-	DocID         string `gorm:"cloumn:doc_id"` //es文档id
+	UserID        uint   `gorm:"cloumn:user_id"` //userid
+	DocID         string `gorm:"cloumn:doc_id"`  //es文档id
 	CoverPlanId   int64  `gorm:"cloumn:cover_plan_id"`
 	BlogTypeId    int64  `gorm:"cloumn:blog_type_id"`
 	YuqueId       int64  `gorm:"cloumn:yuque_id"` //语雀文档id
