@@ -2,6 +2,7 @@ package yuque
 
 import (
 	"errors"
+	"github.com/FlashFeiFei/yuque/request/front"
 	"github.com/FlashFeiFei/yuque/response"
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/model"
@@ -151,10 +152,26 @@ func syncBlog(doc *response.DocDetailSerializer, user_id, blog_type_id uint) {
 	}
 
 	blog_model := new(model.BlogModel)
-	query_result := db.First(blog_model, doc.ID)
-	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	query_result = db.First(blog_model, doc.ID)
+	find = errors.Is(query_result.Error, gorm.ErrRecordNotFound)
 	if find {
+		//获取博客的封面图和摘要
+		DocIntor := front.GetDocIntorSerializer(doc.Slug,doc.BookId)
+
 		//创建文档
+		//语雀数据
+		blog_model.YuqueId = doc.ID
+		blog_model.YuqueSlug = doc.Slug
+		blog_model.YuqueIdFormat = doc.Format
+		blog_model.YuqueHtml = doc.BodyHtml
+		blog_model.YuqueLake = doc.BodyLake
+		blog_model.Title = doc.Title
+		blog_model.Content = doc.Body
+		blog_model.Abstract = DocIntor.Data.CustomDescription
+
+		//系统的数据
+		blog_model.UserID = user_model.ID
+		blog_model.BlogTypeId = int64(blog_type_model.ID)
 	} else {
 		//更新文档
 	}
