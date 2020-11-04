@@ -4,7 +4,7 @@ import (
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/entity"
 	"github.com/blog_backend/model"
-	"github.com/blog_backend/service/backend"
+	blog_rt_s "github.com/blog_backend/service/blog"
 	"github.com/blog_backend/service/common/es/blog"
 	"log"
 )
@@ -51,8 +51,7 @@ func (b *BlogService) SearchBlogMysqlLevel(keyword string, per_page, page int) (
 	log.Println("总数:", count, "数据:", blog_model_list, "数据长度:", len(blog_model_list))
 
 	//转化为传输层的对象
-	bs := new(backend.BlogService)
-	blog_entity_list := bs.ChangeToBlogEntityFormList(blog_model_list)
+	blog_entity_list := blog_rt_s.ChangeToBlogEntityList(blog_model_list)
 
 	//构建结果返回
 	result = new(entity.ListResponseEntity)

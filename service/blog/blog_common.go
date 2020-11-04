@@ -5,7 +5,7 @@ import (
 	"github.com/blog_backend/entity/attachment"
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/model"
-	"github.com/blog_backend/service/common"
+	attachment_service "github.com/blog_backend/service/attachment"
 	"github.com/thoas/go-funk"
 	"log"
 )
@@ -14,7 +14,7 @@ import (
 func PaddingAttachemtInfo(cover_plan_ids []uint64, result []*blog.BlogEntity) {
 
 	//获取图片的ids,填充图片信息
-	attachment_list := common.GetAttachmentImages(cover_plan_ids)
+	attachment_list := attachment_service.GetAttachmentImages(cover_plan_ids)
 
 	if attachment_list != nil {
 		//转化成map

@@ -74,7 +74,7 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	//获取博客的封面图和摘要
 	DocIntor := front.GetDocIntorSerializer(doc.Slug, doc.BookId)
 	//下载封面图
-	attachment_service := new(attachment.AttachmentService)
+	attachment_service := new(attachment.AttachmentRtService)
 	attachment_entity_list := attachment_service.DownloadBlogImage(DocIntor.Data.Cover, model.ATTACHMENT_BLOG_Module, model.ATTACHMENT_FILE_TYPE_IMAGE)
 	if attachment_entity_list == nil {
 		panic("下载封面图失败")
