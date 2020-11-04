@@ -1,13 +1,12 @@
-package common
+package backend
 
 import (
-	"github.com/blog_backend/controller"
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/service/attachment"
 )
 
 type AttachmentController struct {
-	controller.BaseController
+	BaseController
 }
 
 func (a *AttachmentController) UploadBlog() {

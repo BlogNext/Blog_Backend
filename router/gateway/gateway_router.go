@@ -11,7 +11,7 @@ import (
 	zh_translations "github.com/go-playground/validator/v10/translations/zh"
 )
 
-func RegisterYuqueRouter(router *gin.Engine) {
+func RegisterGateWayRouter(router *gin.Engine) {
 	//注册验证器d
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		//自定义验证器，中文信息
@@ -21,7 +21,7 @@ func RegisterYuqueRouter(router *gin.Engine) {
 		_ = zh_translations.RegisterDefaultTranslations(v, trans)
 	}
 
-	//后端公共的路由
+	//gateway公共的路由
 	gateway_router := router.Group("/gateway")
 	{
 		//语雀路由
