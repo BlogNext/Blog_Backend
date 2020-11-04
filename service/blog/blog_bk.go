@@ -17,6 +17,9 @@ import (
 type BlogBkService struct {
 }
 
+/**
+通过yuquewebhook更新博客
+*/
 func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializer) {
 	db := mysql.GetDefaultDBConnect()
 	blog_model := new(model.BlogModel)
@@ -25,7 +28,7 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	if find {
 		panic(fmt.Sprintf("博客未创建id:%d", doc.ID))
 	}
-	
+
 	blog_model.YuqueIdFormat = doc.Format
 	blog_model.YuqueHtml = doc.BodyHtml
 	blog_model.YuqueLake = doc.BodyLake
@@ -40,7 +43,7 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 }
 
 /**
-创建博客
+通过yuquewebhook创建博客
 doc 语雀结构体
 user_id 用户id
 blog_type_id 博客分类
