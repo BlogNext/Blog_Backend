@@ -6,6 +6,7 @@ import (
 	"github.com/FlashFeiFei/yuque/response"
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/model"
+	"github.com/blog_backend/service/attachment"
 	"gorm.io/gorm"
 )
 
@@ -156,8 +157,13 @@ func syncBlog(doc *response.DocDetailSerializer, user_id, blog_type_id uint) {
 	find = errors.Is(query_result.Error, gorm.ErrRecordNotFound)
 	if find {
 		//获取博客的封面图和摘要
-		DocIntor := front.GetDocIntorSerializer(doc.Slug,doc.BookId)
-
+		DocIntor := front.GetDocIntorSerializer(doc.Slug, doc.BookId)
+		//下载封面图
+		attachment_service := new(attachment.AttachmentService)
+		attachment_entity_list := attachment_service.DownloadBlogImage(DocIntor.Data.Cover, model.ATTACHMENT_BLOG_Module, model.ATTACHMENT_FILE_TYPE_IMAGE)
+		if attachment_entity_list == nil {
+			panic("下载封面图失败")
+		}
 		//创建文档
 		//语雀数据
 		blog_model.YuqueId = doc.ID
@@ -167,13 +173,30 @@ func syncBlog(doc *response.DocDetailSerializer, user_id, blog_type_id uint) {
 		blog_model.YuqueLake = doc.BodyLake
 		blog_model.Title = doc.Title
 		blog_model.Content = doc.Body
-		blog_model.Abstract = DocIntor.Data.CustomDescription
-
+		blog_model.Abstract = DocIntor.Data.CustomDescription        // 摘要
+		blog_model.CoverPlanId = int64(attachment_entity_list[0].ID) //封面图
 		//系统的数据
-		blog_model.UserID = user_model.ID
-		blog_model.BlogTypeId = int64(blog_type_model.ID)
+		blog_model.UserID = user_model.ID                 //用户id
+		blog_model.BlogTypeId = int64(blog_type_model.ID) //文章分类id
+
+		result := db.Create(blog_model)
+		if result.Error != nil {
+			panic(result.Error)
+		}
+
 	} else {
 		//更新文档
+		blog_model.YuqueIdFormat = doc.Format
+		blog_model.YuqueHtml = doc.BodyHtml
+		blog_model.YuqueLake = doc.BodyLake
+		blog_model.Title = doc.Title
+		blog_model.Content = doc.Body
+
+		result := db.Save(blog_model)
+
+		if result.Error != nil {
+			panic(result.Error)
+		}
 	}
 
 }
