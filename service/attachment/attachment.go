@@ -158,7 +158,8 @@ func (s *AttachmentService) DownloadBlogImage(url string, module, file_type int6
 	attachment_model.CheckValidModule(module)
 	attachment_model.CheckValidFileType(file_type)
 
-	//上传文件到指定目录
+	log.Println(dst)
+	//创建一个文件
 	out, err := os.Create(dst)
 	if err != nil {
 		return nil
@@ -166,11 +167,13 @@ func (s *AttachmentService) DownloadBlogImage(url string, module, file_type int6
 
 	defer out.Close()
 
+
 	_, err = io.Copy(out, response.Body)
 
 	if err != nil {
 		panic(err)
 	}
+	log.Println("完美拷贝")
 
 	//数据库保存
 	attachment_model = s.saveToDB(dst, module, file_type)
