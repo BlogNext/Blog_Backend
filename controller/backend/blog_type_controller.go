@@ -7,7 +7,7 @@ import (
 )
 
 type BlogTypeController struct {
-	BackendController
+	BaseController
 }
 
 //列表接口

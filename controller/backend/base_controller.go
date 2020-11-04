@@ -6,16 +6,16 @@ import (
 	"log"
 )
 
-type BackendController struct {
+type BaseController struct {
 	controller.BaseController
 }
 
 //做一些鉴权操作等
-func (c *BackendController) Prepare() exception.MyException {
+func (c *BaseController) Prepare() exception.MyException {
 	return nil
 }
 
-func (c *BackendController) Finish() {
+func (c *BaseController) Finish() {
 
 	log.Println(c.UniqFullPath)
 	////可以做一些释放资源的操作

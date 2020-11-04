@@ -8,7 +8,7 @@ import (
 )
 
 type BlogController struct {
-	BackendController
+	BaseController
 }
 
 func (c *BlogController) GetList() {
