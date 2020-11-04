@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/blog_backend/router/backend"
 	"github.com/blog_backend/router/common"
+	"github.com/blog_backend/router/gateway"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,7 +13,7 @@ type MyRouter struct {
 func (mr *MyRouter) registerRouter() {
 	mr.router_list = make([]RegisterRouter, 2)
 	//路由注册
-	mr.router_list[0] = backend.RegisterBlogRouter
+	mr.router_list[0] = gateway.RegisterYuqueRouter
 	mr.router_list[1] = common.RegisterCommontRouter
 }
 
