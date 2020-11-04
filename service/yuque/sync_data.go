@@ -7,6 +7,7 @@ import (
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/model"
 	"github.com/blog_backend/service/attachment"
+	"github.com/blog_backend/service/blog"
 	user_bk "github.com/blog_backend/service/user"
 	"gorm.io/gorm"
 )
@@ -50,26 +51,13 @@ func syncBlogType(book *response.BookSerializer) (blog_type_id uint) {
 	blog_type_model := new(model.BlogTypeModel)
 	query_result := db.Where("yuque_id = ?", book.ID).First(blog_type_model)
 	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	blog_type_service := new(blog.BlogTypeBkService)
 	if find {
 		//找不到博客类型
-		blog_type_model.YuqueId = book.ID
-		blog_type_model.YuqueName = book.Name
-		blog_type_model.YuqueType = book.Type
-
-		result := db.Create(blog_type_model)
-		if result.Error != nil {
-			panic(result.Error)
-		}
-
+		blog_type_model = blog_type_service.CreateTypeByYuqueWebHook(book)
 	} else {
 		//找到博客类型
-		blog_type_model.YuqueName = book.Name
-		blog_type_model.YuqueType = book.Type
-		result := db.Save(blog_type_model)
-
-		if result.Error != nil {
-			panic(result.Error)
-		}
+		blog_type_model = blog_type_service.UpdateTypeByYuqueWebHook(book)
 	}
 
 	return blog_type_model.ID
