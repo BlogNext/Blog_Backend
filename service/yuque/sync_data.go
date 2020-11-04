@@ -7,6 +7,7 @@ import (
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/model"
 	"github.com/blog_backend/service/attachment"
+	user_bk "github.com/blog_backend/service/user"
 	"gorm.io/gorm"
 )
 
@@ -25,78 +26,19 @@ func SyncData(serializer *response.ResponseDocDetailSerializer) {
 
 //同步用户
 func syncUserData(user *response.UserSerializer) (user_id uint) {
+	var user_model *model.UsereModel
+
 	db := mysql.GetDefaultDBConnect()
-	user_model := new(model.UsereModel)
 	user_yuque_model := new(model.UsereYuQueModel)
 	query_result := db.First(user_yuque_model, user.ID)
 	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	user_bk_service := new(user_bk.UserBkService)
 	if find {
-		//找不到用户，创建用户
-
-		err := db.Transaction(func(tx *gorm.DB) error {
-
-			//创建用户
-			user_model.NickName = user.Name
-			result := tx.Create(user_model)
-			if result.Error != nil {
-				return result.Error
-			}
-
-			//创建语雀用户
-			user_yuque_model.ID = uint(user.ID)
-			user_yuque_model.Login = user.Login
-			user_yuque_model.Name = user.Name
-			user_yuque_model.AvatarUrl = user.AvatarUrl
-			user_yuque_model.Description = user.Description
-			user_yuque_model.UserId = int64(user_model.ID)
-			result = tx.Create(user_yuque_model)
-			if result.Error != nil {
-				return result.Error
-			}
-
-			return nil
-		})
-
-		if err != nil {
-			panic(err)
-		}
-
+		//创建用户
+		user_model = user_bk_service.CreateUserByYuqueWebHook(user)
 	} else {
-		//找到用户，更新用户
-
 		//更新用户
-		err := db.Transaction(func(tx *gorm.DB) error {
-
-			//更新用户
-			query_result = tx.First(user_model, user_yuque_model.UserId)
-			find = errors.Is(query_result.Error, gorm.ErrRecordNotFound)
-			if find {
-				return query_result.Error
-			}
-			user_model.NickName = user.Name
-			result := tx.Save(user_model)
-			if result.Error != nil {
-				return result.Error
-			}
-
-			//更新语雀用户
-			user_yuque_model.Login = user.Login
-			user_yuque_model.Name = user.Name
-			user_yuque_model.AvatarUrl = user.AvatarUrl
-			user_yuque_model.Description = user.Description
-			result = tx.Save(user_model)
-
-			if result.Error != nil {
-				return result.Error
-			}
-
-			return nil
-		})
-
-		if err != nil {
-			panic(err)
-		}
-
+		user_model = user_bk_service.UpdateUserByYuqueWebHook(user)
 	}
 
 	return user_model.ID
