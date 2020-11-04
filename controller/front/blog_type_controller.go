@@ -37,7 +37,7 @@ func (c *BlogTypeController) GetList() {
 		search_request.Page = 1
 	}
 
-	service := new(blog.BlogTypeBkService)
+	service := new(blog.BlogTypeRtService)
 	result := service.GetList(search_request.PerPage, search_request.Page)
 
 	help.Gin200SuccessResponse(c.Ctx, "成功", result)

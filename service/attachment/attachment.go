@@ -99,10 +99,8 @@ func (s *AttachmentService) saveToDB(dst string, module, file_type int64) (attac
 	return attachment_model
 }
 
-/**
-重命名文件名
-file_name_list 一批文件名
-*/
+//重命名文件名
+//file_name_list 一批文件名
 func (s *AttachmentService) renameFileName(file_name_list []string) (new_file_name_list []string) {
 
 	rand.Seed(time.Now().UnixNano())
@@ -119,10 +117,8 @@ func (s *AttachmentService) renameFileName(file_name_list []string) (new_file_na
 	return new_file_name_list
 }
 
-/**
-创建博客功能点静态资源存放的目录
-返回目录
-*/
+//创建博客功能点静态资源存放的目录
+//返回目录
 func (s *AttachmentService) createBlogDir() string {
 	dir := strings.Join([]string{UPLOAD_ROOT_PATH, "blog"}, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -131,12 +127,10 @@ func (s *AttachmentService) createBlogDir() string {
 	return dir
 }
 
-/**
-网络下载博客功能点的静态资源
-url 网络下载的资源
-module 功能点
-file_type 文件类型
-*/
+//网络下载博客功能点的静态资源
+//url 网络下载的资源
+//module 功能点
+//file_type 文件类型
 func (s *AttachmentService) DownloadBlogImage(url string, module, file_type int64) (full_attachment_extend []*attachment.AttachmentEntity) {
 	response, err := http.Get(url)
 
@@ -166,7 +160,6 @@ func (s *AttachmentService) DownloadBlogImage(url string, module, file_type int6
 	}
 
 	defer out.Close()
-
 
 	_, err = io.Copy(out, response.Body)
 

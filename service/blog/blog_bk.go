@@ -11,15 +11,12 @@ import (
 	"gorm.io/gorm"
 )
 
-/**
-博客服务
-*/
+//博客服务
 type BlogBkService struct {
 }
 
-/**
-通过yuquewebhook更新博客
-*/
+//通过yuquewebhook更新博客
+//doc 语雀结构体
 func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializer) {
 	db := mysql.GetDefaultDBConnect()
 	blog_model := new(model.BlogModel)
@@ -42,12 +39,10 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	}
 }
 
-/**
-通过yuquewebhook创建博客
-doc 语雀结构体
-user_id 用户id
-blog_type_id 博客分类
-*/
+//通过yuquewebhook创建博客
+//doc 语雀结构体
+//user_id 用户id
+//blog_type_id 博客分类
 func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializer, user_id, blog_type_id uint) {
 	db := mysql.GetDefaultDBConnect()
 	//查找用户
