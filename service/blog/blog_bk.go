@@ -6,9 +6,12 @@ import (
 	"github.com/FlashFeiFei/yuque/request/front"
 	"github.com/FlashFeiFei/yuque/response"
 	"github.com/blog_backend/common-lib/db/mysql"
+	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
 	"github.com/blog_backend/service/attachment"
+	es_blog "github.com/blog_backend/service/common/es/blog"
 	"gorm.io/gorm"
+	"log"
 )
 
 //博客后台服务
@@ -96,4 +99,42 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	if result.Error != nil {
 		panic(result.Error)
 	}
+}
+
+
+//导入数据到es中
+func (s *BlogBkService) ImportDataToEs() {
+
+	var blog_list []model.BlogModel
+
+	db := mysql.GetDefaultDBConnect()
+	db.Find(&blog_list)
+
+	if blog_list == nil {
+		return
+	}
+
+	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_list, blog_list, blog_list))
+
+	for _, blog_model := range blog_list {
+		//es中添加文件
+		blog_doc := ChangeToBlogEntity(&blog_model)
+
+		log.Println("导入的es文档是：", fmt.Sprintf("v = %v,t = %T, p = %p", blog_doc, blog_doc, blog_doc))
+
+		es_blog_service := new(es_blog.BlogEsService)
+
+		log.Println("连接:es成功")
+
+		doc := es_blog_service.AddDoc(blog_doc)
+
+		blog_model.DocID = doc.Id
+
+		db_error := db.Save(blog_model)
+
+		if db_error.Error != nil {
+			panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("更新失败error:%s", db_error.Error.Error())))
+		}
+	}
+
 }
