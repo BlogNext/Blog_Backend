@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-//博客服务
+//博客后台服务
 type BlogBkService struct {
 }
 
