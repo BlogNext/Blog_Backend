@@ -5,17 +5,17 @@ import (
 	"encoding/json"
 	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/blog"
-	"github.com/blog_backend/service/common/es"
+	"github.com/blog_backend/service/es"
 	"github.com/olivere/elastic/v7"
 	"log"
 )
 
-type BlogEsService struct {
+type BlogEsBkService struct {
 	es.BaseEsService
 }
 
 //删除blog文档
-func (b *BlogEsService) DeleteDoc(blog_doc *blog.BlogEntity) *elastic.DeleteResponse {
+func (b *BlogEsBkService) DeleteDoc(blog_doc *blog.BlogEntity) *elastic.DeleteResponse {
 	result, err := b.BaseEsService.DeleteDoc(es.BLOG_INDEX, blog_doc.DocID)
 	if err != nil {
 		return nil
@@ -24,7 +24,7 @@ func (b *BlogEsService) DeleteDoc(blog_doc *blog.BlogEntity) *elastic.DeleteResp
 }
 
 //添加一个doc,返回文档在es中的唯一标识
-func (b *BlogEsService) AddDoc(blog_doc *blog.BlogEntity) *elastic.IndexResponse {
+func (b *BlogEsBkService) AddDoc(blog_doc *blog.BlogEntity) *elastic.IndexResponse {
 	result, err := b.BaseEsService.AddDoc(es.BLOG_INDEX, blog_doc)
 	if err != nil {
 		return nil
@@ -33,7 +33,7 @@ func (b *BlogEsService) AddDoc(blog_doc *blog.BlogEntity) *elastic.IndexResponse
 }
 
 //更新一个文档的内容
-func (b *BlogEsService) UpdateDoc(blog_doc *blog.BlogEntity) *elastic.UpdateResponse {
+func (b *BlogEsBkService) UpdateDoc(blog_doc *blog.BlogEntity) *elastic.UpdateResponse {
 	result, err := b.BaseEsService.UpdateDoc(es.BLOG_INDEX, blog_doc.DocID, blog_doc)
 	if err != nil {
 		return nil
@@ -45,7 +45,7 @@ func (b *BlogEsService) UpdateDoc(blog_doc *blog.BlogEntity) *elastic.UpdateResp
 //per_page 每页多少条
 //page 第几页
 
-func (b *BlogEsService) SearchBlog(keyword string, per_page, page int) (result *entity.ListResponseEntity) {
+func (b *BlogEsBkService) SearchBlog(keyword string, per_page, page int) (result *entity.ListResponseEntity) {
 
 	search_result, err := b.BaseEsService.SearchDoc(func() es.Commend {
 		return func(client *elastic.Client) (i interface{}, err error) {

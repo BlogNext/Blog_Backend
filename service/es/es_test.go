@@ -1,7 +1,7 @@
 package es
 
 import (
-"context"
+	"context"
 "github.com/olivere/elastic/v7"
 "log"
 "os"
