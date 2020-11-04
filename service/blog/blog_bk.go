@@ -9,7 +9,6 @@ import (
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
 	"github.com/blog_backend/service/attachment"
-	es_blog "github.com/blog_backend/service/common/es/blog"
 	"gorm.io/gorm"
 	"log"
 )
@@ -122,7 +121,7 @@ func (s *BlogBkService) ImportDataToEs() {
 
 		log.Println("导入的es文档是：", fmt.Sprintf("v = %v,t = %T, p = %p", blog_doc, blog_doc, blog_doc))
 
-		es_blog_service := new(es_blog.BlogEsService)
+		es_blog_service := new(BlogEsBkService)
 
 		log.Println("连接:es成功")
 

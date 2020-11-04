@@ -4,7 +4,6 @@ import (
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/service/blog"
-	"github.com/blog_backend/service/front"
 )
 
 type BlogController struct {
@@ -48,7 +47,7 @@ func (c *BlogController) SearchBlog() {
 
 	//非必填字段
 	var search_level string
-	search_level = c.Ctx.DefaultQuery("search_level", front.ES_SEARCH_LEVEL)
+	search_level = c.Ctx.DefaultQuery("search_level", blog.ES_SEARCH_LEVEL)
 
 	//必填字段
 	type searchRequest struct {
@@ -75,7 +74,7 @@ func (c *BlogController) SearchBlog() {
 		search_request.Page = 1
 	}
 
-	b_s := new(front.BlogService)
+	b_s := new(blog.BlogRtService)
 
 	result := b_s.SearchBlog(search_level, search_request.Keyword, search_request.PerPage, search_request.Page)
 
