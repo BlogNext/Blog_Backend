@@ -1,20 +1,30 @@
 package yuque
 
 import (
+	"encoding/json"
 	"errors"
+	"github.com/FlashFeiFei/yuque/request"
 	"github.com/FlashFeiFei/yuque/response"
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/model"
 	"github.com/blog_backend/service/blog"
 	user_bk "github.com/blog_backend/service/user"
 	"gorm.io/gorm"
+	"log"
 )
 
 //webhook数据同步
-func SyncData(serializer *response.ResponseDocDetailSerializer) {
+func SyncData(serializer *response.ResponseDocDetailSerializer, token string) {
 
+	log.Println("语雀Token: ", token)
 	//同步用户
-	user_id := syncUserData(serializer.Data.User)
+	user_request := request.UserRequest{AuthToken: request.AuthToken{Token: token}} //获取文章人创建人信息
+	user_info_request := user_request.NewUserRequestById(serializer.Data.UserId)
+	user_response := new(response.ResponseUserSerializer)
+	user_info_request.Request(user_response)
+	log.Println("用户信息")
+	log.Println(json.Marshal(user_info_request))
+	user_id := syncUserData(user_response.Data)
 
 	//同步知识库
 	blog_type_id := syncBlogType(serializer.Data.Book)

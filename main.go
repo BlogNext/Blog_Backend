@@ -21,6 +21,12 @@ func loadConfig() {
 		log.Fatal(err)
 	}
 
+	//语雀配置
+	err = config.LoadConfig("yuque","config","yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	//es配置可有可无
 	_ = config.LoadConfig("es","config","yaml")
 }

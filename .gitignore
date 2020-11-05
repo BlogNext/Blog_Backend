@@ -20,4 +20,5 @@ user_system.exe
 config/db.yaml
 config/server.yaml
 config/es.yaml
+config/yuque.yaml
 upload/
