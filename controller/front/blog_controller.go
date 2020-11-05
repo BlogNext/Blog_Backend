@@ -37,8 +37,13 @@ func (c *BlogController) GetList() {
 		search_request.Page = 1
 	}
 
+	//过滤参数
+	filter := make(map[string]string, 1)
+	filter["blog_type_id"] = c.Ctx.DefaultQuery("blog_type_id","") //分类id过滤
+
 	service := new(blog.BlogRtService)
-	result := service.GetList(search_request.PerPage, search_request.Page)
+	result := service.GetList(filter, search_request.PerPage, search_request.Page)
+
 	help.Gin200SuccessResponse(c.Ctx, "成功", result)
 }
 

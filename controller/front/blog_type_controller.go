@@ -36,7 +36,7 @@ func (c *BlogTypeController) GetList() {
 	if search_request.Page <= 0 {
 		search_request.Page = 1
 	}
-
+	
 	service := new(blog.BlogTypeRtService)
 	result := service.GetList(search_request.PerPage, search_request.Page)
 

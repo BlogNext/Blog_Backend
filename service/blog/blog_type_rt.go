@@ -17,7 +17,7 @@ type BlogTypeRtService struct {
 func (s *BlogTypeRtService) getListByids(ids []uint64) (result map[uint64]*blog.BlogTypeEntity) {
 	db := mysql.GetDefaultDBConnect()
 	table_name := model.BlogTypeModel{}.TableName()
-	select_felid := []string{"id", "title", "created_at", "updated_at"}
+	select_felid := []string{"id", "yuque_name", "created_at", "updated_at"}
 	rows, err := db.Table(table_name).
 		Select(strings.Join(select_felid, ", ")).Where("id IN (?)", ids).Rows()
 
@@ -30,15 +30,15 @@ func (s *BlogTypeRtService) getListByids(ids []uint64) (result map[uint64]*blog.
 
 	for rows.Next() {
 		var id uint64
-		var title string
+		var yuque_name string
 		var created_at uint64
 		var updated_at uint64
 
-		rows.Scan(&id, &title, &created_at, &updated_at)
+		rows.Scan(&id, &yuque_name, &created_at, &updated_at)
 
 		blog_type_entity := new(blog.BlogTypeEntity)
 		blog_type_entity.ID = id
-		blog_type_entity.Title = title
+		blog_type_entity.Title = yuque_name
 		blog_type_entity.CreatedAt = created_at
 		blog_type_entity.UpdatedAt = updated_at
 
@@ -55,6 +55,7 @@ func (s *BlogTypeRtService) GetList(per_page, page int) (result *entity.ListResp
 
 	var count int64
 	db = db.Model(&model.BlogTypeModel{})
+
 	db.Count(&count)
 
 	rows, _ := db.Select("id, yuque_name, yuque_id, created_at, updated_at").

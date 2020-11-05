@@ -21,7 +21,7 @@ type BlogRtService struct {
 }
 
 //列表页
-func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponseEntity) {
+func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (result *entity.ListResponseEntity) {
 	db := mysql.GetDefaultDBConnect()
 
 	blog_table_name := model.BlogModel{}.TableName()
@@ -36,6 +36,11 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 	var count int64
 	//sql
 	db = db.Table(blog_table_name)
+
+	//过滤分类id过滤
+	if filter["blog_type_id"] != "" {
+		db = db.Where("blog_type_id = ?", filter["blog_type_id"])
+	}
 
 	db.Count(&count)
 
