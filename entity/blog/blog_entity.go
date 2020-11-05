@@ -22,10 +22,11 @@ type BlogEntity struct {
 	//文章内容
 	Content string `json:"content"`
 
+	//封面图id
 	CoverPlanId uint64 `json:"cover_plan_id"`
 
-	//附件信息
-	AttachmentInfo *attachment.AttachmentEntity `json:"attachment_info"`
+	//封面图信息
+	CoverPlanInfo *attachment.AttachmentEntity `json:"cover_plan_info"`
 
 	BlogTypeObject *BlogTypeEntity `json:"blog_type_object"`
 

@@ -30,9 +30,9 @@ func PaddingAttachemtInfo(cover_plan_ids []uint64, result []*blog.BlogEntity) {
 			log.Println(attachment_list_map[item.CoverPlanId])
 
 			if attachment_item, ok := attachment_list_map[item.CoverPlanId]; ok {
-				item.AttachmentInfo = attachment_item
+				item.CoverPlanInfo = attachment_item
 			} else {
-				item.AttachmentInfo = nil
+				item.CoverPlanInfo = nil
 			}
 
 		}
@@ -48,7 +48,7 @@ func PaddingUserInfo(user_ids []uint, result []*blog.BlogEntity) {
 		if user_info, ok := user_entity_map[uint(item.UserId)]; ok {
 			item.UserInfo = user_info
 		} else {
-			item.AttachmentInfo = nil
+			item.CoverPlanInfo = nil
 		}
 
 	}
