@@ -106,15 +106,15 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, per_page,
 	switch searchLevel {
 	case MYSQL_SEARCH_LEVEL:
 		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
-	case ES_SEARCH_LEVEL:
-		//es搜索
-		blog_s := new(BlogEsRtService)
-		result = blog_s.SearchBlog(keyword, per_page, page)
-
-		if result == nil {
-			//降级为mysql搜索
-			result = s.SearchBlogMysqlLevel(keyword, per_page, page)
-		}
+	//case ES_SEARCH_LEVEL:
+	//	//es搜索
+	//	blog_s := new(BlogEsRtService)
+	//	result = blog_s.SearchBlog(keyword, per_page, page)
+	//
+	//	if result == nil {
+	//		//降级为mysql搜索
+	//		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
+	//	}
 	}
 
 	return
@@ -129,7 +129,11 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int)
 	var count int64
 
 	db := mysql.GetDefaultDBConnect()
-	db = db.Table(model.BlogModel{}.TableName()).Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
+	db = db.Table(model.BlogModel{}.TableName())
+	if keyword != "" {
+		db = db.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
+	}
+
 	db.Count(&count)
 	db.Limit(per_page).Offset((page - 1) * per_page).Find(&blog_model_list)
 

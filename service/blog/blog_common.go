@@ -68,6 +68,8 @@ func ChangeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 	blog_entity.UpdatedAt = uint64(blog_model.UpdatedAt)
 	blog_entity.BlogTypeId = uint64(blog_model.BlogTypeId)
 	blog_entity.CoverPlanId = uint64(blog_model.CoverPlanId)
+	blog_entity.YuqueFormat = blog_model.YuqueFormat
+	blog_entity.YuqueHtml = blog_model.YuqueHtml
 	blog_entity.Title = blog_model.Title
 	blog_entity.Abstract = blog_model.Abstract
 	blog_entity.Content = blog_model.Content
@@ -113,6 +115,8 @@ func ChangeToBlogEntityList(blog_model_list []*model.BlogModel) []*blog.BlogEnti
 		blog_entity.BlogTypeId = uint64(item.BlogTypeId)
 		blog_entity.CoverPlanId = uint64(item.CoverPlanId)
 		blog_entity.Title = item.Title
+		blog_entity.YuqueFormat = item.YuqueFormat
+		blog_entity.YuqueHtml = item.YuqueHtml
 		blog_entity.Abstract = item.Abstract
 		blog_entity.Content = item.Content
 		blog_entity.DocID = item.DocID

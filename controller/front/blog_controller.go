@@ -47,12 +47,12 @@ func (c *BlogController) SearchBlog() {
 
 	//非必填字段
 	var search_level string
-	search_level = c.Ctx.DefaultQuery("search_level", blog.ES_SEARCH_LEVEL)
+	search_level = c.Ctx.DefaultQuery("search_level", blog.MYSQL_SEARCH_LEVEL)
 
 	//必填字段
 	type searchRequest struct {
 		//搜索维度
-		Keyword string `form:"keyword" binding:"required"`
+		Keyword string `form:"keyword"`
 		PerPage int    `form:"per_page"`
 		Page    int    `form:"page"`
 	}
