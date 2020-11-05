@@ -38,7 +38,7 @@ func (s *UserBkService) UpdateUserByYuqueWebHook(user *response.UserSerializer) 
 		}
 
 		//更新用户昵称
-		user_model.NickName = user.Name
+		user_model.Nickname = user.Name
 
 		result := tx.Save(user_model)
 
@@ -84,7 +84,7 @@ func (s *UserBkService) CreateUserByYuqueWebHook(user *response.UserSerializer) 
 			return errors.New(fmt.Sprintf("语雀用户已同步:%d", user.ID))
 		}
 		//创建用户
-		user_model.NickName = user.Name
+		user_model.Nickname = user.Name
 		result := tx.Create(user_model)
 		if result.Error != nil {
 			return result.Error
