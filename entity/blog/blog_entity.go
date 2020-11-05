@@ -10,6 +10,9 @@ type BlogEntity struct {
 	entity.BaseEntity
 
 	BlogTypeId uint64 `json:"blog_type_id"`
+
+	YuqueFormat string `json:"yuque_format"`
+	YuqueHtml   string `json:"yuque_html"`
 	//文章标题
 	Title string `json:"title"`
 	//文章摘要

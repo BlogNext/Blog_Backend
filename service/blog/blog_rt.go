@@ -27,7 +27,7 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 	blog_table_name := model.BlogModel{}.TableName()
 
 	//博客需要的字段
-	blog_felid := []string{"id", "blog_type_id", "cover_plan_id", "title", "created_at", "updated_at"}
+	blog_felid := []string{"id", "blog_type_id", "cover_plan_id", "yuque_format", "yuque_html", "title", "abstract", "content", "created_at", "updated_at"}
 
 	for index, felid := range blog_felid {
 		blog_felid[index] = fmt.Sprintf("%s.%s", blog_table_name, felid)
@@ -39,7 +39,7 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 
 	db.Count(&count)
 
-	rows, err := db.Select(strings.Join(blog_felid, ", ")).Order("create_time DESC").Limit(per_page).Offset((page - 1) * per_page).Rows()
+	rows, err := db.Select(strings.Join(blog_felid, ", ")).Order("created_at DESC").Limit(per_page).Offset((page - 1) * per_page).Rows()
 
 	if err != nil {
 		return nil
@@ -54,17 +54,25 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 		var id uint64
 		var blog_type_id uint64
 		var cover_plan_id uint64
+		var yuque_format string
+		var yuque_html string
 		var title string
+		var abstract string
+		var content string
 		var created_at uint64
 		var updated_at uint64
-		rows.Scan(&id, &blog_type_id, &cover_plan_id, &title, &created_at, &updated_at)
+		rows.Scan(&id, &blog_type_id, &cover_plan_id, &yuque_format, &yuque_html, &title, &abstract, &content, &created_at, &updated_at)
 
 		//博客实体
 		blog_entity := new(blog.BlogEntity)
 		blog_entity.ID = id
 		blog_entity.BlogTypeId = blog_type_id
 		blog_entity.CoverPlanId = cover_plan_id
+		blog_entity.YuqueFormat = yuque_format
+		blog_entity.YuqueHtml = yuque_html
 		blog_entity.Title = title
+		blog_entity.Abstract = abstract
+		blog_entity.Content = content
 		blog_entity.CreatedAt = created_at
 		blog_entity.UpdatedAt = updated_at
 		log.Println("blog_entity")
