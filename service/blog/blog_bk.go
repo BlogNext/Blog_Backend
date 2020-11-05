@@ -28,7 +28,7 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 		panic(fmt.Sprintf("博客未创建id:%d", doc.ID))
 	}
 
-	blog_model.YuqueIdFormat = doc.Format
+	blog_model.YuqueFormat = doc.Format
 	blog_model.YuqueHtml = doc.BodyHtml
 	blog_model.YuqueLake = doc.BodyLake
 	blog_model.Title = doc.Title
@@ -83,7 +83,7 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	//语雀数据
 	blog_model.YuqueId = doc.ID
 	blog_model.YuqueSlug = doc.Slug
-	blog_model.YuqueIdFormat = doc.Format
+	blog_model.YuqueFormat = doc.Format
 	blog_model.YuqueHtml = doc.BodyHtml
 	blog_model.YuqueLake = doc.BodyLake
 	blog_model.Title = doc.Title

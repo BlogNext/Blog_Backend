@@ -8,7 +8,7 @@ type BlogModel struct {
 	BlogTypeId    int64  `gorm:"cloumn:blog_type_id"`
 	YuqueId       int64  `gorm:"cloumn:yuque_id"` //语雀文档id
 	YuqueSlug     string `gorm:"cloumn:yuque_slug"`
-	YuqueIdFormat string `gorm:"cloumn:yuque_format"`
+	YuqueFormat string `gorm:"cloumn:yuque_format"`
 	YuqueHtml     string `gorm:"cloumn:yuque_html"`
 	YuqueLake     string `gorm:"cloumn:yuque_lake"`
 	Title         string `gorm:"cloumn:title"`
