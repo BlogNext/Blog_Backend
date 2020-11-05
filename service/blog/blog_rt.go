@@ -27,7 +27,7 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 	blog_table_name := model.BlogModel{}.TableName()
 
 	//博客需要的字段
-	blog_felid := []string{"id", "blog_type_id", "cover_plan_id", "title", "create_time", "update_time"}
+	blog_felid := []string{"id", "blog_type_id", "cover_plan_id", "title", "created_at", "updated_at"}
 
 	for index, felid := range blog_felid {
 		blog_felid[index] = fmt.Sprintf("%s.%s", blog_table_name, felid)
@@ -55,9 +55,9 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 		var blog_type_id uint64
 		var cover_plan_id uint64
 		var title string
-		var create_time uint64
-		var update_time uint64
-		rows.Scan(&id, &blog_type_id, &cover_plan_id, &title, &create_time, &update_time)
+		var created_at uint64
+		var updated_at uint64
+		rows.Scan(&id, &blog_type_id, &cover_plan_id, &title, &created_at, &updated_at)
 
 		//博客实体
 		blog_entity := new(blog.BlogEntity)
@@ -65,8 +65,8 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 		blog_entity.BlogTypeId = blog_type_id
 		blog_entity.CoverPlanId = cover_plan_id
 		blog_entity.Title = title
-		blog_entity.CreateTime = create_time
-		blog_entity.UpdateTime = update_time
+		blog_entity.CreatedAt = created_at
+		blog_entity.UpdatedAt = updated_at
 		log.Println("blog_entity")
 		log.Println(blog_entity)
 

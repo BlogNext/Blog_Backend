@@ -41,8 +41,8 @@ func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.Att
 	for index, attachment_model := range attachment_list {
 		attachment_entity := new(attachment.AttachmentEntity)
 		attachment_entity.ID = uint64(attachment_model.ID)
-		attachment_entity.CreateTime = uint64(attachment_model.CreateTime)
-		attachment_entity.UpdateTime = uint64(attachment_model.UpdateTime)
+		attachment_entity.CreatedAt = uint64(attachment_model.CreatedAt)
+		attachment_entity.UpdatedAt = uint64(attachment_model.UpdatedAt)
 		attachment_entity.Module = attachment_model.Module
 		attachment_entity.Path = attachment_model.Path
 		attachment_entity.Url = attachment_model.Path
@@ -81,8 +81,8 @@ func (s *AttachmentBaseService) saveToDB(dst string, module, file_type int64) (a
 	db := mysql.GetDefaultDBConnect()
 	attachment_model = new(model.AttachmentModel)
 	attachment_model.Path = dst
-	attachment_model.CreateTime = time.Now().Unix()
-	attachment_model.UpdateTime = time.Now().Unix()
+	attachment_model.CreatedAt = time.Now().Unix()
+	attachment_model.UpdatedAt = time.Now().Unix()
 	attachment_model.Module = module
 	attachment_model.FileType = file_type
 

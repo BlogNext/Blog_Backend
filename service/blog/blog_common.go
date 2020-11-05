@@ -64,8 +64,8 @@ func ChangeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 
 	blog_entity := new(blog.BlogEntity)
 	blog_entity.ID = uint64(blog_model.ID)
-	blog_entity.CreateTime = uint64(blog_model.CreateTime)
-	blog_entity.UpdateTime = uint64(blog_model.UpdateTime)
+	blog_entity.CreatedAt = uint64(blog_model.CreatedAt)
+	blog_entity.UpdatedAt = uint64(blog_model.UpdatedAt)
 	blog_entity.BlogTypeId = uint64(blog_model.BlogTypeId)
 	blog_entity.CoverPlanId = uint64(blog_model.CoverPlanId)
 	blog_entity.Title = blog_model.Title
@@ -108,8 +108,8 @@ func ChangeToBlogEntityList(blog_model_list []*model.BlogModel) []*blog.BlogEnti
 	for index, item := range blog_model_list {
 		blog_entity := new(blog.BlogEntity)
 		blog_entity.ID = uint64(item.ID)
-		blog_entity.CreateTime = uint64(item.CreateTime)
-		blog_entity.UpdateTime = uint64(item.UpdateTime)
+		blog_entity.CreatedAt = uint64(item.CreatedAt)
+		blog_entity.UpdatedAt = uint64(item.UpdatedAt)
 		blog_entity.BlogTypeId = uint64(item.BlogTypeId)
 		blog_entity.CoverPlanId = uint64(item.CoverPlanId)
 		blog_entity.Title = item.Title
