@@ -22,10 +22,10 @@ type BlogBkService struct {
 func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializer) {
 	db := mysql.GetDefaultDBConnect()
 	blog_model := new(model.BlogModel)
-	query_result := db.First(blog_model, doc.ID)
+	query_result := db.Where("yuque_id = ?", doc.ID).First(blog_model)
 	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
 	if find {
-		panic(fmt.Sprintf("博客未创建id:%d", doc.ID))
+		panic(fmt.Sprintf("博客未创建yuque_id:%d", doc.ID))
 	}
 
 	blog_model.YuqueFormat = doc.Format
@@ -64,14 +64,17 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	}
 
 	blog_model := new(model.BlogModel)
-	query_result = db.First(blog_model, doc.ID)
+	query_result = db.Where("yuque_id = ?", doc.ID).First(blog_model)
 	find = errors.Is(query_result.Error, gorm.ErrRecordNotFound)
 	if !find {
-		panic(fmt.Sprintf("博客已存在id:%d", doc.ID))
+		log.Println(fmt.Sprintf("博客已存在yuque_id:%d", doc.ID))
+		panic(fmt.Sprintf("博客已存在yuque_id:%d", doc.ID))
 	}
-
+	log.Println("成功进入创建博客")
 	//获取博客的封面图和摘要
+	log.Println(doc.Slug, doc.BookId)
 	DocIntor := front.GetDocIntorSerializer(doc.Slug, doc.BookId)
+	log.Println("下载不了封面图和摘要")
 	//下载封面图
 	attachment_service := new(attachment.AttachmentRtService)
 	attachment_entity_list := attachment_service.DownloadBlogImage(DocIntor.Data.Cover, model.ATTACHMENT_BLOG_Module, model.ATTACHMENT_FILE_TYPE_IMAGE)
@@ -99,7 +102,6 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 		panic(result.Error)
 	}
 }
-
 
 //导入数据到es中
 func (s *BlogBkService) ImportDataToEs() {

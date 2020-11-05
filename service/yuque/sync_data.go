@@ -65,7 +65,7 @@ func syncBlogType(book *response.BookSerializer) (blog_type_id uint) {
 func syncBlog(doc *response.DocDetailSerializer, user_id, blog_type_id uint) {
 	db := mysql.GetDefaultDBConnect()
 	blog_model := new(model.BlogModel)
-	query_result := db.First(blog_model, doc.ID)
+	query_result := db.Where("yuque_id = ?", doc.ID).First(blog_model)
 	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
 	blog_service := new(blog.BlogBkService)
 	if find {
