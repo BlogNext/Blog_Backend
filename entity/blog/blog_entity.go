@@ -3,12 +3,14 @@ package blog
 import (
 	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/attachment"
+	"github.com/blog_backend/entity/user"
 )
 
 //blog文档
 type BlogEntity struct {
 	entity.BaseEntity
 
+	UserId     uint64 `json:"user_id"`
 	BlogTypeId uint64 `json:"blog_type_id"`
 
 	YuqueFormat string `json:"yuque_format"`
@@ -26,6 +28,9 @@ type BlogEntity struct {
 	AttachmentInfo *attachment.AttachmentEntity `json:"attachment_info"`
 
 	BlogTypeObject *BlogTypeEntity `json:"blog_type_object"`
+
+	//用户信息
+	UserInfo *user.UserEntity `json:"user_info"`
 }
 
 //blog_type文档

@@ -15,15 +15,15 @@ import (
 type UserBkService struct {
 }
 
-func (s *UserBkService) UpdateUserByYuqueWebHook(user *response.UserSerializer) *model.UsereModel {
+func (s *UserBkService) UpdateUserByYuqueWebHook(user *response.UserSerializer) *model.UserModel {
 	db := mysql.GetDefaultDBConnect()
-	user_model := new(model.UsereModel)
+	user_model := new(model.UserModel)
 
 	//更新用户
 	err := db.Transaction(func(tx *gorm.DB) error {
 
 		//找到语雀用户
-		user_yuque_model := new(model.UsereYuQueModel)
+		user_yuque_model := new(model.UserYuQueModel)
 		query_result := tx.First(user_yuque_model, user.ID)
 		find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
 		if find {
@@ -70,14 +70,14 @@ func (s *UserBkService) UpdateUserByYuqueWebHook(user *response.UserSerializer) 
 /**
 通过语雀的webhook创建用户
 */
-func (s *UserBkService) CreateUserByYuqueWebHook(user *response.UserSerializer) *model.UsereModel {
+func (s *UserBkService) CreateUserByYuqueWebHook(user *response.UserSerializer) *model.UserModel {
 	db := mysql.GetDefaultDBConnect()
 
-	user_model := new(model.UsereModel)
+	user_model := new(model.UserModel)
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 
-		user_yuque_model := new(model.UsereYuQueModel)
+		user_yuque_model := new(model.UserYuQueModel)
 		query_result := tx.First(user_yuque_model, user.ID)
 		find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
 		if !find {

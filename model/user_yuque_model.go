@@ -1,6 +1,6 @@
 package model
 
-type UsereYuQueModel struct {
+type UserYuQueModel struct {
 	BaseModel
 	UserId      int64  `gorm:"cloumn:user_id"`
 	Login       string `gorm:"cloumn:login"`
@@ -9,6 +9,6 @@ type UsereYuQueModel struct {
 	Description string `gorm:"cloumn:description"`
 }
 
-func (UsereYuQueModel) TableName() string {
+func (UserYuQueModel) TableName() string {
 	return "user_yuque"
 }

@@ -27,7 +27,7 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 	blog_table_name := model.BlogModel{}.TableName()
 
 	//博客需要的字段
-	blog_felid := []string{"id", "blog_type_id", "cover_plan_id", "yuque_format", "yuque_html", "title", "abstract", "content", "created_at", "updated_at"}
+	blog_felid := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "yuque_format", "yuque_html", "title", "abstract", "content", "created_at", "updated_at"}
 
 	for index, felid := range blog_felid {
 		blog_felid[index] = fmt.Sprintf("%s.%s", blog_table_name, felid)
@@ -49,9 +49,11 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 
 	cover_plan_ids := make([]uint64, 0)
 	blog_type_ids := make([]uint64, 0)
+	user_id_ids := make([]uint, 0)
 
 	for rows.Next() {
 		var id uint64
+		var user_id uint
 		var blog_type_id uint64
 		var cover_plan_id uint64
 		var yuque_format string
@@ -61,11 +63,12 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 		var content string
 		var created_at uint64
 		var updated_at uint64
-		rows.Scan(&id, &blog_type_id, &cover_plan_id, &yuque_format, &yuque_html, &title, &abstract, &content, &created_at, &updated_at)
+		rows.Scan(&id, &user_id, &blog_type_id, &cover_plan_id, &yuque_format, &yuque_html, &title, &abstract, &content, &created_at, &updated_at)
 
 		//博客实体
 		blog_entity := new(blog.BlogEntity)
 		blog_entity.ID = id
+		blog_entity.UserId = uint64(user_id)
 		blog_entity.BlogTypeId = blog_type_id
 		blog_entity.CoverPlanId = cover_plan_id
 		blog_entity.YuqueFormat = yuque_format
@@ -80,6 +83,7 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 
 		cover_plan_ids = append(cover_plan_ids, cover_plan_id)
 		blog_type_ids = append(blog_type_ids, blog_type_id)
+		user_id_ids = append(user_id_ids, user_id)
 
 		query_result = append(query_result, blog_entity)
 	}
@@ -87,6 +91,7 @@ func (s *BlogRtService) GetList(per_page, page int) (result *entity.ListResponse
 	//填充信息
 	PaddingAttachemtInfo(cover_plan_ids, query_result) //填充附件信息
 	PaddingBlogTypeInfo(blog_type_ids, query_result)   //博客类型实体
+	PaddingUserInfo(user_id_ids, query_result)         //填充用户信息
 
 	//构建结果返回
 	result = new(entity.ListResponseEntity)
@@ -106,15 +111,15 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, per_page,
 	switch searchLevel {
 	case MYSQL_SEARCH_LEVEL:
 		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
-	//case ES_SEARCH_LEVEL:
-	//	//es搜索
-	//	blog_s := new(BlogEsRtService)
-	//	result = blog_s.SearchBlog(keyword, per_page, page)
-	//
-	//	if result == nil {
-	//		//降级为mysql搜索
-	//		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
-	//	}
+		//case ES_SEARCH_LEVEL:
+		//	//es搜索
+		//	blog_s := new(BlogEsRtService)
+		//	result = blog_s.SearchBlog(keyword, per_page, page)
+		//
+		//	if result == nil {
+		//		//降级为mysql搜索
+		//		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
+		//	}
 	}
 
 	return
@@ -135,7 +140,7 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int)
 	}
 
 	db.Count(&count)
-	db.Limit(per_page).Offset((page - 1) * per_page).Find(&blog_model_list)
+	db.Order("created_at DESC").Limit(per_page).Offset((page - 1) * per_page).Find(&blog_model_list)
 
 	log.Println("总数:", count, "数据:", blog_model_list, "数据长度:", len(blog_model_list))
 

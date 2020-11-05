@@ -48,7 +48,7 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializer, user_id, blog_type_id uint) {
 	db := mysql.GetDefaultDBConnect()
 	//查找用户
-	user_model := new(model.UsereModel)
+	user_model := new(model.UserModel)
 	query_result := db.First(user_model, user_id)
 	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
 	if find {

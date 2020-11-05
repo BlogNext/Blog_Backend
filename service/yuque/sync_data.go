@@ -35,10 +35,10 @@ func SyncData(serializer *response.ResponseDocDetailSerializer, token string) {
 
 //同步用户
 func syncUserData(user *response.UserSerializer) (user_id uint) {
-	var user_model *model.UsereModel
+	var user_model *model.UserModel
 
 	db := mysql.GetDefaultDBConnect()
-	user_yuque_model := new(model.UsereYuQueModel)
+	user_yuque_model := new(model.UserYuQueModel)
 	query_result := db.First(user_yuque_model, user.ID)
 	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
 	user_bk_service := new(user_bk.UserBkService)

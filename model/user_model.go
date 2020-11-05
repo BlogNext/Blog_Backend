@@ -1,10 +1,10 @@
 package model
 
-type UsereModel struct {
+type UserModel struct {
 	BaseModel
 	Nickname string `gorm:"cloumn:nickname"`
 }
 
-func (UsereModel) TableName() string {
+func (UserModel) TableName() string {
 	return "user"
 }

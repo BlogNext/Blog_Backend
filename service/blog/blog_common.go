@@ -6,6 +6,7 @@ import (
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/model"
 	attachment_service "github.com/blog_backend/service/attachment"
+	"github.com/blog_backend/service/user"
 	"github.com/thoas/go-funk"
 	"log"
 )
@@ -35,6 +36,21 @@ func PaddingAttachemtInfo(cover_plan_ids []uint64, result []*blog.BlogEntity) {
 			}
 
 		}
+	}
+}
+
+//填充用户信息
+func PaddingUserInfo(user_ids []uint, result []*blog.BlogEntity) {
+	user_entity_map := user.GetUserEntityByUserIds(user_ids)
+
+	for _, item := range result {
+
+		if user_info, ok := user_entity_map[uint(item.UserId)]; ok {
+			item.UserInfo = user_info
+		} else {
+			item.AttachmentInfo = nil
+		}
+
 	}
 }
 
@@ -107,9 +123,12 @@ func ChangeToBlogEntityList(blog_model_list []*model.BlogModel) []*blog.BlogEnti
 
 	blog_type_ids := make([]uint64, number)
 
+	user_id_ids := make([]uint, number)
+
 	for index, item := range blog_model_list {
 		blog_entity := new(blog.BlogEntity)
 		blog_entity.ID = uint64(item.ID)
+		blog_entity.UserId = uint64(item.UserID)
 		blog_entity.CreatedAt = uint64(item.CreatedAt)
 		blog_entity.UpdatedAt = uint64(item.UpdatedAt)
 		blog_entity.BlogTypeId = uint64(item.BlogTypeId)
@@ -121,15 +140,20 @@ func ChangeToBlogEntityList(blog_model_list []*model.BlogModel) []*blog.BlogEnti
 		blog_entity.Content = item.Content
 		blog_entity.DocID = item.DocID
 
+		//填充数据
 		cover_plan_ids[index] = blog_entity.CoverPlanId
 		blog_type_ids[index] = blog_entity.BlogTypeId
+		user_id_ids[index] = item.UserID
 
+		//返回的集合
 		blog_entity_list[index] = blog_entity
 	}
 
 	PaddingAttachemtInfo(cover_plan_ids, blog_entity_list)
 
 	PaddingBlogTypeInfo(blog_type_ids, blog_entity_list)
+
+	PaddingUserInfo(user_id_ids, blog_entity_list) //填充用户信息
 
 	return blog_entity_list
 
