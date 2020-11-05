@@ -1,53 +1,73 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : 本地
+ Source Server         : blog
  Source Server Type    : MySQL
  Source Server Version : 50722
- Source Host           : localhost:3306
- Source Schema         : qixi_user
+ Source Host           : 216.24.183.162:3306
+ Source Schema         : blog_develop
 
  Target Server Type    : MySQL
  Target Server Version : 50722
  File Encoding         : 65001
 
- Date: 25/05/2020 17:35:53
+ Date: 05/11/2020 16:02:58
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Table structure for oauth_client
+-- Table structure for attachment
 -- ----------------------------
-DROP TABLE IF EXISTS `oauth_client`;
-CREATE TABLE `oauth_client`  (
+DROP TABLE IF EXISTS `attachment`;
+CREATE TABLE `attachment`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `client_app_id` char(23) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '应用app_id',
-  `client_app_secret` char(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '应用app_secret',
-  `client_name` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '应用名称',
-  `redirect_url` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '颁发token或者code之后的地址',
-  `year` int(4) NOT NULL COMMENT '创建的年，为了sql查询速度快',
-  `month` tinyint(4) NOT NULL COMMENT '创建的月，为了sql查询速度快',
-  `created_at` int(10) NOT NULL,
-  `updated_at` int(10) NOT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `uniq-client_id`(`client_app_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'oauth接入的客户应用程序表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for oauth_client_user_relation
--- ----------------------------
-DROP TABLE IF EXISTS `oauth_client_user_relation`;
-CREATE TABLE `oauth_client_user_relation`  (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `user_id` int(10) UNSIGNED NOT NULL COMMENT '用户id',
-  `client_id` int(10) UNSIGNED NOT NULL COMMENT '客户id',
-  `refresh_token` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT 'refresh_token，没有过期时间',
+  `file_type` int(10) UNSIGNED NOT NULL COMMENT '文件类型 1: 图片, 2视频',
+  `module` tinyint(3) NOT NULL COMMENT '功能模块 1：博客',
+  `path` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '相对路径',
   `created_at` int(10) NOT NULL,
   `updated_at` int(10) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '授权者和接入的应用程序的关系. 应用程序和用户是多对多的关系' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '附件表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for blog
+-- ----------------------------
+DROP TABLE IF EXISTS `blog`;
+CREATE TABLE `blog`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) UNSIGNED NOT NULL COMMENT '用户id，user表id',
+  `doc_id` char(23) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '文档在es的唯一标识',
+  `cover_plan_id` int(10) NOT NULL COMMENT '封面图',
+  `blog_type_id` int(10) UNSIGNED NOT NULL COMMENT '博客类型id',
+  `yuque_id` int(10) NOT NULL DEFAULT 0 COMMENT '语雀文档id',
+  `yuque_slug` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '语雀文档路劲',
+  `yuque_format` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '语雀文档格式',
+  `yuque_html` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '语雀 markdump转的html',
+  `yuque_lake` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '语雀 lake格式文档',
+  `title` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '博客标题',
+  `abstract` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '博客摘要',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '博客内容，markdump',
+  `created_at` int(10) UNSIGNED NOT NULL,
+  `updated_at` int(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '博客' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for blog_type
+-- ----------------------------
+DROP TABLE IF EXISTS `blog_type`;
+CREATE TABLE `blog_type`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `yuque_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '语雀知识库名',
+  `yuque_id` int(11) NOT NULL COMMENT '语雀知识库id',
+  `yuque_type` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '语雀知识库类型',
+  `created_at` int(10) UNSIGNED NOT NULL,
+  `updated_at` int(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uniq_yuque_id`(`yuque_id`) USING BTREE COMMENT '语雀知识库唯一id'
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '博客类型(对饮语雀的知识库)' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user
@@ -55,12 +75,26 @@ CREATE TABLE `oauth_client_user_relation`  (
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '用户email',
-  `phone` char(17) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '用户手机号',
-  `password` char(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '密码',
+  `nickname` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '昵称',
+  `created_at` int(10) NOT NULL COMMENT '创建时间',
+  `updated_at` int(10) NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for user_yuque
+-- ----------------------------
+DROP TABLE IF EXISTS `user_yuque`;
+CREATE TABLE `user_yuque`  (
+  `id` int(10) UNSIGNED NOT NULL COMMENT '语雀用户的id',
+  `user_id` int(10) UNSIGNED NOT NULL COMMENT '用户id',
+  `login` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '语雀用户的login',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '语雀用户的昵称',
+  `avatar_url` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '语雀用户头像',
+  `description` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '语雀用户个性签名',
   `created_at` int(10) NOT NULL,
   `updated_at` int(10) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用户表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '语雀用户表，与user一对第一绑定' ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
