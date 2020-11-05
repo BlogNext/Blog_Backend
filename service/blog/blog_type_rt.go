@@ -57,7 +57,7 @@ func (s *BlogTypeRtService) GetList(per_page, page int) (result *entity.ListResp
 	db = db.Model(&model.BlogTypeModel{})
 	db.Count(&count)
 
-	rows, _ := db.Select("id, title, create_time, update_time").
+	rows, _ := db.Select("id, yuque_name, yuque_id, created_at, updated_at").
 		Limit(per_page).Offset((page - 1) * per_page).Rows()
 
 	defer rows.Close()
@@ -67,17 +67,19 @@ func (s *BlogTypeRtService) GetList(per_page, page int) (result *entity.ListResp
 	for rows.Next() {
 
 		var id int64
-		var title string
-		var create_time int64
-		var update_time int64
-		rows.Scan(&id, &title, &create_time, &update_time)
+		var yuque_name string
+		var yuque_id int64
+		var created_at int64
+		var updated_at int64
+		rows.Scan(&id, &yuque_name, &yuque_id, &created_at, &updated_at)
 
 		item := make(map[string]interface{})
 
 		item["id"] = id
-		item["title"] = title
-		item["create_time"] = create_time
-		item["update_time"] = update_time
+		item["yuque_name"] = yuque_name
+		item["yuque_id"] = yuque_id
+		item["create_time"] = created_at
+		item["update_time"] = updated_at
 
 		blog_type_model_list = append(blog_type_model_list, item)
 	}
