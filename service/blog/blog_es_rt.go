@@ -71,3 +71,4 @@ func (b *BlogEsRtService) SearchBlog(keyword string, per_page, page int) (result
 	return
 
 }
+

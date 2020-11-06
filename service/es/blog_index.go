@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/olivere/elastic/v7"
+	"log"
 )
 
 //创建博客的索引
@@ -14,7 +15,8 @@ func CreateBlogIndex() Commend {
 		exists, err := client.IndexExists(BLOG_INDEX).Do(context.Background())
 		if err != nil {
 			// 链接出错
-			panic(err)
+			log.Println(err)
+			return nil, errors.New(fmt.Sprintf("创建博客索引失败，链接出错"))
 		}
 
 		if exists {

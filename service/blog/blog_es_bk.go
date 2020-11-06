@@ -4,10 +4,24 @@ import (
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/service/es"
 	"github.com/olivere/elastic/v7"
+	"log"
 )
 
 type BlogEsBkService struct {
 	es.BaseEsService
+}
+
+//创建博客索引
+func (b *BlogEsBkService) CreateIndex() {
+	commend := es.CreateBlogIndex()
+	//设置命令
+	b.SetExecCommend(commend)
+	//运行命令
+	_, err := es.RunCommend(b)
+	if err != nil {
+		log.Println("无法创建索引")
+		panic(err)
+	}
 }
 
 //删除blog文档
