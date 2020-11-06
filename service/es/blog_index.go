@@ -22,15 +22,59 @@ func CreateBlogIndex() Commend {
 			return nil, errors.New(fmt.Sprintf("博客索引:%s已存在", BLOG_INDEX))
 		}
 
-		mapping := ``
+		//blog索引
+		mapping := `
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1,
+    "analysis": {
+      "analyzer": {
+        "my_ik_synonym": {
+          "type": "custom",
+          "tokenizer": "ik_max_word"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "abstract": {
+        "type": "text",
+        "analyzer": "my_ik_synonym"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "my_ik_synonym"
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "my_ik_synonym"
+      },
+      "user_info": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "text",
+            "analyzer": "my_ik_synonym"
+          }
+        }
+      }
+    }
+  }
+}
+
+`
 		//创建索引
 		createIndex, err := client.CreateIndex(BLOG_INDEX).Body(mapping).Do(context.Background())
+
 		if err != nil {
 			// 创建索引失败
 			panic(err)
 		}
 		if !createIndex.Acknowledged {
 			// Not acknowledged
+			//可能是由于网络原因，中断了，重试就好了
 			panic("??? Not acknowledged 啥意思？？？")
 		}
 

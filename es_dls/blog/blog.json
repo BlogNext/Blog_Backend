@@ -1,0 +1,41 @@
+//博客索引
+
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1,
+    "analysis": {
+      "analyzer": {
+        "my_ik_synonym": {
+          "type": "custom",
+          "tokenizer": "ik_max_word"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "abstract": {
+        "type": "text",
+        "analyzer": "my_ik_synonym"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "my_ik_synonym"
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "my_ik_synonym"
+      },
+      "user_info": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "text",
+            "analyzer": "my_ik_synonym"
+          }
+        }
+      }
+    }
+  }
+}
