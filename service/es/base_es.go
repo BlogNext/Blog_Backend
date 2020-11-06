@@ -20,7 +20,7 @@ type EsExecService interface {
 	SetExecCommend(commend Commend)
 	GetExecCommend() Commend
 	//析构函数
-	Finish()
+	Finish(*elastic.Client)
 }
 
 //回调执行命令
@@ -44,14 +44,12 @@ func RunCommend(esExecService EsExecService) (result interface{}, err error) {
 	}
 
 	//执行一些释放字段的操作
-	esExecService.Finish()
+	esExecService.Finish(client)
 
 	return
 }
 
 type BaseEsService struct {
-	//es连接
-	Client elastic.Client
 	//命令的执行
 	Commend Commend
 }
@@ -79,8 +77,8 @@ func (bs *BaseEsService) GetExecCommend() Commend {
 	return bs.Commend
 }
 
-func (bs *BaseEsService) Finish() {
-	es_default_connet_pool.Put(bs.Client)
+func (bs *BaseEsService) Finish(client *elastic.Client) {
+	es_default_connet_pool.Put(client)
 }
 
 //删除一个文档
