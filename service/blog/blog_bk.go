@@ -39,14 +39,14 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	}
 
 	//es同步
-	blog_list_entity := ChangeToBlogListEntity(blog_model)
-
-	blog_es_service := new(BlogEsBkService)
-	if blog_model.DocID == "" {
-		blog_es_service.AddDoc(blog_list_entity)
-	} else {
-		blog_es_service.UpdateDoc(blog_list_entity)
-	}
+	//blog_list_entity := ChangeToBlogListEntity(blog_model)
+	//
+	//blog_es_service := new(BlogEsBkService)
+	//if blog_model.DocID == "" {
+	//	blog_es_service.AddDoc(blog_list_entity)
+	//} else {
+	//	blog_es_service.UpdateDoc(blog_list_entity)
+	//}
 }
 
 //通过yuquewebhook创建博客
@@ -110,8 +110,8 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	}
 
 	//es同步
-	blog_list_entity := ChangeToBlogListEntity(blog_model)
-	blog_es_service := new(BlogEsBkService)
-	blog_es_service.AddDoc(blog_list_entity)
+	//blog_list_entity := ChangeToBlogListEntity(blog_model)
+	//blog_es_service := new(BlogEsBkService)
+	//blog_es_service.AddDoc(blog_list_entity)
 
 }
