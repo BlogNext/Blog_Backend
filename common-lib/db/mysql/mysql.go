@@ -3,6 +3,7 @@ package mysql
 import (
 	"fmt"
 	"github.com/blog_backend/common-lib/db"
+	"github.com/gin-gonic/gin"
 	gmysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -23,21 +24,29 @@ func InitDBConnect(db_info map[string]db.DBInfo) {
 	}
 
 	log.Println(fmt.Sprintf("v=%v ,t=%t, p=%p", db_info, db_info, db_info))
+	log.Println(gin.Mode())
 
+	//mysql一些配置
+	config := new(gorm.Config)
 
-	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-		logger.Config{
-			SlowThreshold: time.Second, // 慢 SQL 阈值
-			LogLevel:      logger.Info, // Log level
-			Colorful:      false,       // 禁用彩色打印
-		},
-	)
+	if gin.Mode() == "release" {
+		//正式环境
+	} else {
+		//非正式环境
+		//mysql日志打印
+		newLogger := logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+			logger.Config{
+				SlowThreshold: time.Second, // 慢 SQL 阈值
+				LogLevel:      logger.Info, // Log level
+				Colorful:      false,       // 禁用彩色打印
+			},
+		)
 
+		config.Logger = newLogger
+	}
 	//主数据库
-	myGdb, err := gorm.Open(gmysql.Open(db_info["sources"].Dsn), &gorm.Config{
-		Logger: newLogger,
-	})
+	myGdb, err := gorm.Open(gmysql.Open(db_info["sources"].Dsn), config)
 
 	if err != nil {
 		panic(err)

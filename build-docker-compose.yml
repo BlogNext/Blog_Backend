@@ -14,11 +14,11 @@ services:
     - /home/xiaochen/BlogNext/code/Blog_Backend/upload:/go/bin/upload
     - /home/xiaochen/BlogNext/code/Blog_Backend/config/:/go/bin/config
     command: /bin/bash -c "go install -v ./ && /go/bin/blog_backend"
+    #设置环境变量
+    environment:
+      - GIN_MODE=release
     ports:
     - "8083:8083"
-    #设置环境变量
-    #environment:
-    #- GOPROXY=https://mirrors.aliyun.com/goproxy/
     networks:
     - blog_next
 networks:
