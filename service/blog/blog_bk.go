@@ -37,6 +37,11 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	if result.Error != nil {
 		panic(result.Error)
 	}
+
+	//es同步
+	blog_list_entity := ChangeToBlogListEntity(blog_model)
+	blog_es_service := new(BlogEsBkService)
+	blog_es_service.UpdateDoc(blog_list_entity)
 }
 
 //通过yuquewebhook创建博客
@@ -98,5 +103,17 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	if result.Error != nil {
 		panic(result.Error)
 	}
-}
 
+	//es同步
+	blog_list_entity := ChangeToBlogListEntity(blog_model)
+	blog_es_service := new(BlogEsBkService)
+	es_doc := blog_es_service.AddDoc(blog_list_entity)
+
+	//更新esId
+	blog_model.DocID = es_doc.Id
+	db_error := db.Save(blog_model)
+	if db_error.Error != nil {
+		panic(fmt.Sprintf("同步到es失败"))
+	}
+
+}
