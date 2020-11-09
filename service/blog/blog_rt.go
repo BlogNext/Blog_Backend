@@ -1,11 +1,13 @@
 package blog
 
 import (
+	"errors"
 	"fmt"
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/model"
+	"gorm.io/gorm"
 	"log"
 	"strings"
 )
@@ -18,6 +20,27 @@ const (
 
 //博客前台服务
 type BlogRtService struct {
+}
+
+//博客详情
+func (s *BlogRtService) Detail(id uint) *blog.BlogEntity {
+	db := mysql.GetDefaultDBConnect()
+	blog_model := new(model.BlogModel)
+	query_result := db.First(blog_model, id)
+
+	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	if find {
+		panic(fmt.Sprintf("找不到博客:%d", id))
+	}
+
+	result := make([]*blog.BlogEntity, 1)
+	result[0] = ChangeToBlogEntity(blog_model)
+
+	PaddingBlogTypeInfo([]uint64{uint64(blog_model.BlogTypeId)}, result)
+	PaddingUserInfo([]uint{blog_model.UserID}, result)
+	PaddingAttachemtInfo([]uint64{uint64(blog_model.CoverPlanId)}, result)
+
+	return result[0]
 }
 
 //列表页

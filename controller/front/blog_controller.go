@@ -10,6 +10,27 @@ type BlogController struct {
 	BaseController
 }
 
+func (c *BlogController) Detail() {
+	//必填字段
+	type searchRequest struct {
+		ID uint `form:"id" binding:"required"`
+	}
+
+	var search_request searchRequest
+
+	err := c.Ctx.ShouldBind(&search_request)
+
+	if err != nil {
+		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
+		return
+	}
+
+	service := new(blog.BlogRtService)
+	result := service.Detail(search_request.ID)
+
+	help.Gin200SuccessResponse(c.Ctx, "成功", result)
+}
+
 /**
 获取博客列表
 */
@@ -39,7 +60,7 @@ func (c *BlogController) GetList() {
 
 	//过滤参数
 	filter := make(map[string]string, 1)
-	filter["blog_type_id"] = c.Ctx.DefaultQuery("blog_type_id","") //分类id过滤
+	filter["blog_type_id"] = c.Ctx.DefaultQuery("blog_type_id", "") //分类id过滤
 
 	service := new(blog.BlogRtService)
 	result := service.GetList(filter, search_request.PerPage, search_request.Page)
