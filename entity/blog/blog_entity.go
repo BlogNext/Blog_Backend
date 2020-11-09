@@ -6,7 +6,29 @@ import (
 	"github.com/blog_backend/entity/user"
 )
 
-//blog文档
+//blog列表实体
+type BlogListEntity struct {
+	entity.BaseEntity
+	UserId     uint64 `json:"user_id"`
+	BlogTypeId uint64 `json:"blog_type_id"`
+	//文章标题
+	Title string `json:"title"`
+	//文章摘要
+	Abstract string `json:"abstract"`
+
+	//封面图id
+	CoverPlanId uint64 `json:"cover_plan_id"`
+
+	//封面图信息
+	CoverPlanInfo *attachment.AttachmentEntity `json:"cover_plan_info"`
+
+	BlogTypeObject *BlogTypeEntity `json:"blog_type_object"`
+
+	//用户信息
+	UserInfo *user.UserEntity `json:"user_info"`
+}
+
+//blog详情文档
 type BlogEntity struct {
 	entity.BaseEntity
 
@@ -14,7 +36,6 @@ type BlogEntity struct {
 	BlogTypeId uint64 `json:"blog_type_id"`
 
 	YuqueFormat string `json:"yuque_format"`
-	YuqueHtml   string `json:"yuque_html"`
 	//文章标题
 	Title string `json:"title"`
 	//文章摘要
