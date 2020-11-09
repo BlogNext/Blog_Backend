@@ -1,6 +1,7 @@
 package blog
 
 import (
+	"errors"
 	"fmt"
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/entity/blog"
@@ -8,6 +9,7 @@ import (
 	"github.com/blog_backend/model"
 	"github.com/blog_backend/service/es"
 	"github.com/olivere/elastic/v7"
+	"gorm.io/gorm"
 	"log"
 )
 
@@ -76,10 +78,29 @@ func (b *BlogEsBkService) DeleteDoc(blog_doc *blog.BlogListEntity) *elastic.Dele
 
 //添加一个doc,返回文档在es中的唯一标识
 func (b *BlogEsBkService) AddDoc(blog_doc *blog.BlogListEntity) *elastic.IndexResponse {
+
+	db := mysql.GetDefaultDBConnect()
+	blog_model := new(model.BlogModel)
+	query_result := db.First(blog_model, blog_doc.ID)
+	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	if find {
+		panic(fmt.Sprintf("博客未创建id:%d", blog_doc.ID))
+	}
+
 	result, err := b.BaseEsService.AddDoc(es.BLOG_INDEX, blog_doc)
+
 	if err != nil {
 		return nil
 	}
+
+	blog_model.DocID = result.Id
+
+	query_result = db.Save(blog_model)
+
+	if query_result.Error != nil {
+		panic(query_result.Error)
+	}
+
 	return result
 }
 

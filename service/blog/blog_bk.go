@@ -112,13 +112,6 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	//es同步
 	blog_list_entity := ChangeToBlogListEntity(blog_model)
 	blog_es_service := new(BlogEsBkService)
-	es_doc := blog_es_service.AddDoc(blog_list_entity)
-
-	//更新esId
-	blog_model.DocID = es_doc.Id
-	db_error := db.Save(blog_model)
-	if db_error.Error != nil {
-		panic(fmt.Sprintf("同步到es失败"))
-	}
+	blog_es_service.AddDoc(blog_list_entity)
 
 }
