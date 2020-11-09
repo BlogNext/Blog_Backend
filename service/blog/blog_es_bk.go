@@ -44,7 +44,7 @@ func (s *BlogEsBkService) ImportDataToEs() {
 
 	for _, blog_model := range blog_list {
 		//es中添加文件
-		blog_doc := ChangeToBlogEntity(&blog_model)
+		blog_doc := ChangeToBlogListEntity(&blog_model)
 
 		log.Println("导入的es文档是：", fmt.Sprintf("v = %v,t = %T, p = %p", blog_doc, blog_doc, blog_doc))
 
@@ -66,7 +66,7 @@ func (s *BlogEsBkService) ImportDataToEs() {
 }
 
 //删除blog文档
-func (b *BlogEsBkService) DeleteDoc(blog_doc *blog.BlogEntity) *elastic.DeleteResponse {
+func (b *BlogEsBkService) DeleteDoc(blog_doc *blog.BlogListEntity) *elastic.DeleteResponse {
 	result, err := b.BaseEsService.DeleteDoc(es.BLOG_INDEX, blog_doc.DocID)
 	if err != nil {
 		return nil
@@ -75,7 +75,7 @@ func (b *BlogEsBkService) DeleteDoc(blog_doc *blog.BlogEntity) *elastic.DeleteRe
 }
 
 //添加一个doc,返回文档在es中的唯一标识
-func (b *BlogEsBkService) AddDoc(blog_doc *blog.BlogEntity) *elastic.IndexResponse {
+func (b *BlogEsBkService) AddDoc(blog_doc *blog.BlogListEntity) *elastic.IndexResponse {
 	result, err := b.BaseEsService.AddDoc(es.BLOG_INDEX, blog_doc)
 	if err != nil {
 		return nil
@@ -84,7 +84,7 @@ func (b *BlogEsBkService) AddDoc(blog_doc *blog.BlogEntity) *elastic.IndexRespon
 }
 
 //更新一个文档的内容
-func (b *BlogEsBkService) UpdateDoc(blog_doc *blog.BlogEntity) *elastic.UpdateResponse {
+func (b *BlogEsBkService) UpdateDoc(blog_doc *blog.BlogListEntity) *elastic.UpdateResponse {
 	result, err := b.BaseEsService.UpdateDoc(es.BLOG_INDEX, blog_doc.DocID, blog_doc)
 	if err != nil {
 		return nil
