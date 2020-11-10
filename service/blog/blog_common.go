@@ -68,14 +68,13 @@ func PaddingAttachemtInfoByBlogListEntity(cover_plan_ids []uint64, result []*blo
 
 //填充用户信息
 func PaddingUserInfo(user_ids []uint, result []*blog.BlogEntity) {
+
 	user_entity_map := user.GetUserEntityByUserIds(user_ids)
-
 	for _, item := range result {
-
 		if user_info, ok := user_entity_map[uint(item.UserId)]; ok {
 			item.UserInfo = user_info
 		} else {
-			item.CoverPlanInfo = nil
+			item.UserInfo = nil
 		}
 
 	}
@@ -142,6 +141,7 @@ func ChangeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 
 	blog_entity := new(blog.BlogEntity)
 	blog_entity.ID = uint64(blog_model.ID)
+	blog_entity.UserId = uint64(blog_model.UserID)
 	blog_entity.CreatedAt = uint64(blog_model.CreatedAt)
 	blog_entity.UpdatedAt = uint64(blog_model.UpdatedAt)
 	blog_entity.BlogTypeId = uint64(blog_model.BlogTypeId)

@@ -35,7 +35,7 @@ func (s *BlogRtService) Detail(id uint) *blog.BlogEntity {
 
 	result := make([]*blog.BlogEntity, 1)
 	result[0] = ChangeToBlogEntity(blog_model)
-
+	
 	PaddingBlogTypeInfo([]uint64{uint64(blog_model.BlogTypeId)}, result)
 	PaddingUserInfo([]uint{blog_model.UserID}, result)
 	PaddingAttachemtInfo([]uint64{uint64(blog_model.CoverPlanId)}, result)
