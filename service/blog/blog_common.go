@@ -167,6 +167,8 @@ func ChangeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 
 	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
 
+	PaddingUserInfo([]uint{uint(blog_entity.UserId)}, blog_entity_list)
+
 	return blog_entity_list[0]
 }
 
@@ -182,6 +184,7 @@ func ChangeToBlogListEntity(blog_model *model.BlogModel) *blog.BlogListEntity {
 	blog_entity.Title = blog_model.Title
 	blog_entity.Abstract = blog_model.Abstract
 	blog_entity.DocID = blog_model.DocID
+	blog_entity.UserId = uint64(blog_model.UserID)
 
 	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity, blog_entity, blog_entity))
 
@@ -197,6 +200,8 @@ func ChangeToBlogListEntity(blog_model *model.BlogModel) *blog.BlogListEntity {
 	PaddingBlogTypeInfoByBlogListEntity([]uint64{blog_entity.BlogTypeId}, blog_entity_list)
 
 	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
+
+	PaddingUserInfoByBlogListEntity([]uint{uint(blog_entity.UserId)}, blog_entity_list) //填充用户信息
 
 	return blog_entity_list[0]
 }
