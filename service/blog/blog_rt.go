@@ -22,6 +22,12 @@ const (
 type BlogRtService struct {
 }
 
+//浏览量自增
+func (s *BlogRtService) IncBrowse(id uint) {
+	db := mysql.GetDefaultDBConnect()
+	db.Model(model.BlogModel{}).Where("id = ?", id).UpdateColumn("browse_total", gorm.Expr("browse_total + ?", 1))
+}
+
 //博客详情
 func (s *BlogRtService) Detail(id uint) *blog.BlogEntity {
 	db := mysql.GetDefaultDBConnect()
@@ -36,7 +42,6 @@ func (s *BlogRtService) Detail(id uint) *blog.BlogEntity {
 	result := make([]*blog.BlogEntity, 1)
 	result[0] = ChangeToBlogEntity(blog_model)
 
-
 	return result[0]
 }
 
@@ -47,7 +52,7 @@ func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (r
 	blog_table_name := model.BlogModel{}.TableName()
 
 	//博客需要的字段
-	blog_felid := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "title", "abstract", "created_at", "updated_at"}
+	blog_felid := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "title", "abstract", "browse_total", "created_at", "updated_at"}
 
 	for index, felid := range blog_felid {
 		blog_felid[index] = fmt.Sprintf("%s.%s", blog_table_name, felid)
@@ -83,9 +88,10 @@ func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (r
 		var cover_plan_id uint64
 		var title string
 		var abstract string
+		var browse_total uint
 		var created_at uint64
 		var updated_at uint64
-		rows.Scan(&id, &user_id, &blog_type_id, &cover_plan_id, &title, &abstract, &created_at, &updated_at)
+		rows.Scan(&id, &user_id, &blog_type_id, &cover_plan_id, &title, &abstract, &browse_total, &created_at, &updated_at)
 
 		//博客实体
 		blog_entity := new(blog.BlogListEntity)
@@ -95,6 +101,7 @@ func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (r
 		blog_entity.CoverPlanId = cover_plan_id
 		blog_entity.Title = title
 		blog_entity.Abstract = abstract
+		blog_entity.BrowseTotal = browse_total
 		blog_entity.CreatedAt = created_at
 		blog_entity.UpdatedAt = updated_at
 		log.Println("blog_entity")

@@ -146,6 +146,7 @@ func ChangeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 	blog_entity.UpdatedAt = uint64(blog_model.UpdatedAt)
 	blog_entity.BlogTypeId = uint64(blog_model.BlogTypeId)
 	blog_entity.CoverPlanId = uint64(blog_model.CoverPlanId)
+	blog_entity.BrowseTotal = blog_model.BrowseTotal
 	blog_entity.YuqueFormat = blog_model.YuqueFormat
 	blog_entity.Title = blog_model.Title
 	blog_entity.Abstract = blog_model.Abstract
@@ -183,6 +184,7 @@ func ChangeToBlogListEntity(blog_model *model.BlogModel) *blog.BlogListEntity {
 	blog_entity.CoverPlanId = uint64(blog_model.CoverPlanId)
 	blog_entity.Title = blog_model.Title
 	blog_entity.Abstract = blog_model.Abstract
+	blog_entity.BrowseTotal = blog_model.BrowseTotal
 	blog_entity.DocID = blog_model.DocID
 	blog_entity.UserId = uint64(blog_model.UserID)
 
@@ -233,6 +235,7 @@ func ChangeToBlogEntityList(blog_model_list []*model.BlogModel) []*blog.BlogEnti
 		blog_entity.Title = item.Title
 		blog_entity.YuqueFormat = item.YuqueFormat
 		blog_entity.Abstract = item.Abstract
+		blog_entity.BrowseTotal = item.BrowseTotal
 		blog_entity.Content = item.Content
 		blog_entity.DocID = item.DocID
 
@@ -281,6 +284,7 @@ func ChangeToBlogListEntityList(blog_model_list []*model.BlogModel) []*blog.Blog
 		blog_entity.CoverPlanId = uint64(item.CoverPlanId)
 		blog_entity.Title = item.Title
 		blog_entity.Abstract = item.Abstract
+		blog_entity.BrowseTotal = item.BrowseTotal
 		blog_entity.DocID = item.DocID
 
 		//填充数据

@@ -16,6 +16,8 @@ type BlogListEntity struct {
 	//文章摘要
 	Abstract string `json:"abstract"`
 
+	BrowseTotal uint `json:"browse_total"` //浏览量
+
 	//封面图id
 	CoverPlanId uint64 `json:"cover_plan_id"`
 
@@ -41,7 +43,8 @@ type BlogEntity struct {
 	//文章摘要
 	Abstract string `json:"abstract"`
 	//文章内容
-	Content string `json:"content"`
+	Content     string `json:"content"`
+	BrowseTotal uint   `json:"browse_total"` //浏览量
 
 	//封面图id
 	CoverPlanId uint64 `json:"cover_plan_id"`
