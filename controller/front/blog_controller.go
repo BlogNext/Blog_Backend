@@ -10,29 +10,6 @@ type BlogController struct {
 	BaseController
 }
 
-func (c *BlogController) IncBrowse() {
-	//必填字段
-	type searchRequest struct {
-		ID uint `form:"id" binding:"required"`
-	}
-
-	var search_request searchRequest
-
-	err := c.Ctx.ShouldBind(&search_request)
-
-	if err != nil {
-		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
-		return
-	}
-
-	service := new(blog.BlogRtService)
-	service.IncBrowse(search_request.ID)
-
-	help.Gin200SuccessResponse(c.Ctx, "成功", nil)
-
-	return
-}
-
 //博客详情
 func (c *BlogController) Detail() {
 	//必填字段
@@ -50,9 +27,15 @@ func (c *BlogController) Detail() {
 	}
 
 	service := new(blog.BlogRtService)
+
+	//获取详情
 	result := service.Detail(search_request.ID)
+	//浏览量加1
+	service.IncBrowse(search_request.ID)
 
 	help.Gin200SuccessResponse(c.Ctx, "成功", result)
+
+	return
 }
 
 /**
