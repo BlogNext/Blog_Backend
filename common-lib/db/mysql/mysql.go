@@ -56,6 +56,7 @@ func InitDBConnect(db_info map[string]db.DBInfo) {
 	//主数据库
 	myGdb, err := gorm.Open(gmysql.Open(db_info["sources"].Dsn), &gorm.Config{
 		Logger: newLogger,
+		PrepareStmt:true,
 	})
 
 	if err != nil {
