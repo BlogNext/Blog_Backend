@@ -8,7 +8,6 @@ import (
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
-	"log"
 	"strings"
 )
 
@@ -104,8 +103,7 @@ func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (r
 		blog_entity.BrowseTotal = browse_total
 		blog_entity.CreatedAt = created_at
 		blog_entity.UpdatedAt = updated_at
-		log.Println("blog_entity")
-		log.Println(blog_entity)
+
 
 		cover_plan_ids = append(cover_plan_ids, cover_plan_id)
 		blog_type_ids = append(blog_type_ids, blog_type_id)
@@ -154,7 +152,7 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, per_page,
 //mysql等级搜索博客
 func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int) (result *entity.ListResponseEntity) {
 
-	log.Println("进入mysql搜索")
+
 
 	var blog_model_list []*model.BlogModel
 	var count int64
@@ -168,7 +166,7 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int)
 	db.Count(&count)
 	db.Order("created_at DESC").Limit(per_page).Offset((page - 1) * per_page).Find(&blog_model_list)
 
-	log.Println("总数:", count, "数据:", blog_model_list, "数据长度:", len(blog_model_list))
+	
 
 	//转化为传输层的对象
 	blog_list_entity_list := ChangeToBlogListEntityList(blog_model_list)

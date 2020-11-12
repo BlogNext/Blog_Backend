@@ -7,7 +7,6 @@ import (
 	"github.com/blog_backend/entity/attachment"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
-	"log"
 	"math/rand"
 	"os"
 	"path"
@@ -31,7 +30,6 @@ func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.Att
 		return
 	}
 
-	log.Println(fmt.Sprintf("附件长度=%d", len(attachment_list)))
 	attachment_entity_list = make([]*attachment.AttachmentEntity, len(attachment_list))
 
 	server_config, _ := config.GetConfig("server")
@@ -48,12 +46,10 @@ func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.Att
 		attachment_entity.Url = attachment_model.Path
 		attachment_entity.FullUrl = strings.Join([]string{domain, attachment_model.Path}, "/")
 		attachment_entity.FileType = attachment_model.FileType
-		log.Println(attachment_entity)
 
 		attachment_entity_list[index] = attachment_entity
 	}
 
-	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", attachment_entity_list[0], attachment_entity_list[0], attachment_entity_list[0]))
 
 	return
 }

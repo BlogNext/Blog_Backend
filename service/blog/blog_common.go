@@ -1,14 +1,12 @@
 package blog
 
 import (
-	"fmt"
 	"github.com/blog_backend/entity/attachment"
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/model"
 	attachment_service "github.com/blog_backend/service/attachment"
 	"github.com/blog_backend/service/user"
 	"github.com/thoas/go-funk"
-	"log"
 )
 
 //填充附件信息
@@ -19,15 +17,11 @@ func PaddingAttachemtInfo(cover_plan_ids []uint64, result []*blog.BlogEntity) {
 
 	if attachment_list != nil {
 		//转化成map
-		log.Println(attachment_list)
-		log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", attachment_list, attachment_list, attachment_list))
 
 		attachment_list_map := funk.ToMap(attachment_list, "ID").(map[uint64]*attachment.AttachmentEntity)
-		log.Println(attachment_list_map)
-		log.Println("哗啦啦")
+
 		//填充图片信息
 		for _, item := range result {
-			log.Println(attachment_list_map[item.CoverPlanId])
 
 			if attachment_item, ok := attachment_list_map[item.CoverPlanId]; ok {
 				item.CoverPlanInfo = attachment_item
@@ -46,15 +40,11 @@ func PaddingAttachemtInfoByBlogListEntity(cover_plan_ids []uint64, result []*blo
 
 	if attachment_list != nil {
 		//转化成map
-		log.Println(attachment_list)
-		log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", attachment_list, attachment_list, attachment_list))
 
 		attachment_list_map := funk.ToMap(attachment_list, "ID").(map[uint64]*attachment.AttachmentEntity)
-		log.Println(attachment_list_map)
-		log.Println("哗啦啦")
+
 		//填充图片信息
 		for _, item := range result {
-			log.Println(attachment_list_map[item.CoverPlanId])
 
 			if attachment_item, ok := attachment_list_map[item.CoverPlanId]; ok {
 				item.CoverPlanInfo = attachment_item
@@ -101,8 +91,6 @@ func PaddingBlogTypeInfo(blog_type_ids []uint64, result []*blog.BlogEntity) {
 	blog_type_service := new(BlogTypeRtService)
 	blog_type_list := blog_type_service.getListByids(blog_type_ids)
 
-	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_type_list, blog_type_list, blog_type_list))
-
 	if blog_type_list != nil {
 		//填充博客类型
 
@@ -120,8 +108,6 @@ func PaddingBlogTypeInfo(blog_type_ids []uint64, result []*blog.BlogEntity) {
 func PaddingBlogTypeInfoByBlogListEntity(blog_type_ids []uint64, result []*blog.BlogListEntity) {
 	blog_type_service := new(BlogTypeRtService)
 	blog_type_list := blog_type_service.getListByids(blog_type_ids)
-
-	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_type_list, blog_type_list, blog_type_list))
 
 	if blog_type_list != nil {
 		//填充博客类型
@@ -153,20 +139,12 @@ func ChangeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 	blog_entity.Content = blog_model.Content
 	blog_entity.DocID = blog_model.DocID
 
-	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity, blog_entity, blog_entity))
-
 	blog_entity_list := []*blog.BlogEntity{blog_entity}
 	//填充别的实体信息
 
-	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
-
 	PaddingAttachemtInfo([]uint64{blog_entity.CoverPlanId}, blog_entity_list)
 
-	log.Println("附件填充完毕", fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
-
 	PaddingBlogTypeInfo([]uint64{blog_entity.BlogTypeId}, blog_entity_list)
-
-	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
 
 	PaddingUserInfo([]uint{uint(blog_entity.UserId)}, blog_entity_list)
 
@@ -188,20 +166,12 @@ func ChangeToBlogListEntity(blog_model *model.BlogModel) *blog.BlogListEntity {
 	blog_entity.DocID = blog_model.DocID
 	blog_entity.UserId = uint64(blog_model.UserID)
 
-	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity, blog_entity, blog_entity))
-
 	blog_entity_list := []*blog.BlogListEntity{blog_entity}
 	//填充别的实体信息
 
-	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
-
 	PaddingAttachemtInfoByBlogListEntity([]uint64{blog_entity.CoverPlanId}, blog_entity_list)
 
-	log.Println("附件填充完毕", fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
-
 	PaddingBlogTypeInfoByBlogListEntity([]uint64{blog_entity.BlogTypeId}, blog_entity_list)
-
-	log.Println(fmt.Sprintf("v = %v,t = %T, p = %p", blog_entity_list, blog_entity_list, blog_entity_list))
 
 	PaddingUserInfoByBlogListEntity([]uint{uint(blog_entity.UserId)}, blog_entity_list) //填充用户信息
 

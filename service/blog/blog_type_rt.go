@@ -5,7 +5,6 @@ import (
 	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/model"
-	"log"
 	"strings"
 )
 
@@ -25,7 +24,6 @@ func (s *BlogTypeRtService) getListByids(ids []uint64) (result map[uint64]*blog.
 		return nil
 	}
 
-	log.Println("到这里", rows)
 	result = make(map[uint64]*blog.BlogTypeEntity)
 
 	for rows.Next() {

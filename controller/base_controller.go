@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -50,7 +49,7 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 		var param []reflect.Value         // 反射调用方法所需要的参数
 		action := context.Param("action") //获取执行控制器的方法
 		id_string := context.Param("id")
-		log.Println(id_string)
+
 		id, err := strconv.ParseUint(id_string, 10, 64) //id
 		if err == nil {
 			//转成功才添加
@@ -58,7 +57,7 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 			param[0] = reflect.ValueOf(id)
 		}
 
-		log.Println(id)
+
 		//通过反射去执行具体的方法
 		value := reflect.ValueOf(controller)
 		//通过路径中的action参数，去解析，调用具体的控制器方法
@@ -69,7 +68,7 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 			action_split = strings.Split(action, "_") // '_'符号分割方法，例如hello_world,百度是 '_'
 		}
 
-		log.Println(action_split)
+
 
 		for index, item := range action_split {
 			action_split[index] = help.StrFirstToUpper(item) //首字母大写
@@ -78,7 +77,7 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 		method := strings.Join(action_split, "") //拼接方法
 
 		call_method := value.MethodByName(method)
-		log.Println("执行方法", method)
+
 
 		if !call_method.IsValid() {
 			//没有找到action参数，通过请求类型去执行具体对应的方法
