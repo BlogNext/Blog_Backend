@@ -2,6 +2,7 @@ package es
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/blog_backend/exception"
 	"github.com/olivere/elastic/v7"
@@ -117,6 +118,26 @@ func (bs *BaseEsService) AddDoc(index string, doc interface{}) (*elastic.IndexRe
 	return resule.(*elastic.IndexResponse), nil
 }
 
+//通过mysql主键id获取一个es文档
+//index 索引
+//id mysql主键
+//赋值的dock文档
+func (bs *BaseEsService) GetDocByMysqlId(index string, id uint, doc_result interface{}) error {
+
+	//构建一个命令
+	commend := BuildGetDocCommendByMysql(index, id, doc_result)
+	//设置命令
+	bs.SetExecCommend(commend)
+	//运行命令
+	_, err := RunCommend(bs)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 //更新一个文档
 func (bs *BaseEsService) UpdateDoc(index, doc_id string, doc interface{}) (*elastic.UpdateResponse, error) {
 	if doc == nil {
@@ -191,13 +212,31 @@ func BuildDeleteDocCommend(index, doc_id string) Commend {
 }
 
 //获取一个文档
-func BuildGetDocCoCommend(index, doc_id string) Commend {
+func BuildGetDocCommend(index, doc_id string) Commend {
 	return func(client *elastic.Client) (i interface{}, err error) {
 		res, err := client.Get().Index(index).Id(doc_id).Do(context.Background())
 		if err != nil {
 			return nil, err
 		}
 		return res, nil
+	}
+}
+
+func BuildGetDocCommendByMysql(index string, id uint, doc_result interface{}) Commend {
+	return func(client *elastic.Client) (i interface{}, err error) {
+		boolQ := elastic.NewBoolQuery()
+		boolQ.Filter(elastic.NewTermQuery("id", id))
+		res, err := client.Search().Index(index).Query(boolQ).Pretty(true).Do(context.Background())
+		if err != nil {
+			return nil, err
+		}
+
+		if res.TotalHits() <= 0 {
+			return nil, errors.New("es查询不到单个文档数据")
+		}
+
+		json.Unmarshal(res.Hits.Hits[0].Source, doc_result)
+		return nil, nil
 	}
 }
 

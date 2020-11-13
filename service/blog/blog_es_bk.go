@@ -74,3 +74,11 @@ func (b *BlogEsBkService) UpdateDoc(blog_doc *blog.BlogEntity) *elastic.UpdateRe
 	}
 	return result
 }
+
+//获取一个文档内容
+func (b *BlogEsBkService) GetDocByMysqlId(id uint, blog_doc *blog.BlogEntity) {
+	err := b.BaseEsService.GetDocByMysqlId(es.BLOG_INDEX, id, blog_doc)
+	if err != nil {
+		panic(err)
+	}
+}
