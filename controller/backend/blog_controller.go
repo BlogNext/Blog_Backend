@@ -1,8 +1,10 @@
 package backend
 
 import (
+	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/help"
+	"github.com/blog_backend/model"
 	"github.com/blog_backend/service/blog"
 	"strings"
 )
@@ -11,11 +13,10 @@ type BlogController struct {
 	BaseController
 }
 
-//导入数据到es中
-func (c *BlogController) ImportData() {
+func (c *BlogController) AddEs() {
 
 	type importRequest struct {
-		Password string `form:"password" binding:"required"`
+		ID uint `form:"id" binding:"required"`
 	}
 
 	var import_request importRequest
@@ -26,15 +27,14 @@ func (c *BlogController) ImportData() {
 		return
 	}
 
-	if strings.Compare(import_request.Password, "ly123") != 0 {
-		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, "密码不对", nil)
-		return
-	}
-
+	db := mysql.GetDefaultDBConnect()
+	blog_model := new(model.BlogModel)
+	db.First(blog_model, import_request.ID)
+	blog_list_entity := blog.ChangeToBlogEntity(blog_model)
 	b_s := new(blog.BlogEsBkService)
-	b_s.ImportDataToEs()
+	b_s.AddDoc(blog_list_entity)
 
-	help.Gin200SuccessResponse(c.Ctx, "导入完毕", nil)
+	help.Gin200SuccessResponse(c.Ctx, "添加完毕", nil)
 	return
 }
 

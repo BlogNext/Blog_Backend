@@ -151,6 +151,8 @@ func ChangeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 	return blog_entity_list[0]
 }
 
+
+
 //模型转化成BlogListEntity实体
 func ChangeToBlogListEntity(blog_model *model.BlogModel) *blog.BlogListEntity {
 

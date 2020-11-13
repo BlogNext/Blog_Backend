@@ -48,3 +48,22 @@ SUBSCRIBE maxwell
 
 ```
 
+## es遇到的问题
+
+```cassandraql
+elastic: Error 429 (Too Many Requests): [parent] Data too large, data for [<
+```
+
+原因: 
+- fileddata占用内存过大,解决办法如下
+
+```cassandraql
+PUT _cluster/settings
+{
+  "persistent" : {
+    "indices.breaker.fielddata.limit" : "20%" 
+  }
+}
+
+```
+

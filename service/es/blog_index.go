@@ -28,7 +28,7 @@ func CreateBlogIndex() Commend {
 		mapping := `
 {
   "settings": {
-    "number_of_shards": 5,
+    "number_of_shards": 1,
     "number_of_replicas": 1,
     "analysis": {
       "analyzer": {
