@@ -135,15 +135,15 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, per_page,
 	switch searchLevel {
 	case MYSQL_SEARCH_LEVEL:
 		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
-		//case ES_SEARCH_LEVEL:
-		//	//es搜索
-		//	blog_s := new(BlogEsRtService)
-		//	result = blog_s.SearchBlog(keyword, per_page, page)
-		//
-		//	if result == nil {
-		//		//降级为mysql搜索
-		//		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
-		//	}
+		case ES_SEARCH_LEVEL:
+			//es搜索
+			blog_s := new(BlogEsRtService)
+			result = blog_s.SearchBlog(keyword, per_page, page)
+
+			if result == nil {
+				//降级为mysql搜索
+				result = s.SearchBlogMysqlLevel(keyword, per_page, page)
+			}
 	}
 
 	return
