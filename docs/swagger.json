@@ -15,7 +15,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8083",
+    "host": "216.24.183.162:8083",
     "basePath": "/",
     "paths": {
         "/front/blog/detail": {
