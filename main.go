@@ -70,7 +70,7 @@ func init() {
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host 216.24.183.162:8083
+// @host localhost:8083
 // @BasePath /
 func main() {
 
@@ -88,8 +88,9 @@ func main() {
 	server_info := server_config.GetStringMap("servier")
 	//gin的路由
 	r := router.RunRouter()
-	url := ginSwagger.URL("http://localhost:8083/swagger/doc.json") // The url pointing to API definition
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+	//url := ginSwagger.URL("http://localhost:8083/swagger/doc.json") // The url pointing to API definition
+	//r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	http.ListenAndServe(fmt.Sprintf(":%d", server_info["port"].(int)), r)
 }
