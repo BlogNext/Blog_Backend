@@ -1,5 +1,5 @@
 basePath: /
-host: 216.24.183.162:8083
+host: localhost:8083
 info:
   contact:
     email: 51785816@qq.com
