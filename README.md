@@ -69,3 +69,55 @@ PUT _cluster/settings
 
 ```
 
+
+## nginx
+
+```cassandraql
+server
+ {
+     listen       443 ssl;
+     
+    # ssl_certificate    /home/xiaochen/BlogNext/ssl_certs/laughingzhu.com/blog/server.crt;
+    # ssl_certificate_key  /home/xiaochen/BlogNext/ssl_certs/laughingzhu.com/blog/server.key;
+    ssl_certificate    /etc/letsencrypt/live/laughingzhu.com/fullchain.pem;
+    ssl_certificate_key  /etc/letsencrypt/live/laughingzhu.com/privkey.pem;
+    
+    server_name blog.laughingzhu.com;
+
+
+    add_header Access-Control-Allow-Origin $http_origin;
+    add_header 'Access-Control-Allow-Credentials' 'true';
+    #add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,X-Requested-With';
+    add_header 'Access-Control-Allow-Headers' '*';
+    add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS';
+    access_log  /var/log/nginx/blog_next_access.log  main;
+
+    location /upload/ {
+        expires 30s;
+        root /home/xiaochen/BlogNext/code/Blog_Backend/;
+   }
+
+
+   location /swagger {
+
+    auth_basic "swagger登录";
+    auth_basic_user_file /home/xiaochen/BlogNext/nginx/htpasswd;
+    proxy_pass  http://127.0.0.1:8083;
+
+   }
+
+   location / {
+
+     proxy_pass  http://127.0.0.1:8083;
+   }
+   
+}
+```
+
+
+- /home/xiaochen/BlogNext/nginx/htpasswd文件的生成
+
+```cassandraql
+printf "admin:$(openssl passwd -crypt 123456)\n" >> htpasswd
+```
+
