@@ -23,6 +23,7 @@
 - 2020/09/30 blog搜索添加降级功能，es挂了之后降为mysql搜索
 - 2020/11/05 重构数据库，加入语雀，es没有接入
 - 2020/11/09 接入es
+- 2020/11/23 接入swagger和前端联调,访问地址/swaager/index.html
 
 
 ## MAXWELL和redis部署

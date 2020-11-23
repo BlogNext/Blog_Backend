@@ -1,0 +1,128 @@
+basePath: /
+host: localhost:8083
+info:
+  contact:
+    email: 51785816@qq.com
+    name: Ly
+    url: https://github.com/FlashFeiFei?tab=repositories
+  description: 改swagger用于和前端联调用的，正在努力的测试中，目前的测试securityDefinitions.apikey ApiKeyAuth只能带一个请求头
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: https://github.com/BlogNext
+  title: 晓琛博客
+  version: "1.0"
+paths:
+  /front/blog/detail:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: 博客详情
+      parameters:
+      - description: 博客id
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: json格式
+          schema:
+            type: object
+      tags:
+      - 前台-博客
+  /front/blog/get_list:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: 获取博客列表
+      parameters:
+      - description: 一页多少条
+        in: query
+        name: per_page
+        required: true
+        type: integer
+      - description: 第几页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 博客分类
+        in: query
+        name: blog_type_id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: json格式
+          schema:
+            type: object
+      tags:
+      - 前台-博客
+  /front/blog/search_blog:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: 搜素博客
+      parameters:
+      - description: 一页多少条
+        in: query
+        name: per_page
+        required: true
+        type: integer
+      - description: 第几页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 搜索等级，默认mysql搜索
+        in: query
+        name: search_level
+        type: string
+      - description: 搜索关键字
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: json格式
+          schema:
+            type: object
+      tags:
+      - 前台-博客
+  /front/blog_type/get_list:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: 获取博客类型列表
+      parameters:
+      - description: 每页多少条记录
+        in: query
+        name: per_page
+        required: true
+        type: integer
+      - description: 第几页
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: json格式
+          schema:
+            type: object
+      tags:
+      - 前台-博客类型（知识库）
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: token
+    type: apiKey
+swagger: "2.0"

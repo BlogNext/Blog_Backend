@@ -10,9 +10,15 @@ type BlogTypeController struct {
 	BaseController
 }
 
-/**
-获取博客类型列表
-*/
+// @获取博客类型列表
+// @Description 获取博客类型列表
+// @Tags 前台-博客类型（知识库）
+// @Accept  application/x-www-form-urlencoded
+// @Produce  json
+// @Param   per_page     query    int     true        "每页多少条记录"
+// @Param   page     query    int     true        "第几页"
+// @Success 200 {object} interface{}	"json格式"
+// @Router /front/blog_type/get_list [get]
 func (c *BlogTypeController) GetList() {
 	//必填字段
 	type searchRequest struct {
@@ -36,7 +42,7 @@ func (c *BlogTypeController) GetList() {
 	if search_request.Page <= 0 {
 		search_request.Page = 1
 	}
-	
+
 	service := new(blog.BlogTypeRtService)
 	result := service.GetList(search_request.PerPage, search_request.Page)
 

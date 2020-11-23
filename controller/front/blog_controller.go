@@ -10,7 +10,14 @@ type BlogController struct {
 	BaseController
 }
 
-//博客详情
+// @博客详情
+// @Description 博客详情
+// @Tags 前台-博客
+// @Accept  application/x-www-form-urlencoded
+// @Produce  json
+// @Param   id     query    uint     true        "博客id"
+// @Success 200 {object} interface{}	"json格式"
+// @Router /front/blog/detail [get]
 func (c *BlogController) Detail() {
 	//必填字段
 	type searchRequest struct {
@@ -38,9 +45,16 @@ func (c *BlogController) Detail() {
 	return
 }
 
-/**
-获取博客列表
-*/
+// @获取博客列表
+// @Description 获取博客列表
+// @Tags 前台-博客
+// @Accept  application/x-www-form-urlencoded
+// @Produce  json
+// @Param   per_page     query    int     true    "一页多少条"
+// @Param   page     query    int     true        "第几页"
+// @Param   blog_type_id     query    int     false        "博客分类"
+// @Success 200 {object} interface{}	"json格式"
+// @Router /front/blog/get_list [get]
 func (c *BlogController) GetList() {
 	//必填字段
 	type searchRequest struct {
@@ -75,7 +89,17 @@ func (c *BlogController) GetList() {
 	help.Gin200SuccessResponse(c.Ctx, "成功", result)
 }
 
-//搜素
+// @搜素博客
+// @Description 搜素博客
+// @Tags 前台-博客
+// @Accept  application/x-www-form-urlencoded
+// @Produce  json
+// @Param   per_page     query    int     true    "一页多少条"
+// @Param   page     query    int     true        "第几页"
+// @Param   search_level     query    string     false        "搜索等级，默认mysql搜索"
+// @Param   keyword     query    string     false        "搜索关键字"
+// @Success 200 {object} interface{}	"json格式"
+// @Router /front/blog/search_blog [get]
 func (c *BlogController) SearchBlog() {
 
 	//非必填字段
