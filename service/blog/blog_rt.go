@@ -104,7 +104,6 @@ func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (r
 		blog_entity.CreatedAt = created_at
 		blog_entity.UpdatedAt = updated_at
 
-
 		cover_plan_ids = append(cover_plan_ids, cover_plan_id)
 		blog_type_ids = append(blog_type_ids, blog_type_id)
 		user_id_ids = append(user_id_ids, user_id)
@@ -135,15 +134,15 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, per_page,
 	switch searchLevel {
 	case MYSQL_SEARCH_LEVEL:
 		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
-		case ES_SEARCH_LEVEL:
-			//es搜索
-			blog_s := new(BlogEsRtService)
-			result = blog_s.SearchBlog(keyword, per_page, page)
-
-			if result == nil {
-				//降级为mysql搜索
-				result = s.SearchBlogMysqlLevel(keyword, per_page, page)
-			}
+	//case ES_SEARCH_LEVEL:
+	//	//es搜索
+	//	blog_s := new(BlogEsRtService)
+	//	result = blog_s.SearchBlog(keyword, per_page, page)
+	//
+	//	if result == nil {
+	//		//降级为mysql搜索
+	//		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
+	//	}
 	}
 
 	return
@@ -151,8 +150,6 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, per_page,
 
 //mysql等级搜索博客
 func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int) (result *entity.ListResponseEntity) {
-
-
 
 	var blog_model_list []*model.BlogModel
 	var count int64
@@ -165,8 +162,6 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int)
 
 	db.Count(&count)
 	db.Order("created_at DESC").Limit(per_page).Offset((page - 1) * per_page).Find(&blog_model_list)
-
-	
 
 	//转化为传输层的对象
 	blog_list_entity_list := ChangeToBlogListEntityList(blog_model_list)
