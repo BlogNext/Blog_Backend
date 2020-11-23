@@ -70,7 +70,7 @@ func init() {
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8083
+// @host blog.laughingzhu.com
 // @BasePath /
 func main() {
 
