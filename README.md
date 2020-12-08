@@ -121,3 +121,93 @@ server
 printf "admin:$(openssl passwd -crypt 123456)\n" >> htpasswd
 ```
 
+
+
+# docker 部署blog_front遇到的问题
+
+
+##问题描述
+
+- 进入容器里面，手动执行npm install的时候，有些包总是下载不下载了（不是源的问题），下载一直卡着，卡了很久
+- 然后npm install下载的进程就被killer掉了，没有任何的报错信息，npm install就直接被停止掉了
+- 但是docker容器没有killer掉，单单只是里面的npm失败了
+- 重复了很多遍，都是下载不下载，npm install，就是没有报错信息,直接被killer掉了
+
+
+## 如何解决的问题，针对被killer掉的程序，
+
+###  查看被killer程序的原因
+- dmesg | grep -i -B100 'killed process'
+
+```cassandraql
+dmesg | grep -i -B100 'killed process'
+
+
+#输出
+
+[9561396.672577] [99372]     0 99372    38226      319   307200        0             0 sshd
+[9561396.674020] [99375]  1000 99375    23438      368   212992        0             0 systemd
+[9561396.675449] [99376]  1000 99376    77579      681   311296      151             0 (sd-pam)
+[9561396.676894] [99387]  1000 99387    38226      321   299008        0             0 sshd
+[9561396.678341] [99388]  1000 99388     5840      169    77824        0             0 bash
+[9561396.679756] [99883]  1000 99883   287794    93719  3919872        0             0 npm
+[9561396.681146] Out of memory: Kill process 99883 (npm) score 294 or sacrifice child
+[9561396.682727] Killed process 99883 (npm) total-vm:1151176kB, anon-rss:374876kB, file-rss:0kB, shmem-rss:0kB
+
+```
+
+- 可以看到99883这个程序内存溢出了，npm 总共占用了 total-vm:1151176多的内存
+
+
+### 然后查看机器的内存 free -h
+
+```cassandraql
+free -h
+
+#输出
+
+              total        used        free      shared  buff/cache   available
+Mem:          997Mi       270Mi       233Mi       3.0Mi       492Mi       576Mi
+```
+
+- 发现自己的内存才997M，内存不足，估计是内存不足导致的npm install失败
+
+
+### 开启swap增加虚拟内存
+
+
+[Linux设置Swap交换分区](https://renqiang.xyz/2018/08/21/Linux%E8%AE%BE%E7%BD%AESwap%E4%BA%A4%E6%8D%A2%E5%88%86%E5%8C%BA/)
+
+```cassandraql
+dd if=/dev/zero of=/tmp/swapfile bs=1024 count=1024k
+
+#详细操作参看上面链接
+```
+
+
+- 再次查看机器的内存信息
+
+
+```cassandraql
+
+free -h
+              total        used        free      shared  buff/cache   available
+Mem:          997Mi       271Mi       233Mi       3.0Mi       492Mi       576Mi
+Swap:         2.3Gi       528Mi       1.7Gi
+
+```
+
+
+### 再次运行docker容器，这次就成功了
+
+
+
+## 总结一下
+
+- 对于killer掉程序，在没有任何的报错信息的前提下，可以通过 dmesg | grep -i -B100 'killed process'看原因
+- free可以看到机器的内存信息
+- 开启swap增大虚拟内存
+- swap有个缺点，就是会有io消耗，会拖慢运行在这个机器上所有程序的性能.(没办法，穷，没钱买机器)
+
+
+
