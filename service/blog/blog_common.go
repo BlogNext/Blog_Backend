@@ -265,6 +265,8 @@ func ChangeBlogSortEntityByList(blog_model_list []*model.BlogModel) []*blog.Blog
 		blog_sort_entity.CoverPlanId = uint64(item.CoverPlanId)
 		blog_sort_entity.Title = item.Title
 		blog_sort_entity.BrowseTotal = item.BrowseTotal
+		blog_sort_entity.CreatedAt = uint64(item.CreatedAt)
+		blog_sort_entity.UpdatedAt = uint64(item.UpdatedAt)
 
 		//填充数据
 		cover_plan_ids[index] = blog_sort_entity.CoverPlanId
