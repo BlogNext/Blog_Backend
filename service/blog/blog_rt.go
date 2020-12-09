@@ -138,6 +138,9 @@ func (s *BlogRtService) GetListBySort(sort_dimension string, per_page int) (resu
 	case "browse_total":
 		db = db.Table(model.BlogModel{}.TableName())
 		db.Order("browse_total DESC").Limit(per_page).Find(&blog_model_list)
+	case "created_at":
+		db = db.Table(model.BlogModel{}.TableName())
+		db.Order("created_at DESC").Limit(per_page).Find(&blog_model_list)
 	default:
 		exception.NewException(exception.VALIDATE_ERR, "非法的sort_dimension")
 	}
@@ -155,6 +158,10 @@ func (s *BlogRtService) GetListBySort(sort_dimension string, per_page int) (resu
 				help.Option{
 					Label: "浏览量",
 					Value: "browse_total",
+				},
+				help.Option{
+					Label: "创建时间",
+					Value: "created_at",
 				},
 			},
 		},
