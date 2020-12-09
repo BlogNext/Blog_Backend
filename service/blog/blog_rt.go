@@ -10,6 +10,7 @@ import (
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
+	"log"
 	"strings"
 )
 
@@ -221,6 +222,52 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int)
 	result.SetCount(count)
 	result.SetPerPage(per_page)
 	result.SetList(blog_list_entity_list)
+
+	return result
+}
+
+//blogInfo模块统计展示
+func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
+
+	response := make(map[string]uint, 3)
+
+	db := mysql.GetDefaultDBConnect()
+
+	blog_table_name := model.BlogModel{}.TableName()
+	db = db.Table(blog_table_name)
+
+	//文章总数
+	{
+		var count int64
+		//sql
+		count_db := db.Select("id")
+		count_db.Count(&count)
+		response["blog_total"] = uint(count)
+	}
+
+	//最新一篇文章的时间、最新和最早的文章时间戳
+	{
+		//最新的博客时间
+		var last_create_at uint
+		last_create_at_row := db.Select("created_at").Order("id DESC").Limit(1).Row()
+		last_create_at_row.Scan(&last_create_at)
+		response["last_blog_time"] = last_create_at
+		log.Println("last_create_at")
+		log.Println(last_create_at)
+
+		//最老的博客时间
+		var first_create_at uint
+		first_create_at_row := db.Select("created_at").Order("id ASC").Limit(1).Row()
+		first_create_at_row.Scan(&first_create_at)
+		log.Println("first_create_at")
+		log.Println(first_create_at)
+		response["diff_time"] = last_create_at - first_create_at
+	}
+
+	//构建结果返回
+	result = new(entity.ListResponseEntity)
+
+	result.SetList(response)
 
 	return result
 }

@@ -182,3 +182,20 @@ func (c *BlogController) GetListBySort() {
 	return
 
 }
+
+// @blogInfo模块统计展示
+// @Description blogInfo模块统计展示
+// @Tags 前台-博客
+// @Accept  application/x-www-form-urlencoded
+// @Produce  json
+// @Success 200 {object} interface{}	"json格式"
+// @Router /front/blog/get_stat [get]
+func (c *BlogController) GetStat() {
+
+	b_s := new(blog.BlogRtService)
+	result := b_s.GetStat()
+
+	help.Gin200SuccessResponse(c.Ctx, "请求成功过", result)
+
+	return
+}
