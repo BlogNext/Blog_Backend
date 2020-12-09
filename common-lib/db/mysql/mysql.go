@@ -46,8 +46,8 @@ func InitDBConnect(db_info map[string]db.DBInfo) {
 		newLogger = logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 			logger.Config{
-				SlowThreshold: time.Second,   // 慢 SQL 阈值
-				LogLevel:      logger.Silent, // Log level  warn和error级别下，slowthreshold才生效，非正式环境下开启sql打印
+				SlowThreshold: time.Nanosecond,   // 慢 SQL 阈值
+				LogLevel:      logger.Info, // Log level  warn和error级别下，slowthreshold才生效，非正式环境下开启sql打印
 				Colorful:      true,          // 禁用彩色打印
 			},
 		)

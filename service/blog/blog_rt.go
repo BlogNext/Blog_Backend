@@ -10,7 +10,6 @@ import (
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
-	"log"
 	"strings"
 )
 
@@ -251,16 +250,14 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 		var last_create_at uint
 		last_create_at_row := db.Select("created_at").Order("id DESC").Limit(1).Row()
 		last_create_at_row.Scan(&last_create_at)
-		response["last_blog_time"] = last_create_at
-		log.Println("last_create_at")
-		log.Println(last_create_at)
+		response["last_create_at"] = last_create_at
 
 		//最老的博客时间
 		var first_create_at uint
-		first_create_at_row := db.Select("created_at").Order("id ASC").Limit(1).Row()
+		first_create_at_db := mysql.GetDefaultDBConnect()
+		first_create_at_row := first_create_at_db.Table(blog_table_name).Select("created_at").
+			Order("id ASC").Limit(1).Row()
 		first_create_at_row.Scan(&first_create_at)
-		log.Println("first_create_at")
-		log.Println(first_create_at)
 		response["diff_time"] = last_create_at - first_create_at
 	}
 

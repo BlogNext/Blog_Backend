@@ -85,6 +85,20 @@ paths:
             type: object
       tags:
       - 前台-博客
+  /front/blog/get_stat:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: blogInfo模块统计展示
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: json格式
+          schema:
+            type: object
+      tags:
+      - 前台-博客
   /front/blog/search_blog:
     get:
       consumes:

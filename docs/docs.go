@@ -144,6 +144,28 @@ var doc = `{
                 }
             }
         },
+        "/front/blog/get_stat": {
+            "get": {
+                "description": "blogInfo模块统计展示",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "前台-博客"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "json格式",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/front/blog/search_blog": {
             "get": {
                 "description": "搜素博客",
