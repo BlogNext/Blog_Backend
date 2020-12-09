@@ -20,6 +20,42 @@ const (
 )
 
 //获取附件
+//返回map
+func GetAttachmentImagesMap(ids []uint64) (attachment_entity_list map[uint]*attachment.AttachmentEntity) {
+	attachment_list := getAttachmentByIds(ids)
+	if attachment_list == nil {
+		return
+	}
+
+	if len(attachment_list) <= 0 {
+		return
+	}
+
+	attachment_entity_list = make(map[uint]*attachment.AttachmentEntity, len(attachment_list))
+
+	server_config, _ := config.GetConfig("server")
+	server_info := server_config.GetStringMap("servier")
+	domain := server_info["domain"].(string)
+
+	for _, attachment_model := range attachment_list {
+		attachment_entity := new(attachment.AttachmentEntity)
+		attachment_entity.ID = uint64(attachment_model.ID)
+		attachment_entity.CreatedAt = uint64(attachment_model.CreatedAt)
+		attachment_entity.UpdatedAt = uint64(attachment_model.UpdatedAt)
+		attachment_entity.Module = attachment_model.Module
+		attachment_entity.Path = attachment_model.Path
+		attachment_entity.Url = attachment_model.Path
+		attachment_entity.FullUrl = strings.Join([]string{domain, attachment_model.Path}, "/")
+		attachment_entity.FileType = attachment_model.FileType
+
+		attachment_entity_list[uint(attachment_entity.ID)] = attachment_entity
+	}
+
+	return
+}
+
+//获取附件
+//返回切片
 func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.AttachmentEntity) {
 	attachment_list := getAttachmentByIds(ids)
 	if attachment_list == nil {
@@ -49,7 +85,6 @@ func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.Att
 
 		attachment_entity_list[index] = attachment_entity
 	}
-
 
 	return
 }

@@ -6,6 +6,8 @@ import (
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/blog"
+	"github.com/blog_backend/exception"
+	"github.com/blog_backend/help"
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
 	"strings"
@@ -125,6 +127,46 @@ func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (r
 	return
 }
 
+//排序方向
+//per_page 每页多少条
+func (s *BlogRtService) GetListBySort(sort_dimension string, per_page int) (result *entity.ListResponseEntity) {
+
+	db := mysql.GetDefaultDBConnect()
+	var blog_model_list []*model.BlogModel
+	//查询
+	switch sort_dimension {
+	case "browse_total":
+		db = db.Table(model.BlogModel{}.TableName())
+		db.Order("browse_total DESC").Limit(per_page).Find(&blog_model_list)
+	default:
+		exception.NewException(exception.VALIDATE_ERR, "非法的sort_dimension")
+	}
+
+	//转化为传输层的对象
+	blog_sort_entity_list := ChangeBlogSortEntityByList(blog_model_list)
+
+	//构建结果返回
+	result = new(entity.ListResponseEntity)
+	filter_list := []help.Filter{
+		help.Filter{
+			Label: "排序维度",
+			Field: "sort_dimension",
+			Options: []help.Option{
+				help.Option{
+					Label: "浏览量",
+					Value: "browse_total",
+				},
+			},
+		},
+	}
+	result.SetFilter(filter_list)
+	result.SetCount(int64(per_page))
+	result.SetPerPage(per_page)
+	result.SetList(blog_sort_entity_list)
+
+	return result
+}
+
 //searchLevel 搜索等级
 //keyword 搜索的关键字
 //per_page 每页多少条
@@ -134,15 +176,15 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, per_page,
 	switch searchLevel {
 	case MYSQL_SEARCH_LEVEL:
 		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
-	//case ES_SEARCH_LEVEL:
-	//	//es搜索
-	//	blog_s := new(BlogEsRtService)
-	//	result = blog_s.SearchBlog(keyword, per_page, page)
-	//
-	//	if result == nil {
-	//		//降级为mysql搜索
-	//		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
-	//	}
+		//case ES_SEARCH_LEVEL:
+		//	//es搜索
+		//	blog_s := new(BlogEsRtService)
+		//	result = blog_s.SearchBlog(keyword, per_page, page)
+		//
+		//	if result == nil {
+		//		//降级为mysql搜索
+		//		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
+		//	}
 	}
 
 	return

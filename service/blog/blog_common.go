@@ -33,6 +33,25 @@ func PaddingAttachemtInfo(cover_plan_ids []uint64, result []*blog.BlogEntity) {
 	}
 }
 
+//填充附件信息，blogEntity
+func PaddingAttachemtInfoByBlogSortEntityList(cover_plan_ids []uint64, result []*blog.BlogSortEntity) {
+	//获取图片的ids,填充图片信息
+	attachment_map_list := attachment_service.GetAttachmentImagesMap(cover_plan_ids)
+
+	if attachment_map_list != nil {
+		//填充图片信息
+		for _, item := range result {
+
+			if attachment_item, ok := attachment_map_list[uint(item.CoverPlanId)]; ok {
+				item.CoverPlanInfo = attachment_item
+			} else {
+				item.CoverPlanInfo = nil
+			}
+
+		}
+	}
+}
+
 //填充附件信息，blogList实体
 func PaddingAttachemtInfoByBlogListEntity(cover_plan_ids []uint64, result []*blog.BlogListEntity) {
 	//获取图片的ids,填充图片信息
@@ -151,8 +170,6 @@ func ChangeToBlogEntity(blog_model *model.BlogModel) *blog.BlogEntity {
 	return blog_entity_list[0]
 }
 
-
-
 //模型转化成BlogListEntity实体
 func ChangeToBlogListEntity(blog_model *model.BlogModel) *blog.BlogListEntity {
 
@@ -228,6 +245,37 @@ func ChangeToBlogEntityList(blog_model_list []*model.BlogModel) []*blog.BlogEnti
 
 	return blog_entity_list
 
+}
+
+//模型转化为blogSortEntity实体
+func ChangeBlogSortEntityByList(blog_model_list []*model.BlogModel) []*blog.BlogSortEntity {
+	number := len(blog_model_list)
+
+	if number <= 0 {
+		return nil
+	}
+
+	blog_sort_entity_list := make([]*blog.BlogSortEntity, number)
+
+	cover_plan_ids := make([]uint64, number)
+
+	for index, item := range blog_model_list {
+		blog_sort_entity := new(blog.BlogSortEntity)
+		blog_sort_entity.ID = uint64(item.ID)
+		blog_sort_entity.CoverPlanId = uint64(item.CoverPlanId)
+		blog_sort_entity.Title = item.Title
+		blog_sort_entity.BrowseTotal = item.BrowseTotal
+
+		//填充数据
+		cover_plan_ids[index] = blog_sort_entity.CoverPlanId
+
+		//返回的集合
+		blog_sort_entity_list[index] = blog_sort_entity
+	}
+
+	PaddingAttachemtInfoByBlogSortEntityList(cover_plan_ids, blog_sort_entity_list)
+
+	return blog_sort_entity_list
 }
 
 //模型转化为BlogListEntity实体List操作

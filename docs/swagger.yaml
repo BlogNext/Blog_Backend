@@ -62,6 +62,29 @@ paths:
             type: object
       tags:
       - 前台-博客
+  /front/blog/get_list_by_sort:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: 按排序维度获取排序博客
+      parameters:
+      - description: 一页多少条，默认值5
+        in: query
+        name: per_page
+        type: integer
+      - description: 排序维度，默认值browse_total
+        in: query
+        name: sort_dimension
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: json格式
+          schema:
+            type: object
+      tags:
+      - 前台-博客
   /front/blog/search_blog:
     get:
       consumes:

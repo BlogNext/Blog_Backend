@@ -139,3 +139,46 @@ func (c *BlogController) SearchBlog() {
 
 	return
 }
+
+// @按排序维度获取排序博客
+// @Description 按排序维度获取排序博客
+// @Tags 前台-博客
+// @Accept  application/x-www-form-urlencoded
+// @Produce  json
+// @Param   per_page     query    int     false    "一页多少条，默认值5"
+// @Param   sort_dimension     query    string     false        "排序维度，默认值browse_total"
+// @Success 200 {object} interface{}	"json格式"
+// @Router /front/blog/get_list_by_sort [get]
+func (c *BlogController) GetListBySort() {
+	//必填字段
+	type sortRequest struct {
+		//搜索维度
+		SortDimension string `form:"sort_dimension"`
+		PerPage       int    `form:"per_page"`
+	}
+
+	var sort_request sortRequest
+
+	err := c.Ctx.ShouldBind(&sort_request)
+
+	if err != nil {
+		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
+		return
+	}
+
+	if sort_request.PerPage <= 0 {
+		sort_request.PerPage = 5
+	}
+
+	if sort_request.SortDimension == "" {
+		sort_request.SortDimension = "browse_total"
+	}
+
+	b_s := new(blog.BlogRtService)
+	result := b_s.GetListBySort(sort_request.SortDimension, sort_request.PerPage)
+
+	help.Gin200SuccessResponse(c.Ctx, "请求成功过", result)
+
+	return
+
+}

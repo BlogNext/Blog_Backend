@@ -7,6 +7,19 @@ import (
 )
 
 
+//blogSort实体
+type BlogSortEntity struct {
+	entity.BaseEntity
+	//文章标题
+	Title string `json:"title"`
+	BrowseTotal uint `json:"browse_total"` //浏览量
+	//封面图id
+	CoverPlanId uint64 `json:"cover_plan_id"`
+	//封面图信息
+	CoverPlanInfo *attachment.AttachmentEntity `json:"cover_plan_info"`
+}
+
+
 //blog列表实体
 type BlogListEntity struct {
 	entity.BaseEntity

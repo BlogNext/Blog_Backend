@@ -108,6 +108,42 @@ var doc = `{
                 }
             }
         },
+        "/front/blog/get_list_by_sort": {
+            "get": {
+                "description": "按排序维度获取排序博客",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "前台-博客"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "一页多少条，默认值5",
+                        "name": "per_page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序维度，默认值browse_total",
+                        "name": "sort_dimension",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "json格式",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/front/blog/search_blog": {
             "get": {
                 "description": "搜素博客",
