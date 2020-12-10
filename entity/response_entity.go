@@ -1,6 +1,9 @@
 package entity
 
-import "math"
+import (
+	"math"
+	"reflect"
+)
 
 //通用的http list响应结构体
 type ListResponseEntity struct {
@@ -38,7 +41,17 @@ func (lre *ListResponseEntity) SetFilter(filter interface{}) {
 }
 
 func (lre *ListResponseEntity) SetList(list interface{}) {
+
 	lre.List = list
+
+	//反射判断，list是否为“空”,处理"空逻辑"
+	vi := reflect.ValueOf(list)
+	switch vi.Kind() {
+	case reflect.Slice: //list是切片，并且是nil时，返回json数组[]
+		if vi.IsNil() {
+			lre.List = make([]interface{}, 0)
+		}
+	}
 }
 
 func (lre *ListResponseEntity) SetExtra(extra interface{}) {
