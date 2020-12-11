@@ -40,7 +40,7 @@ type Client struct {
 	conn *websocket.Conn
 
 	// 缓冲出站消息的通道。
-	send chan []byte   //这里假设一个消息的大小是256个字节
+	send chan []byte   //这里假设一个消息的大小是256个缓存
 }
 
 //读处理
