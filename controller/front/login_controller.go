@@ -50,7 +50,7 @@ func (u *LoginController) IsLogin() {
 	service := new(login.LoginRtService)
 	login_entity := new(front.LoginEntity)
 	is_login := service.IsLogin(token, login_entity)
-	
+
 	result := make(map[string]interface{})
 	result["is_login"] = is_login
 	result["login_entity"] = login_entity
