@@ -63,6 +63,7 @@ func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (r
 	//sql
 	db = db.Table(blog_table_name)
 
+	db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 	//过滤分类id过滤
 	if filter["blog_type_id"] != "" {
 		db = db.Where("blog_type_id = ?", filter["blog_type_id"])
@@ -137,9 +138,11 @@ func (s *BlogRtService) GetListBySort(sort_dimension string, per_page int) (resu
 	switch sort_dimension {
 	case "browse_total":
 		db = db.Table(model.BlogModel{}.TableName())
+		db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 		db.Order("browse_total DESC").Limit(per_page).Find(&blog_model_list)
 	case "created_at":
 		db = db.Table(model.BlogModel{}.TableName())
+		db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 		db.Order("created_at DESC").Limit(per_page).Find(&blog_model_list)
 	default:
 		exception.NewException(exception.VALIDATE_ERR, "非法的sort_dimension")
@@ -205,6 +208,8 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int)
 
 	db := mysql.GetDefaultDBConnect()
 	db = db.Table(model.BlogModel{}.TableName())
+
+	db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 	if keyword != "" {
 		db = db.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
 	}
@@ -234,6 +239,7 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 
 	blog_table_name := model.BlogModel{}.TableName()
 	db = db.Table(blog_table_name)
+	db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 
 	//文章总数
 	{

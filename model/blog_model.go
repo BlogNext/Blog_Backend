@@ -1,5 +1,11 @@
 package model
 
+const (
+	//语雀公开级别
+	BLOG_MODEL_YUQUE_PUBLIC_1 = iota + 1
+	BLOG_MODEL_YUQUE_PUBLIC_2
+)
+
 type BlogModel struct {
 	BaseModel
 	UserID      uint   `gorm:"cloumn:user_id"` //userid
