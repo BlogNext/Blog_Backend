@@ -253,6 +253,44 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/front/login/Login_by_yuque": {
+            "post": {
+                "description": "语雀账号登录",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "前台-登录"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "语雀login",
+                        "name": "login",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "登录密码",
+                        "name": "password",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "json格式",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
         }
     },
     "securityDefinitions": {

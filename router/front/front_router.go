@@ -38,6 +38,13 @@ func RegisterFrontRouter(router *gin.Engine) {
 			blog_router.Any("/:action", blog_controller)
 		}
 
+		//登录
+		login_router := front_router.Group("/login")
+		{
+			login_controller := controller.NewController(new(front.LoginController))
+			login_router.Any("/:action", login_controller)
+		}
+
 	}
 
 }

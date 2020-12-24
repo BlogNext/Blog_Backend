@@ -157,6 +157,31 @@ paths:
             type: object
       tags:
       - 前台-博客类型（知识库）
+  /front/login/Login_by_yuque:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: 语雀账号登录
+      parameters:
+      - description: 语雀login
+        in: query
+        name: login
+        required: true
+        type: string
+      - description: 登录密码
+        in: query
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: json格式
+          schema:
+            type: object
+      tags:
+      - 前台-登录
 securityDefinitions:
   ApiKeyAuth:
     in: header
