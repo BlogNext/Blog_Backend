@@ -28,6 +28,7 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	}
 
 	blog_model.YuqueFormat = doc.Format
+	blog_model.YuquePublic = int(doc.Public)
 	blog_model.YuqueLake = doc.BodyLake
 	blog_model.Title = doc.Title
 	blog_model.Content = doc.Body
@@ -96,6 +97,7 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	blog_model.YuqueSlug = doc.Slug
 	blog_model.YuqueFormat = doc.Format
 	blog_model.YuqueLake = doc.BodyLake
+	blog_model.YuquePublic = int(doc.Public)
 	blog_model.Title = doc.Title
 	blog_model.Content = doc.Body
 	blog_model.Abstract = DocIntor.Data.CustomDescription        // 摘要

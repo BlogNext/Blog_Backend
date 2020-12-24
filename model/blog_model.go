@@ -10,6 +10,7 @@ type BlogModel struct {
 	YuqueSlug   string `gorm:"cloumn:yuque_slug"`
 	YuqueFormat string `gorm:"cloumn:yuque_format"`
 	YuqueLake   string `gorm:"cloumn:yuque_lake"`
+	YuquePublic int    `gorm:"cloumn:yuque_public"`
 	Title       string `gorm:"cloumn:title"`
 	BrowseTotal uint   `gorm:"cloumn:browse_total"` //浏览量
 	Abstract    string `gorm:"cloumn:abstract"`
