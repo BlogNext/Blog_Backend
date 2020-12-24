@@ -6,10 +6,12 @@ import (
 	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/login/front"
 	"github.com/blog_backend/entity/user"
+	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
 	"github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
 	"strings"
+	"time"
 )
 
 var mySigningKey []byte
@@ -28,7 +30,7 @@ type LoginRtService struct {
 //return true登录，false未登录
 func (u *LoginRtService) IsLogin(login_token string, login_entity *front.LoginEntity) bool {
 
-	token, err := jwt.ParseWithClaims(login_token, &front.LoginEntity{}, func(token *jwt.Token) (i interface{}, err error) {
+	token, err := jwt.ParseWithClaims(login_token, login_entity, func(token *jwt.Token) (i interface{}, err error) {
 		return mySigningKey, nil
 	})
 
@@ -36,11 +38,10 @@ func (u *LoginRtService) IsLogin(login_token string, login_entity *front.LoginEn
 		panic(err)
 	}
 
-	if claims, ok := token.Claims.(*front.LoginEntity); ok && token.Valid {
-		login_entity = claims
+	if _, ok := token.Claims.(*front.LoginEntity); ok && token.Valid {
 		return true
 	}
-	
+
 	return false
 }
 
@@ -53,7 +54,7 @@ func (u *LoginRtService) LoginByYuque(login, password string) (login_token strin
 	query_result := db.Where("login = ?", login).First(model)
 	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
 	if find {
-		panic("为找到用户login:" + login)
+		panic(exception.NewException(exception.VALIDATE_ERR, "未找到用户login:"+login))
 	}
 
 	if strings.Compare(password, "xiaochen123") != 0 {
@@ -61,9 +62,10 @@ func (u *LoginRtService) LoginByYuque(login, password string) (login_token strin
 	}
 
 	//生成jwt
-	claims := front.LoginEntity{
+	claims := &front.LoginEntity{
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: 60 * 60 * 24,
+			Issuer:    "ly",
+			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
 		},
 		UserFrontEntity: user.UserFrontEntity{
 			BaseEntity: entity.BaseEntity{
@@ -78,7 +80,7 @@ func (u *LoginRtService) LoginByYuque(login, password string) (login_token strin
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	login_token, err := token.SignedString(mySigningKey)
 	if err != nil {
 		panic(err)
