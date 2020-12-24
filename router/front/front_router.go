@@ -45,6 +45,13 @@ func RegisterFrontRouter(router *gin.Engine) {
 			login_router.Any("/:action", login_controller)
 		}
 
+		//私人空间路由
+		person_router := front_router.Group("/person")
+		{
+			person_controller := controller.NewController(new(front.PersonController))
+			person_router.Any("/:action", person_controller)
+		}
+
 	}
 
 }

@@ -10,7 +10,18 @@ type PersonController struct {
 	BaseController
 }
 
-func (p *PersonController) Blog() {
+
+// @私人博客列表，这里的私人只的是登录的用户
+// @Description 私人博客列表，这里的私人只的是登录的用户
+// @Tags 前台-博客-登录用户
+// @Accept  application/x-www-form-urlencoded
+// @Produce  json
+// @Param   per_page     query    int     true    "一页多少条"
+// @Param   page     query    int     true        "第几页"
+// @Param   blog_type_id     query    int     false        "博客分类"
+// @Success 200 {object} interface{}	"json格式"
+// @Router /front/person/blog_list [get]
+func (p *PersonController) BlogList() {
 	//必填字段
 	type searchRequest struct {
 		PerPage int `form:"per_page"`
