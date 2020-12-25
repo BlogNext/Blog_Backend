@@ -2,6 +2,7 @@ package front
 
 import (
 	log_entity "github.com/blog_backend/entity/login/front"
+	"github.com/blog_backend/exception"
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/service/login"
 	"github.com/gin-gonic/gin"
@@ -17,7 +18,7 @@ func LoginMiddleware() gin.HandlerFunc {
 
 		ok := service.IsLogin(log_token, login_entity)
 		if !ok {
-			help.Gin200SuccessResponse(c, "请先登录", nil)
+			help.Gin200ErrorResponse(c, exception.TOKEN_ILLEGALITY, "请先登录", nil)
 			panic("请登录")
 		}
 		c.Next()
