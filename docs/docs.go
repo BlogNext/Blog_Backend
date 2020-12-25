@@ -307,7 +307,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "前台-博客-登录用户"
+                    "前台-登录-私人博客"
                 ],
                 "parameters": [
                     {
