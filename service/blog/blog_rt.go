@@ -342,6 +342,7 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 		var first_create_at uint
 		first_create_at_db := mysql.GetDefaultDBConnect()
 		first_create_at_row := first_create_at_db.Table(blog_table_name).Select("created_at").
+			Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1).
 			Order("id ASC").Limit(1).Row()
 		first_create_at_row.Scan(&first_create_at)
 		response["diff_time"] = last_create_at - first_create_at
