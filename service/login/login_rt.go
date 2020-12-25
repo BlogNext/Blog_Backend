@@ -30,6 +30,10 @@ type LoginRtService struct {
 //return true登录，false未登录
 func (u *LoginRtService) IsLogin(login_token string, login_entity *front.LoginEntity) bool {
 
+	if login_token == "" {
+		return false
+	}
+	
 	token, err := jwt.ParseWithClaims(login_token, login_entity, func(token *jwt.Token) (i interface{}, err error) {
 		return mySigningKey, nil
 	})

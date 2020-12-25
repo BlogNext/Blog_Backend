@@ -3,6 +3,7 @@ package front
 import (
 	"github.com/blog_backend/controller"
 	"github.com/blog_backend/controller/front"
+	middleware_front "github.com/blog_backend/middleware/front"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/locales/zh"
@@ -48,6 +49,7 @@ func RegisterFrontRouter(router *gin.Engine) {
 		//私人空间路由
 		person_router := front_router.Group("/person")
 		{
+			person_router.Use(middleware_front.LoginMiddleware())
 			person_controller := controller.NewController(new(front.PersonController))
 			person_router.Any("/:action", person_controller)
 		}
