@@ -13,6 +13,7 @@ type PersonController struct {
 // @私人博客列表，这里的私人只的是登录的用户
 // @Description 私人博客列表，这里的私人只的是登录的用户
 // @Tags 前台-博客-登录用户
+// @Security ApiKeyAuth
 // @Accept  application/x-www-form-urlencoded
 // @Produce  json
 // @Param   per_page     query    int     true    "一页多少条"

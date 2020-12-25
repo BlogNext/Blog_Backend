@@ -60,7 +60,7 @@ func init() {
 // @description 改swagger用于和前端联调用的，正在努力的测试中，目前的测试securityDefinitions.apikey ApiKeyAuth只能带一个请求头
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
-// @name token
+// @name x-access-token
 // @termsOfService https://github.com/BlogNext
 
 // @contact.name Ly
