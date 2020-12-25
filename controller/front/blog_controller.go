@@ -80,7 +80,7 @@ func (c *BlogController) GetList() {
 	}
 
 	//过滤参数
-	filter := make(map[string]string, 1)
+	filter := make(map[string]string)
 	filter["blog_type_id"] = c.Ctx.DefaultQuery("blog_type_id", "") //分类id过滤
 
 	service := new(blog.BlogRtService)

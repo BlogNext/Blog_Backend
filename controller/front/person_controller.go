@@ -10,7 +10,6 @@ type PersonController struct {
 	BaseController
 }
 
-
 // @私人博客列表，这里的私人只的是登录的用户
 // @Description 私人博客列表，这里的私人只的是登录的用户
 // @Tags 前台-博客-登录用户
@@ -45,12 +44,8 @@ func (p *PersonController) BlogList() {
 		search_request.Page = 1
 	}
 
-	//过滤参数
-	filter := make(map[string]string, 1)
-	filter["blog_type_id"] = p.Ctx.DefaultQuery("blog_type_id", "") //分类id过滤
-
 	service := new(blog.BlogRtService)
-	result := service.GetList(filter, search_request.PerPage, search_request.Page)
+	result := service.GetListByPerson(search_request.PerPage, search_request.Page)
 
 	help.Gin200SuccessResponse(p.Ctx, "成功", result)
 }

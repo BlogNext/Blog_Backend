@@ -2,8 +2,8 @@ package model
 
 const (
 	//语雀公开级别
-	BLOG_MODEL_YUQUE_PUBLIC_1 = iota + 1
-	BLOG_MODEL_YUQUE_PUBLIC_2
+	BLOG_MODEL_YUQUE_PUBLIC_0 = iota //私密的
+	BLOG_MODEL_YUQUE_PUBLIC_1        //公开的
 )
 
 type BlogModel struct {

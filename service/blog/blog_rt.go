@@ -46,6 +46,86 @@ func (s *BlogRtService) Detail(id uint) *blog.BlogEntity {
 	return result[0]
 }
 
+
+//获取博客列表，用于私人空间
+func (s *BlogRtService) GetListByPerson(per_page, page int) (result *entity.ListResponseEntity) {
+	db := mysql.GetDefaultDBConnect()
+
+	blog_table_name := model.BlogModel{}.TableName()
+
+	//博客需要的字段
+	blog_felid := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "title", "abstract", "browse_total", "created_at", "updated_at"}
+
+	for index, felid := range blog_felid {
+		blog_felid[index] = fmt.Sprintf("%s.%s", blog_table_name, felid)
+	}
+
+	var count int64
+	//sql
+	db = db.Table(blog_table_name)
+
+	//私密博客过滤
+	db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_0)
+
+	db.Count(&count)
+
+	rows, err := db.Select(strings.Join(blog_felid, ", ")).Order("created_at DESC").Limit(per_page).Offset((page - 1) * per_page).Rows()
+
+	if err != nil {
+		return nil
+	}
+
+	query_result := make([]*blog.BlogListEntity, 0)
+
+	cover_plan_ids := make([]uint64, 0)
+	blog_type_ids := make([]uint64, 0)
+	user_id_ids := make([]uint, 0)
+
+	for rows.Next() {
+		var id uint64
+		var user_id uint
+		var blog_type_id uint64
+		var cover_plan_id uint64
+		var title string
+		var abstract string
+		var browse_total uint
+		var created_at uint64
+		var updated_at uint64
+		rows.Scan(&id, &user_id, &blog_type_id, &cover_plan_id, &title, &abstract, &browse_total, &created_at, &updated_at)
+
+		//博客实体
+		blog_entity := new(blog.BlogListEntity)
+		blog_entity.ID = id
+		blog_entity.UserId = uint64(user_id)
+		blog_entity.BlogTypeId = blog_type_id
+		blog_entity.CoverPlanId = cover_plan_id
+		blog_entity.Title = title
+		blog_entity.Abstract = abstract
+		blog_entity.BrowseTotal = browse_total
+		blog_entity.CreatedAt = created_at
+		blog_entity.UpdatedAt = updated_at
+
+		cover_plan_ids = append(cover_plan_ids, cover_plan_id)
+		blog_type_ids = append(blog_type_ids, blog_type_id)
+		user_id_ids = append(user_id_ids, user_id)
+
+		query_result = append(query_result, blog_entity)
+	}
+
+	//填充信息
+	PaddingAttachemtInfoByBlogListEntity(cover_plan_ids, query_result) //填充附件信息
+	PaddingBlogTypeInfoByBlogListEntity(blog_type_ids, query_result)   //博客类型实体
+	PaddingUserInfoByBlogListEntity(user_id_ids, query_result)         //填充用户信息
+
+	//构建结果返回
+	result = new(entity.ListResponseEntity)
+	result.SetCount(count)
+	result.SetPerPage(per_page)
+	result.SetList(query_result)
+
+	return
+}
+
 //列表页
 func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (result *entity.ListResponseEntity) {
 	db := mysql.GetDefaultDBConnect()
