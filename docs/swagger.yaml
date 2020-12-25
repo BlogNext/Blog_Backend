@@ -168,7 +168,7 @@ paths:
         name: login
         required: true
         type: string
-      - description: 登录密码
+      - description: xiaochen123
         in: query
         name: password
         required: true

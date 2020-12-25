@@ -276,7 +276,7 @@ var doc = `{
                     },
                     {
                         "type": "string",
-                        "description": "登录密码",
+                        "description": "xiaochen123",
                         "name": "password",
                         "in": "query",
                         "required": true

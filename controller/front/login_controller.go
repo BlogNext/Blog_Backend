@@ -17,7 +17,7 @@ type LoginController struct {
 // @Accept  application/x-www-form-urlencoded
 // @Produce  json
 // @Param   login  query   string     true        "语雀login"
-// @Param   password  query   string     true        "登录密码"
+// @Param   password  query   string     true        "xiaochen123"
 // @Success 200 {object} interface{}	"json格式"
 // @Router /front/login/Login_by_yuque [post]
 func (u *LoginController) LoginByYuque() {
