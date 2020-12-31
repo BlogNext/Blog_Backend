@@ -1,14 +1,18 @@
 package lru
 
-import "container/list"
+import (
+	"container/list"
+	"time"
+)
 
 //key 是接口，可以是任意类型
 type Key interface{}
 
 //一个 entry 包含一个 key 和一个 value，都是任意类型
 type entry struct {
-	key   Key
-	value interface{}
+	key    Key
+	value  interface{}
+	expire time.Time //过期时间
 }
 
 const (
@@ -61,7 +65,7 @@ func (c *LruCache) Add(key Key, value interface{}) {
 	}
 
 	//元素第一次访问,进入缓存
-	ele := c.ll.PushFront(&entry{key, value})
+	ele := c.ll.PushFront(&entry{key, value, time.Now().Add(15 * time.Second)})
 	c.cache[key] = ele
 
 	if c.MaxEntries != 0 && c.ll.Len() > c.MaxEntries {
@@ -120,6 +124,17 @@ func (c *LruCache) RemoveOldest() {
 	ele := c.ll.Back()
 	if ele != nil {
 		c.removeElement(ele)
+	}
+}
+
+//删除过期的元素
+func (c *LruCache) RemoveExpire() {
+	now_time := time.Now()
+	for key, e := range c.cache {
+		kv := e.Value.(*entry)
+		if now_time.Before(kv.expire) {
+			c.removeElement(c.cache[key])
+		}
 	}
 }
 
