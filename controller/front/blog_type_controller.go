@@ -26,9 +26,9 @@ func (c *BlogTypeController) GetList() {
 		Page    int `form:"page"`
 	}
 
-	var search_request searchRequest
+	var sr searchRequest
 
-	err := c.Ctx.ShouldBind(&search_request)
+	err := c.Ctx.ShouldBind(&sr)
 
 	if err != nil {
 		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
@@ -36,15 +36,15 @@ func (c *BlogTypeController) GetList() {
 	}
 
 	//参数默认值
-	if search_request.PerPage <= 0 {
-		search_request.PerPage = 10
+	if sr.PerPage <= 0 {
+		sr.PerPage = 10
 	}
-	if search_request.Page <= 0 {
-		search_request.Page = 1
+	if sr.Page <= 0 {
+		sr.Page = 1
 	}
 
 	service := new(blog.BlogTypeRtService)
-	result := service.GetList(search_request.PerPage, search_request.Page)
+	result := service.GetList(sr.PerPage, sr.Page)
 
 	help.Gin200SuccessResponse(c.Ctx, "成功", result)
 	return
