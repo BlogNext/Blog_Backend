@@ -132,7 +132,7 @@ func (c *LruCache) RemoveExpire() {
 	now_time := time.Now()
 	for key, e := range c.cache {
 		kv := e.Value.(*entry)
-		if now_time.Before(kv.expire) {
+		if now_time.After(kv.expire) {
 			c.removeElement(c.cache[key])
 		}
 	}
