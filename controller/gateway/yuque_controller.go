@@ -22,20 +22,20 @@ func (c *YuqueController) WebHook() {
 	}
 
 	//数据解码
-	yuque_webhook_data := new(response.ResponseDocDetailSerializer)
-	err = json.Unmarshal(data, yuque_webhook_data)
+	yuqueWebhookData := new(response.ResponseDocDetailSerializer)
+	err = json.Unmarshal(data, yuqueWebhookData)
 	if err != nil {
 		panic(err)
 	}
 
-	yuque_config, err := config.GetConfig("yuque")
+	yuqueConfig, err := config.GetConfig("yuque")
 
 	if err != nil {
 		panic(fmt.Sprintf("语雀配置失败"))
 	}
-	yuque_info := yuque_config.GetStringMap("yuque")
+	yuqueInfo := yuqueConfig.GetStringMap("yuque")
 
-	yuque.SyncData(yuque_webhook_data, yuque_info["token"].(string))
+	yuque.SyncData(yuqueWebhookData, yuqueInfo["token"].(string))
 
 	help.Gin200SuccessResponse(c.Ctx, "WebHook触发完成", nil)
 

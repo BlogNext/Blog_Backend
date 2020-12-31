@@ -16,13 +16,13 @@ import (
 
 //创建一个控制器
 //参数是一个执行的controller
-func NewController(exec_controller Controller) func(*gin.Context) {
+func NewController(execController Controller) func(*gin.Context) {
 
 	return func(context *gin.Context) {
 		//通过反射创建一个新的controller，为什么要这样做？
 		//因为如果不这么做，所有用户都公用一个controller，又因为gin.context是指针，所以用户第二次请求会覆盖第一次请求的context
-		exec_controller_type := reflect.TypeOf(exec_controller) //获取controller的指针的reflect.Type
-		trueType := exec_controller_type.Elem()                 //获取controller的真实类型
+		execControllerType := reflect.TypeOf(execController) //获取controller的指针的reflect.Type
+		trueType := execControllerType.Elem()                 //获取controller的真实类型
 		ptrValue := reflect.New(trueType)                       //获取controller的真实值
 		controller := ptrValue.Interface().(Controller)         //底层的“值” =>  转interface{} => 再转具体类型 Controller
 		//捕获异常 try/catch
@@ -48,9 +48,9 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 
 		var param []reflect.Value         // 反射调用方法所需要的参数
 		action := context.Param("action") //获取执行控制器的方法
-		id_string := context.Param("id")
+		idString := context.Param("id")
 
-		id, err := strconv.ParseUint(id_string, 10, 64) //id
+		id, err := strconv.ParseUint(idString, 10, 64) //id
 		if err == nil {
 			//转成功才添加
 			param = make([]reflect.Value, 1)
@@ -62,44 +62,44 @@ func NewController(exec_controller Controller) func(*gin.Context) {
 		value := reflect.ValueOf(controller)
 		//通过路径中的action参数，去解析，调用具体的控制器方法
 		action = strings.Trim(action, " ") //修剪一下空格
-		var action_split []string
-		action_split = strings.Split(action, "-") // '-' 符号分割方法, 例如 hello-world，谷歌是 '-'
-		if len(action_split) == 1 {
-			action_split = strings.Split(action, "_") // '_'符号分割方法，例如hello_world,百度是 '_'
+		var actionSplit []string
+		actionSplit = strings.Split(action, "-") // '-' 符号分割方法, 例如 hello-world，谷歌是 '-'
+		if len(actionSplit) == 1 {
+			actionSplit = strings.Split(action, "_") // '_'符号分割方法，例如hello_world,百度是 '_'
 		}
 
 
 
-		for index, item := range action_split {
-			action_split[index] = help.StrFirstToUpper(item) //首字母大写
+		for index, item := range actionSplit {
+			actionSplit[index] = help.StrFirstToUpper(item) //首字母大写
 		}
 
-		method := strings.Join(action_split, "") //拼接方法
+		method := strings.Join(actionSplit, "") //拼接方法
 
-		call_method := value.MethodByName(method)
+		callMethod := value.MethodByName(method)
 
 
-		if !call_method.IsValid() {
+		if !callMethod.IsValid() {
 			//没有找到action参数，通过请求类型去执行具体对应的方法
 			method := context.Request.Method
 			panic(errors.New(fmt.Sprintf("还不支持的方法: %s", method)))
 		}
 
 		//一些钩子吧,在真正执行到控制器请求前在做一下操作，例如权限认证等
-		base_exception := controller.Prepare()
+		baseException := controller.Prepare()
 
 		prefixPath := strings.Split(context.FullPath(),":")[0]
 
 		//转化成uri路径
 		controller.SetMyFullPath(prefixPath + method)
 
-		if base_exception != nil {
-			help.Gin200ErrorResponse(context, base_exception.GetErrorCode(), base_exception.Error(), nil)
+		if baseException != nil {
+			help.Gin200ErrorResponse(context, baseException.GetErrorCode(), baseException.Error(), nil)
 			return //结束请求
 		}
 
 		//调用方法
-		call_method.Call(param)
+		callMethod.Call(param)
 		return
 	}
 }

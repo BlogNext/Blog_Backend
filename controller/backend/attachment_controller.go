@@ -11,10 +11,10 @@ type AttachmentController struct {
 
 func (a *AttachmentController) UploadBlog() {
 
-	attachment_service := new(attachment.AttachmentBkService)
-	upload_resule := attachment_service.UploadBlog(a.Ctx)
+	attachmentService := new(attachment.AttachmentBkService)
+	uploadResule := attachmentService.UploadBlog(a.Ctx)
 
-	help.Gin200SuccessResponse(a.Ctx, "上传成功", upload_resule)
+	help.Gin200SuccessResponse(a.Ctx, "上传成功", uploadResule)
 
 	return
 }
