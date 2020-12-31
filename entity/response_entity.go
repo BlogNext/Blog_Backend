@@ -26,8 +26,8 @@ func (lre *ListResponseEntity) SetCount(count int64) {
 	lre.Count = count
 }
 
-func (lre *ListResponseEntity) SetPerPage(per_page int) {
-	pageCount := float64(lre.Count) / float64(per_page)
+func (lre *ListResponseEntity) SetPerPage(perPage int) {
+	pageCount := float64(lre.Count) / float64(perPage)
 	pageCount = math.Ceil(pageCount)
 	lre.PageCount = int(pageCount)
 }

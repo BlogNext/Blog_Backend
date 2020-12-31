@@ -65,7 +65,7 @@ func (c *LruCache) Add(key Key, value interface{}) {
 	}
 
 	//元素第一次访问,进入缓存
-	ele := c.ll.PushFront(&entry{key, value, time.Now().Add(15 * time.Second)})
+	ele := c.ll.PushFront(&entry{key, value, time.Now().Add(1 * time.Minute)})
 	c.cache[key] = ele
 
 	if c.MaxEntries != 0 && c.ll.Len() > c.MaxEntries {

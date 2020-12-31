@@ -25,9 +25,9 @@ func (c *BlogController) Detail() {
 		ID uint `form:"id" binding:"required"`
 	}
 
-	var search_request searchRequest
+	var sq searchRequest
 
-	err := c.Ctx.ShouldBind(&search_request)
+	err := c.Ctx.ShouldBind(&sq)
 
 	if err != nil {
 		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
@@ -37,9 +37,9 @@ func (c *BlogController) Detail() {
 	service := new(blog.BlogRtService)
 
 	//获取详情
-	result := service.Detail(search_request.ID)
+	result := service.Detail(sq.ID)
 	//浏览量加1
-	service.IncBrowse(search_request.ID)
+	service.IncBrowse(sq.ID)
 
 	help.Gin200SuccessResponse(c.Ctx, "成功", result)
 
@@ -63,9 +63,9 @@ func (c *BlogController) GetList() {
 		Page    int `form:"page"`
 	}
 
-	var search_request searchRequest
+	var sr searchRequest
 
-	err := c.Ctx.ShouldBind(&search_request)
+	err := c.Ctx.ShouldBind(&sr)
 
 	if err != nil {
 		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
@@ -73,11 +73,11 @@ func (c *BlogController) GetList() {
 	}
 
 	//参数默认值
-	if search_request.PerPage <= 0 {
-		search_request.PerPage = 10
+	if sr.PerPage <= 0 {
+		sr.PerPage = 10
 	}
-	if search_request.Page <= 0 {
-		search_request.Page = 1
+	if sr.Page <= 0 {
+		sr.Page = 1
 	}
 
 	//过滤参数
@@ -85,7 +85,7 @@ func (c *BlogController) GetList() {
 	filter["blog_type_id"] = c.Ctx.DefaultQuery("blog_type_id", "") //分类id过滤
 
 	service := new(blog.BlogRtService)
-	result := service.GetList(filter, search_request.PerPage, search_request.Page)
+	result := service.GetList(filter, sr.PerPage, sr.Page)
 
 	help.Gin200SuccessResponse(c.Ctx, "成功", result)
 }
@@ -104,8 +104,8 @@ func (c *BlogController) GetList() {
 func (c *BlogController) SearchBlog() {
 
 	//非必填字段
-	var search_level string
-	search_level = c.Ctx.DefaultQuery("search_level", blog.MYSQL_SEARCH_LEVEL)
+	var searchLevel string
+	searchLevel = c.Ctx.DefaultQuery("search_level", blog.MysqlSearchLevel)
 
 	//必填字段
 	type searchRequest struct {
@@ -115,9 +115,9 @@ func (c *BlogController) SearchBlog() {
 		Page    int    `form:"page"`
 	}
 
-	var search_request searchRequest
+	var sr searchRequest
 
-	err := c.Ctx.ShouldBind(&search_request)
+	err := c.Ctx.ShouldBind(&sr)
 
 	if err != nil {
 		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
@@ -125,16 +125,16 @@ func (c *BlogController) SearchBlog() {
 	}
 
 	//参数默认值
-	if search_request.PerPage <= 0 {
-		search_request.PerPage = 10
+	if sr.PerPage <= 0 {
+		sr.PerPage = 10
 	}
-	if search_request.Page <= 0 {
-		search_request.Page = 1
+	if sr.Page <= 0 {
+		sr.Page = 1
 	}
 
-	b_s := new(blog.BlogRtService)
+	bs := new(blog.BlogRtService)
 
-	result := b_s.SearchBlog(search_level, strings.Trim(search_request.Keyword,""), search_request.PerPage, search_request.Page)
+	result := bs.SearchBlog(searchLevel, strings.Trim(sr.Keyword, ""), sr.PerPage, sr.Page)
 
 	help.Gin200SuccessResponse(c.Ctx, "请求成功过", result)
 
@@ -158,25 +158,25 @@ func (c *BlogController) GetListBySort() {
 		PerPage       int    `form:"per_page"`
 	}
 
-	var sort_request sortRequest
+	var sr sortRequest
 
-	err := c.Ctx.ShouldBind(&sort_request)
+	err := c.Ctx.ShouldBind(&sr)
 
 	if err != nil {
 		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
 		return
 	}
 
-	if sort_request.PerPage <= 0 {
-		sort_request.PerPage = 5
+	if sr.PerPage <= 0 {
+		sr.PerPage = 5
 	}
 
-	if sort_request.SortDimension == "" {
-		sort_request.SortDimension = "browse_total"
+	if sr.SortDimension == "" {
+		sr.SortDimension = "browse_total"
 	}
 
-	b_s := new(blog.BlogRtService)
-	result := b_s.GetListBySort(sort_request.SortDimension, sort_request.PerPage)
+	bs := new(blog.BlogRtService)
+	result := bs.GetListBySort(sr.SortDimension, sr.PerPage)
 
 	help.Gin200SuccessResponse(c.Ctx, "请求成功过", result)
 
@@ -193,8 +193,8 @@ func (c *BlogController) GetListBySort() {
 // @Router /front/blog/get_stat [get]
 func (c *BlogController) GetStat() {
 
-	b_s := new(blog.BlogRtService)
-	result := b_s.GetStat()
+	bs := new(blog.BlogRtService)
+	result := bs.GetStat()
 
 	help.Gin200SuccessResponse(c.Ctx, "请求成功过", result)
 

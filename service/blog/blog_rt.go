@@ -16,8 +16,8 @@ import (
 
 //搜索等级
 const (
-	MYSQL_SEARCH_LEVEL = "mysql"
-	ES_SEARCH_LEVEL    = "es"
+	MysqlSearchLevel = "mysql"
+	EsSearchLevel    = "es"
 )
 
 //博客前台服务
@@ -33,115 +33,115 @@ func (s *BlogRtService) IncBrowse(id uint) {
 //博客详情
 func (s *BlogRtService) Detail(id uint) *blog.BlogEntity {
 	db := mysql.GetDefaultDBConnect()
-	blog_model := new(model.BlogModel)
-	query_result := db.First(blog_model, id)
+	blogModel := new(model.BlogModel)
+	queryResult := db.First(blogModel, id)
 
-	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	find := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
 	if find {
 		panic(fmt.Sprintf("找不到博客:%d", id))
 	}
 
 	result := make([]*blog.BlogEntity, 1)
-	result[0] = ChangeToBlogEntity(blog_model)
+	result[0] = ChangeToBlogEntity(blogModel)
 
 	return result[0]
 }
 
 //获取博客列表，用于私人空间
-func (s *BlogRtService) GetListByPerson(per_page, page int) (result *entity.ListResponseEntity) {
+func (s *BlogRtService) GetListByPerson(perPage, page int) (result *entity.ListResponseEntity) {
 	db := mysql.GetDefaultDBConnect()
 
-	blog_table_name := model.BlogModel{}.TableName()
+	blogTableName := model.BlogModel{}.TableName()
 
 	//博客需要的字段
-	blog_felid := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "title", "abstract", "browse_total", "created_at", "updated_at"}
+	blogFelid := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "title", "abstract", "browse_total", "created_at", "updated_at"}
 
-	for index, felid := range blog_felid {
-		blog_felid[index] = fmt.Sprintf("%s.%s", blog_table_name, felid)
+	for index, felid := range blogFelid {
+		blogFelid[index] = fmt.Sprintf("%s.%s", blogTableName, felid)
 	}
 
 	var count int64
 	//sql
-	db = db.Table(blog_table_name)
+	db = db.Table(blogTableName)
 
 	//私密博客过滤
 	db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_0)
 
 	db.Count(&count)
 
-	rows, err := db.Select(strings.Join(blog_felid, ", ")).Order("created_at DESC").Limit(per_page).Offset((page - 1) * per_page).Rows()
+	rows, err := db.Select(strings.Join(blogFelid, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Rows()
 
 	if err != nil {
 		return nil
 	}
 
-	query_result := make([]*blog.BlogListEntity, 0)
+	queryResult := make([]*blog.BlogListEntity, 0)
 
-	cover_plan_ids := make([]uint64, 0)
-	blog_type_ids := make([]uint64, 0)
-	user_id_ids := make([]uint, 0)
+	coverPlanIds := make([]uint64, 0)
+	blogTypeIds := make([]uint64, 0)
+	userIdIds := make([]uint, 0)
 
 	for rows.Next() {
 		var id uint64
-		var user_id uint
-		var blog_type_id uint64
-		var cover_plan_id uint64
+		var userId uint
+		var blogTypeId uint64
+		var coverPlanId uint64
 		var title string
 		var abstract string
-		var browse_total uint
-		var created_at uint64
-		var updated_at uint64
-		rows.Scan(&id, &user_id, &blog_type_id, &cover_plan_id, &title, &abstract, &browse_total, &created_at, &updated_at)
+		var browseTotal uint
+		var createdAt uint64
+		var updatedAt uint64
+		rows.Scan(&id, &userId, &blogTypeId, &coverPlanId, &title, &abstract, &browseTotal, &createdAt, &updatedAt)
 
 		//博客实体
-		blog_entity := new(blog.BlogListEntity)
-		blog_entity.ID = id
-		blog_entity.UserId = uint64(user_id)
-		blog_entity.BlogTypeId = blog_type_id
-		blog_entity.CoverPlanId = cover_plan_id
-		blog_entity.Title = title
-		blog_entity.Abstract = abstract
-		blog_entity.BrowseTotal = browse_total
-		blog_entity.CreatedAt = created_at
-		blog_entity.UpdatedAt = updated_at
+		blogEntity := new(blog.BlogListEntity)
+		blogEntity.ID = id
+		blogEntity.UserId = uint64(userId)
+		blogEntity.BlogTypeId = blogTypeId
+		blogEntity.CoverPlanId = coverPlanId
+		blogEntity.Title = title
+		blogEntity.Abstract = abstract
+		blogEntity.BrowseTotal = browseTotal
+		blogEntity.CreatedAt = createdAt
+		blogEntity.UpdatedAt = updatedAt
 
-		cover_plan_ids = append(cover_plan_ids, cover_plan_id)
-		blog_type_ids = append(blog_type_ids, blog_type_id)
-		user_id_ids = append(user_id_ids, user_id)
+		coverPlanIds = append(coverPlanIds, coverPlanId)
+		blogTypeIds = append(blogTypeIds, blogTypeId)
+		userIdIds = append(userIdIds, userId)
 
-		query_result = append(query_result, blog_entity)
+		queryResult = append(queryResult, blogEntity)
 	}
 
 	//填充信息
-	PaddingAttachemtInfoByBlogListEntity(cover_plan_ids, query_result) //填充附件信息
-	PaddingBlogTypeInfoByBlogListEntity(blog_type_ids, query_result)   //博客类型实体
-	PaddingUserInfoByBlogListEntity(user_id_ids, query_result)         //填充用户信息
+	PaddingAttachemtInfoByBlogListEntity(coverPlanIds, queryResult) //填充附件信息
+	PaddingBlogTypeInfoByBlogListEntity(blogTypeIds, queryResult)   //博客类型实体
+	PaddingUserInfoByBlogListEntity(userIdIds, queryResult)         //填充用户信息
 
 	//构建结果返回
 	result = new(entity.ListResponseEntity)
 	result.SetCount(count)
-	result.SetPerPage(per_page)
-	result.SetList(query_result)
+	result.SetPerPage(perPage)
+	result.SetList(queryResult)
 
 	return
 }
 
 //列表页
-func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (result *entity.ListResponseEntity) {
+func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (result *entity.ListResponseEntity) {
 	db := mysql.GetDefaultDBConnect()
 
-	blog_table_name := model.BlogModel{}.TableName()
+	blogTableName := model.BlogModel{}.TableName()
 
 	//博客需要的字段
-	blog_felid := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "title", "abstract", "browse_total", "created_at", "updated_at"}
+	blogFelid := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "title", "abstract", "browse_total", "created_at", "updated_at"}
 
-	for index, felid := range blog_felid {
-		blog_felid[index] = fmt.Sprintf("%s.%s", blog_table_name, felid)
+	for index, felid := range blogFelid {
+		blogFelid[index] = fmt.Sprintf("%s.%s", blogTableName, felid)
 	}
 
 	var count int64
 	//sql
-	db = db.Table(blog_table_name)
+	db = db.Table(blogTableName)
 
 	db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 	//过滤分类id过滤
@@ -151,89 +151,89 @@ func (s *BlogRtService) GetList(filter map[string]string, per_page, page int) (r
 
 	db.Count(&count)
 
-	rows, err := db.Select(strings.Join(blog_felid, ", ")).Order("created_at DESC").Limit(per_page).Offset((page - 1) * per_page).Rows()
+	rows, err := db.Select(strings.Join(blogFelid, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Rows()
 
 	if err != nil {
 		return nil
 	}
 
-	query_result := make([]*blog.BlogListEntity, 0)
+	queryResult := make([]*blog.BlogListEntity, 0)
 
-	cover_plan_ids := make([]uint64, 0)
-	blog_type_ids := make([]uint64, 0)
-	user_id_ids := make([]uint, 0)
+	coverPlanIds := make([]uint64, 0)
+	blogTypeIds := make([]uint64, 0)
+	userIdIds := make([]uint, 0)
 
 	for rows.Next() {
 		var id uint64
-		var user_id uint
-		var blog_type_id uint64
-		var cover_plan_id uint64
+		var userId uint
+		var blogTypeId uint64
+		var coverPlanId uint64
 		var title string
 		var abstract string
-		var browse_total uint
-		var created_at uint64
-		var updated_at uint64
-		rows.Scan(&id, &user_id, &blog_type_id, &cover_plan_id, &title, &abstract, &browse_total, &created_at, &updated_at)
+		var browseTotal uint
+		var createdAt uint64
+		var updatedAt uint64
+		rows.Scan(&id, &userId, &blogTypeId, &coverPlanId, &title, &abstract, &browseTotal, &createdAt, &updatedAt)
 
 		//博客实体
-		blog_entity := new(blog.BlogListEntity)
-		blog_entity.ID = id
-		blog_entity.UserId = uint64(user_id)
-		blog_entity.BlogTypeId = blog_type_id
-		blog_entity.CoverPlanId = cover_plan_id
-		blog_entity.Title = title
-		blog_entity.Abstract = abstract
-		blog_entity.BrowseTotal = browse_total
-		blog_entity.CreatedAt = created_at
-		blog_entity.UpdatedAt = updated_at
+		blogEntity := new(blog.BlogListEntity)
+		blogEntity.ID = id
+		blogEntity.UserId = uint64(userId)
+		blogEntity.BlogTypeId = blogTypeId
+		blogEntity.CoverPlanId = coverPlanId
+		blogEntity.Title = title
+		blogEntity.Abstract = abstract
+		blogEntity.BrowseTotal = browseTotal
+		blogEntity.CreatedAt = createdAt
+		blogEntity.UpdatedAt = updatedAt
 
-		cover_plan_ids = append(cover_plan_ids, cover_plan_id)
-		blog_type_ids = append(blog_type_ids, blog_type_id)
-		user_id_ids = append(user_id_ids, user_id)
+		coverPlanIds = append(coverPlanIds, coverPlanId)
+		blogTypeIds = append(blogTypeIds, blogTypeId)
+		userIdIds = append(userIdIds, userId)
 
-		query_result = append(query_result, blog_entity)
+		queryResult = append(queryResult, blogEntity)
 	}
 
 	//填充信息
-	PaddingAttachemtInfoByBlogListEntity(cover_plan_ids, query_result) //填充附件信息
-	PaddingBlogTypeInfoByBlogListEntity(blog_type_ids, query_result)   //博客类型实体
-	PaddingUserInfoByBlogListEntity(user_id_ids, query_result)         //填充用户信息
+	PaddingAttachemtInfoByBlogListEntity(coverPlanIds, queryResult) //填充附件信息
+	PaddingBlogTypeInfoByBlogListEntity(blogTypeIds, queryResult)   //博客类型实体
+	PaddingUserInfoByBlogListEntity(userIdIds, queryResult)         //填充用户信息
 
 	//构建结果返回
 	result = new(entity.ListResponseEntity)
 	result.SetCount(count)
-	result.SetPerPage(per_page)
-	result.SetList(query_result)
+	result.SetPerPage(perPage)
+	result.SetList(queryResult)
 
 	return
 }
 
 //排序方向
 //per_page 每页多少条
-func (s *BlogRtService) GetListBySort(sort_dimension string, per_page int) (result *entity.ListResponseEntity) {
+func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result *entity.ListResponseEntity) {
 
 	db := mysql.GetDefaultDBConnect()
-	var blog_model_list []*model.BlogModel
+	var blogModelList []*model.BlogModel
 	//查询
-	switch sort_dimension {
+	switch sortDimension {
 	case "browse_total":
 		db = db.Table(model.BlogModel{}.TableName())
 		db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
-		db.Order("browse_total DESC").Limit(per_page).Find(&blog_model_list)
+		db.Order("browse_total DESC").Limit(perPage).Find(&blogModelList)
 	case "created_at":
 		db = db.Table(model.BlogModel{}.TableName())
 		db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
-		db.Order("created_at DESC").Limit(per_page).Find(&blog_model_list)
+		db.Order("created_at DESC").Limit(perPage).Find(&blogModelList)
 	default:
 		exception.NewException(exception.VALIDATE_ERR, "非法的sort_dimension")
 	}
 
 	//转化为传输层的对象
-	blog_sort_entity_list := ChangeBlogSortEntityByList(blog_model_list)
+	blogSortEntityList := ChangeBlogSortEntityByList(blogModelList)
 
 	//构建结果返回
 	result = new(entity.ListResponseEntity)
-	filter_list := []help.Filter{
+	filterList := []help.Filter{
 		help.Filter{
 			Label: "排序维度",
 			Field: "sort_dimension",
@@ -249,10 +249,10 @@ func (s *BlogRtService) GetListBySort(sort_dimension string, per_page int) (resu
 			},
 		},
 	}
-	result.SetFilter(filter_list)
-	result.SetCount(int64(per_page))
-	result.SetPerPage(per_page)
-	result.SetList(blog_sort_entity_list)
+	result.SetFilter(filterList)
+	result.SetCount(int64(perPage))
+	result.SetPerPage(perPage)
+	result.SetList(blogSortEntityList)
 
 	return result
 }
@@ -261,11 +261,11 @@ func (s *BlogRtService) GetListBySort(sort_dimension string, per_page int) (resu
 //keyword 搜索的关键字
 //per_page 每页多少条
 //page 第几页
-func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, per_page, page int) (result *entity.ListResponseEntity) {
+func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, perPage, page int) (result *entity.ListResponseEntity) {
 
 	switch searchLevel {
-	case MYSQL_SEARCH_LEVEL:
-		result = s.SearchBlogMysqlLevel(keyword, per_page, page)
+	case MysqlSearchLevel:
+		result = s.SearchBlogMysqlLevel(keyword, perPage, page)
 		//case ES_SEARCH_LEVEL:
 		//	//es搜索
 		//	blog_s := new(BlogEsRtService)
@@ -281,9 +281,9 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, per_page,
 }
 
 //mysql等级搜索博客
-func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int) (result *entity.ListResponseEntity) {
+func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) (result *entity.ListResponseEntity) {
 
-	var blog_model_list []*model.BlogModel
+	var blogModelList []*model.BlogModel
 	//var count int64
 
 	//如果存在缓存，先从缓冲中取
@@ -293,7 +293,7 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int)
 		//构建结果返回
 		result = new(entity.ListResponseEntity)
 		result.SetCount(0)
-		result.SetPerPage(per_page)
+		result.SetPerPage(perPage)
 		result.SetList(lruCacheList.([]*blog.BlogListEntity))
 		return result
 	}
@@ -308,16 +308,16 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int)
 	}
 
 	//db.Count(&count)
-	db.Order("created_at DESC").Limit(per_page).Offset((page - 1) * per_page).Find(&blog_model_list)
+	db.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&blogModelList)
 
 	//转化为传输层的对象
-	list := ChangeToBlogListEntityList(blog_model_list)
+	list := ChangeToBlogListEntityList(blogModelList)
 
 	//构建结果返回
 	result = new(entity.ListResponseEntity)
 
 	result.SetCount(0)
-	result.SetPerPage(per_page)
+	result.SetPerPage(perPage)
 	result.SetList(list)
 
 	if list != nil {
@@ -338,35 +338,35 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 
 	db := mysql.GetDefaultDBConnect()
 
-	blog_table_name := model.BlogModel{}.TableName()
-	db = db.Table(blog_table_name)
+	blogTableName := model.BlogModel{}.TableName()
+	db = db.Table(blogTableName)
 	db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 
 	//文章总数
 	{
 		var count int64
 		//sql
-		count_db := db.Select("id")
-		count_db.Count(&count)
+		countDb := db.Select("id")
+		countDb.Count(&count)
 		response["blog_total"] = uint(count)
 	}
 
 	//最新一篇文章的时间、最新和最早的文章时间戳
 	{
 		//最新的博客时间
-		var last_create_at uint
-		last_create_at_row := db.Select("created_at").Order("id DESC").Limit(1).Row()
-		last_create_at_row.Scan(&last_create_at)
-		response["last_create_at"] = last_create_at
+		var lastCreateAt uint
+		lastCreateAtRow := db.Select("created_at").Order("id DESC").Limit(1).Row()
+		lastCreateAtRow.Scan(&lastCreateAt)
+		response["last_create_at"] = lastCreateAt
 
 		//最老的博客时间
-		var first_create_at uint
-		first_create_at_db := mysql.GetDefaultDBConnect()
-		first_create_at_row := first_create_at_db.Table(blog_table_name).Select("created_at").
+		var firstCreateAt uint
+		firstCreateAtDb := mysql.GetDefaultDBConnect()
+		firstCreateAtRow := firstCreateAtDb.Table(blogTableName).Select("created_at").
 			Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1).
 			Order("id ASC").Limit(1).Row()
-		first_create_at_row.Scan(&first_create_at)
-		response["diff_time"] = last_create_at - first_create_at
+		firstCreateAtRow.Scan(&firstCreateAt)
+		response["diff_time"] = lastCreateAt - firstCreateAt
 	}
 
 	//构建结果返回

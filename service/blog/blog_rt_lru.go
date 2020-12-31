@@ -17,7 +17,7 @@ func init() {
 		//定时清除lru到期的key
 		go func() {
 
-			ticker := time.NewTicker(20 * time.Second)
+			ticker := time.NewTicker(2 * time.Minute)
 
 			for {
 				select {
