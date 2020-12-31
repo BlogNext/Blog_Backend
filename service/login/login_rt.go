@@ -25,16 +25,16 @@ type LoginRtService struct {
 }
 
 //是否登录
-//login_token jwt token
-//login_entity 登录实体，如果登录成功，会赋值信息
+//loginToken jwt token
+//loginEntity 登录实体，如果登录成功，会赋值信息
 //return true登录，false未登录
-func (u *LoginRtService) IsLogin(login_token string, login_entity *front.LoginEntity) bool {
+func (u *LoginRtService) IsLogin(loginToken string, loginEntity *front.LoginEntity) bool {
 
-	if login_token == "" {
+	if loginToken == "" {
 		return false
 	}
-	
-	token, err := jwt.ParseWithClaims(login_token, login_entity, func(token *jwt.Token) (i interface{}, err error) {
+
+	token, err := jwt.ParseWithClaims(loginToken, loginEntity, func(token *jwt.Token) (i interface{}, err error) {
 		return mySigningKey, nil
 	})
 
@@ -52,11 +52,11 @@ func (u *LoginRtService) IsLogin(login_token string, login_entity *front.LoginEn
 //语雀登录
 //login语雀的login
 //password登录密码
-func (u *LoginRtService) LoginByYuque(login, password string) (login_token string) {
+func (u *LoginRtService) LoginByYuque(login, password string) (loginToken string) {
 	db := mysql.GetDefaultDBConnect()
-	model := new(model.UserYuQueModel)
-	query_result := db.Where("login = ?", login).First(model)
-	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	userYuQueModel := new(model.UserYuQueModel)
+	queryResult := db.Where("login = ?", login).First(userYuQueModel)
+	find := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
 	if find {
 		panic(exception.NewException(exception.VALIDATE_ERR, "未找到用户login:"+login))
 	}
@@ -74,21 +74,21 @@ func (u *LoginRtService) LoginByYuque(login, password string) (login_token strin
 		UserFrontEntity: user.UserFrontEntity{
 			BaseEntity: entity.BaseEntity{
 				DocID:     "",
-				ID:        uint64(model.ID),
-				CreatedAt: uint64(model.CreatedAt),
-				UpdatedAt: uint64(model.UpdatedAt),
+				ID:        uint64(userYuQueModel.ID),
+				CreatedAt: uint64(userYuQueModel.CreatedAt),
+				UpdatedAt: uint64(userYuQueModel.UpdatedAt),
 			},
-			UserId: uint64(model.UserId),
-			Login:  model.Login,
-			Name:   model.Name,
+			UserId: uint64(userYuQueModel.UserId),
+			Login:  userYuQueModel.Login,
+			Name:   userYuQueModel.Name,
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	login_token, err := token.SignedString(mySigningKey)
+	loginToken, err := token.SignedString(mySigningKey)
 	if err != nil {
 		panic(err)
 	}
 
-	return login_token
+	return loginToken
 }

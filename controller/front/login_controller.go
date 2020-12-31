@@ -28,9 +28,9 @@ func (u *LoginController) LoginByYuque() {
 		Password string `form:"password" binding:"required"`
 	}
 
-	var login_request loginRequest
+	var lr loginRequest
 
-	err := u.Ctx.ShouldBind(&login_request)
+	err := u.Ctx.ShouldBind(&lr)
 
 	if err != nil {
 		help.Gin200ErrorResponse(u.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
@@ -39,7 +39,7 @@ func (u *LoginController) LoginByYuque() {
 
 	service := new(login.LoginRtService)
 
-	tokenString := service.LoginByYuque(login_request.Login, login_request.Password)
+	tokenString := service.LoginByYuque(lr.Login, lr.Password)
 
 	help.Gin200SuccessResponse(u.Ctx, "成功", tokenString)
 	return
@@ -48,12 +48,12 @@ func (u *LoginController) LoginByYuque() {
 func (u *LoginController) IsLogin() {
 	token := u.Ctx.GetHeader("x-access-token")
 	service := new(login.LoginRtService)
-	login_entity := new(front.LoginEntity)
-	is_login := service.IsLogin(token, login_entity)
+	loginEntity := new(front.LoginEntity)
+	isLogin := service.IsLogin(token, loginEntity)
 
 	result := make(map[string]interface{})
-	result["is_login"] = is_login
-	result["login_entity"] = login_entity
+	result["is_login"] = isLogin
+	result["login_entity"] = loginEntity
 
 	help.Gin200SuccessResponse(u.Ctx, "成功", result)
 	return
