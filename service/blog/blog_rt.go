@@ -10,6 +10,7 @@ import (
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
+	"log"
 	"strings"
 )
 
@@ -45,7 +46,6 @@ func (s *BlogRtService) Detail(id uint) *blog.BlogEntity {
 
 	return result[0]
 }
-
 
 //获取博客列表，用于私人空间
 func (s *BlogRtService) GetListByPerson(per_page, page int) (result *entity.ListResponseEntity) {
@@ -284,8 +284,21 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, per_page,
 func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int) (result *entity.ListResponseEntity) {
 
 	var blog_model_list []*model.BlogModel
-	var count int64
+	//var count int64
 
+	//如果存在缓存，先从缓冲中取
+	lruCacheList, ok := GetBlogByLru(keyword)
+	if ok {
+		log.Println("lru中取数据")
+		//构建结果返回
+		result = new(entity.ListResponseEntity)
+		result.SetCount(0)
+		result.SetPerPage(per_page)
+		result.SetList(lruCacheList.([]*blog.BlogListEntity))
+		return result
+	}
+
+	//缓存没有，数据库取
 	db := mysql.GetDefaultDBConnect()
 	db = db.Table(model.BlogModel{}.TableName())
 
@@ -294,18 +307,26 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, per_page, page int)
 		db = db.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
 	}
 
-	db.Count(&count)
+	//db.Count(&count)
 	db.Order("created_at DESC").Limit(per_page).Offset((page - 1) * per_page).Find(&blog_model_list)
 
 	//转化为传输层的对象
-	blog_list_entity_list := ChangeToBlogListEntityList(blog_model_list)
+	list := ChangeToBlogListEntityList(blog_model_list)
 
 	//构建结果返回
 	result = new(entity.ListResponseEntity)
 
-	result.SetCount(count)
+	result.SetCount(0)
 	result.SetPerPage(per_page)
-	result.SetList(blog_list_entity_list)
+	result.SetList(list)
+
+	if list != nil {
+
+		//加入lru缓存
+		AddBlogToLru(keyword, list)
+	}
+
+	log.Println("数据库去数据")
 
 	return result
 }

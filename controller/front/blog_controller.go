@@ -4,6 +4,7 @@ import (
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/service/blog"
+	"strings"
 )
 
 type BlogController struct {
@@ -133,7 +134,7 @@ func (c *BlogController) SearchBlog() {
 
 	b_s := new(blog.BlogRtService)
 
-	result := b_s.SearchBlog(search_level, search_request.Keyword, search_request.PerPage, search_request.Page)
+	result := b_s.SearchBlog(search_level, strings.Trim(search_request.Keyword,""), search_request.PerPage, search_request.Page)
 
 	help.Gin200SuccessResponse(c.Ctx, "请求成功过", result)
 
