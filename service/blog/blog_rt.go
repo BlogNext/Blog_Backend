@@ -10,7 +10,6 @@ import (
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
-	"log"
 	"strings"
 )
 
@@ -289,7 +288,6 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 	//如果存在缓存，先从缓冲中取
 	lruCacheList, ok := GetBlogByLru(keyword)
 	if ok {
-		log.Println("lru中取数据")
 		//构建结果返回
 		result = new(entity.ListResponseEntity)
 		result.SetCount(0)
@@ -326,7 +324,6 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 		AddBlogToLru(keyword, list)
 	}
 
-	log.Println("数据库去数据")
 
 	return result
 }
