@@ -28,9 +28,9 @@ func (p *PersonController) BlogList() {
 		Page    int `form:"page"`
 	}
 
-	var search_request searchRequest
+	var sr searchRequest
 
-	err := p.Ctx.ShouldBind(&search_request)
+	err := p.Ctx.ShouldBind(&sr)
 
 	if err != nil {
 		help.Gin200ErrorResponse(p.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
@@ -38,15 +38,15 @@ func (p *PersonController) BlogList() {
 	}
 
 	//参数默认值
-	if search_request.PerPage <= 0 {
-		search_request.PerPage = 10
+	if sr.PerPage <= 0 {
+		sr.PerPage = 10
 	}
-	if search_request.Page <= 0 {
-		search_request.Page = 1
+	if sr.Page <= 0 {
+		sr.Page = 1
 	}
 
 	service := new(blog.BlogRtService)
-	result := service.GetListByPerson(search_request.PerPage, search_request.Page)
+	result := service.GetListByPerson(sr.PerPage, sr.Page)
 
 	help.Gin200SuccessResponse(p.Ctx, "成功", result)
 }

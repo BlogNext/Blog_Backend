@@ -15,20 +15,20 @@ func RegisterGateWayRouter(router *gin.Engine) {
 	//注册验证器d
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		//自定义验证器，中文信息
-		zh_ch := zh.New()
-		uni := ut.New(zh_ch)
+		zhCh := zh.New()
+		uni := ut.New(zhCh)
 		trans, _ := uni.GetTranslator("zh")
 		_ = zh_translations.RegisterDefaultTranslations(v, trans)
 	}
 
 	//gateway公共的路由
-	gateway_router := router.Group("/gateway")
+	gatewayRouter := router.Group("/gateway")
 	{
 		//语雀路由
-		yuque_router := gateway_router.Group("/yuque")
+		yuqueRouter := gatewayRouter.Group("/yuque")
 		{
-			yuque_controller := controller.NewController(new(gateway.YuqueController))
-			yuque_router.Any("/:action", yuque_controller)
+			yuqueController := controller.NewController(new(gateway.YuqueController))
+			yuqueRouter.Any("/:action", yuqueController)
 		}
 
 	}

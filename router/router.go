@@ -8,15 +8,15 @@ import (
 )
 
 type MyRouter struct {
-	router_list []RegisterRouter
+	routerList []RegisterRouter
 }
 
 func (mr *MyRouter) registerRouter() {
-	mr.router_list = make([]RegisterRouter, 3)
+	mr.routerList = make([]RegisterRouter, 3)
 	//路由注册
-	mr.router_list[0] = gateway.RegisterGateWayRouter
-	mr.router_list[1] = front.RegisterFrontRouter
-	mr.router_list[2] = backend.RegisterBackendRouter
+	mr.routerList[0] = gateway.RegisterGateWayRouter
+	mr.routerList[1] = front.RegisterFrontRouter
+	mr.routerList[2] = backend.RegisterBackendRouter
 }
 
 func (mr *MyRouter) RunRouter() *gin.Engine {
@@ -31,8 +31,8 @@ func (mr *MyRouter) RunRouter() *gin.Engine {
 	//注册路由
 	mr.registerRouter()
 
-	for _, register_router := range mr.router_list {
-		register_router(router)
+	for _, registerRouter := range mr.routerList {
+		registerRouter(router)
 	}
 
 	return router

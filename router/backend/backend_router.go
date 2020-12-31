@@ -15,27 +15,27 @@ func RegisterBackendRouter(router *gin.Engine) {
 	//注册验证器d
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		//自定义验证器，中文信息
-		zh_ch := zh.New()
-		uni := ut.New(zh_ch)
+		zhCh := zh.New()
+		uni := ut.New(zhCh)
 		trans, _ := uni.GetTranslator("zh")
 		_ = zh_translations.RegisterDefaultTranslations(v, trans)
 	}
 
 	//后端公共的路由
-	gateway_router := router.Group("/backend")
+	gatewayRouter := router.Group("/backend")
 	{
 		//博客路由
-		attachment_router := gateway_router.Group("/attachment")
+		attachmentRouter := gatewayRouter.Group("/attachment")
 		{
-			attachment_controller := controller.NewController(new(backend.AttachmentController))
-			attachment_router.Any("/:action", attachment_controller)
+			attachmentController := controller.NewController(new(backend.AttachmentController))
+			attachmentRouter.Any("/:action", attachmentController)
 		}
 
 		//博客路由
-		blog_router := gateway_router.Group("/blog")
+		blogRouter := gatewayRouter.Group("/blog")
 		{
-			blog_controller := controller.NewController(new(backend.BlogController))
-			blog_router.Any("/:action", blog_controller)
+			blogController := controller.NewController(new(backend.BlogController))
+			blogRouter.Any("/:action", blogController)
 		}
 
 	}

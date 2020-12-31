@@ -16,42 +16,42 @@ func RegisterFrontRouter(router *gin.Engine) {
 	//注册验证器d
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		//自定义验证器，中文信息
-		zh_ch := zh.New()
-		uni := ut.New(zh_ch)
+		zhCh := zh.New()
+		uni := ut.New(zhCh)
 		trans, _ := uni.GetTranslator("zh")
 		_ = zh_translations.RegisterDefaultTranslations(v, trans)
 	}
 
 	//前端公共的路由
-	front_router := router.Group("/front")
+	frontRouter := router.Group("/front")
 	{
 		//博客类型路由
-		blog_type_router := front_router.Group("/blog_type")
+		blogTypeRouter := frontRouter.Group("/blog_type")
 		{
-			blog_type_controller := controller.NewController(new(front.BlogTypeController))
-			blog_type_router.Any("/:action", blog_type_controller)
+			blogTypeController := controller.NewController(new(front.BlogTypeController))
+			blogTypeRouter.Any("/:action", blogTypeController)
 		}
 
 		//博客路由
-		blog_router := front_router.Group("/blog")
+		blogRouter := frontRouter.Group("/blog")
 		{
-			blog_controller := controller.NewController(new(front.BlogController))
-			blog_router.Any("/:action", blog_controller)
+			blogController := controller.NewController(new(front.BlogController))
+			blogRouter.Any("/:action", blogController)
 		}
 
 		//登录
-		login_router := front_router.Group("/login")
+		loginRouter := frontRouter.Group("/login")
 		{
-			login_controller := controller.NewController(new(front.LoginController))
-			login_router.Any("/:action", login_controller)
+			loginController := controller.NewController(new(front.LoginController))
+			loginRouter.Any("/:action", loginController)
 		}
 
 		//私人空间路由
-		person_router := front_router.Group("/person")
+		personRouter := frontRouter.Group("/person")
 		{
-			person_router.Use(middleware_front.LoginMiddleware())
-			person_controller := controller.NewController(new(front.PersonController))
-			person_router.Any("/:action", person_controller)
+			personRouter.Use(middleware_front.LoginMiddleware())
+			personController := controller.NewController(new(front.PersonController))
+			personRouter.Any("/:action", personController)
 		}
 
 	}
