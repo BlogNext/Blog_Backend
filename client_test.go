@@ -32,7 +32,7 @@ func BenchmarkMyGinHttp(b *testing.B) {
 		//	"client_name":  {"name_" + strconv.FormatInt(int64(i), 10)},
 		//	"redirect_url": {"http://www.baidu.com"},
 		//}
-		response, _ := http.Get(fmt.Sprintf("http://127.0.0.1:8083/background/user/hello_world2/%d", i))
+		response, _ := http.Get(fmt.Sprintf("http://127.0.0.1:8083/front/blog/search_blog?keyword=vue"))
 		body, _ := ioutil.ReadAll(response.Body)
 		response.Body.Close()
 		b.Log(string(body))

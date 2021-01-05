@@ -18,6 +18,7 @@ require (
 	github.com/swaggo/gin-swagger v1.3.0
 	github.com/swaggo/swag v1.7.0
 	github.com/thoas/go-funk v0.7.0
+	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	gorm.io/driver/mysql v1.0.1
 	gorm.io/gorm v1.20.0
 	gorm.io/plugin/dbresolver v0.2.1

@@ -9,7 +9,9 @@ import (
 	my_router "github.com/blog_backend/router"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"golang.org/x/net/netutil"
 	"log"
+	"net"
 	"net/http"
 )
 
@@ -92,5 +94,16 @@ func main() {
 	//r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	http.ListenAndServe(fmt.Sprintf(":%d", server_info["port"].(int)), r)
+
+	//用了golang github官网的包限制tcp同一时刻的连接数，这个包没有纳入基础库中，目前不知道有什么用，随便加来玩
+	l,err := net.Listen("tcp",fmt.Sprintf(":%d", server_info["port"].(int)))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer l.Close()
+	netutil.LimitListener(l,1000)   //最多同时只能有1000个链接，防止压垮服务器
+	http.Serve(l,r)
+
+
+	//http.ListenAndServe(fmt.Sprintf(":%d", server_info["port"].(int)), r)
 }
