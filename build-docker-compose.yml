@@ -21,6 +21,6 @@ services:
     - "8083:8083"
     networks:
     - blog_next
-networks:
-  blog_next:
-    external: true
+#networks:
+#  blog_next:
+#    external: true
