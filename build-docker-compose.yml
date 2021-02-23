@@ -17,6 +17,7 @@ services:
     #设置环境变量
     environment:
       - GIN_MODE=release
+      - GOPROXY=https://mirrors.aliyun.com/goproxy/
     ports:
     - "8083:8083"
 #    networks:
