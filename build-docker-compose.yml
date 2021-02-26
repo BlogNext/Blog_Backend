@@ -11,8 +11,8 @@ services:
     volumes:
     #jenkins执行的时候，   ./是项目的路径
     - ./:/go/src/github.com/blog_backend
-    - /root/blog_laughingzhu/project/Blog_Backend/upload:/go/bin/upload
-    - /root/blog_laughingzhu/project/Blog_Backend/config/:/go/bin/config
+    - ./upload:/go/bin/upload
+    - ./config/:/go/bin/config
     command: /bin/bash -c "go install -v ./ && /go/bin/blog_backend"
     #设置环境变量
     environment:
