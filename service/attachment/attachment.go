@@ -35,7 +35,7 @@ func GetAttachmentImagesMap(ids []uint64) (attachment_entity_list map[uint]*atta
 
 	server_config, _ := config.GetConfig("server")
 	server_info := server_config.GetStringMap("servier")
-	domain := server_info["domain"].(string)
+	fileDomain := server_info["fileDomain"].(string)
 
 	for _, attachment_model := range attachment_list {
 		attachment_entity := new(attachment.AttachmentEntity)
@@ -45,7 +45,7 @@ func GetAttachmentImagesMap(ids []uint64) (attachment_entity_list map[uint]*atta
 		attachment_entity.Module = attachment_model.Module
 		attachment_entity.Path = attachment_model.Path
 		attachment_entity.Url = attachment_model.Path
-		attachment_entity.FullUrl = strings.Join([]string{domain, attachment_model.Path}, "/")
+		attachment_entity.FullUrl = strings.Join([]string{fileDomain, attachment_model.Path}, "/")
 		attachment_entity.FileType = attachment_model.FileType
 
 		attachment_entity_list[uint(attachment_entity.ID)] = attachment_entity
