@@ -363,7 +363,7 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
-	Host:        "blog.laughingzhu.com",
+	Host:        "blog.laughingzhu.cn",
 	BasePath:    "/",
 	Schemes:     []string{},
 	Title:       "晓琛博客",
