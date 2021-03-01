@@ -21,34 +21,34 @@ const (
 
 //获取附件
 //返回map
-func GetAttachmentImagesMap(ids []uint64) (attachment_entity_list map[uint]*attachment.AttachmentEntity) {
-	attachment_list := getAttachmentByIds(ids)
-	if attachment_list == nil {
+func GetAttachmentImagesMap(ids []uint64) (attachmentEntityList map[uint]*attachment.AttachmentEntity) {
+	attachmentList := getAttachmentByIds(ids)
+	if attachmentList == nil {
 		return
 	}
 
-	if len(attachment_list) <= 0 {
+	if len(attachmentList) <= 0 {
 		return
 	}
 
-	attachment_entity_list = make(map[uint]*attachment.AttachmentEntity, len(attachment_list))
+	attachmentEntityList = make(map[uint]*attachment.AttachmentEntity, len(attachmentList))
 
-	server_config, _ := config.GetConfig("server")
-	server_info := server_config.GetStringMap("servier")
-	fileDomain := server_info["fileDomain"].(string)
+	serverConfig, _ := config.GetConfig("server")
+	serverInfo := serverConfig.GetStringMap("servier")
+	fileDomain := serverInfo["file_domain"].(string)
 
-	for _, attachment_model := range attachment_list {
-		attachment_entity := new(attachment.AttachmentEntity)
-		attachment_entity.ID = uint64(attachment_model.ID)
-		attachment_entity.CreatedAt = uint64(attachment_model.CreatedAt)
-		attachment_entity.UpdatedAt = uint64(attachment_model.UpdatedAt)
-		attachment_entity.Module = attachment_model.Module
-		attachment_entity.Path = attachment_model.Path
-		attachment_entity.Url = attachment_model.Path
-		attachment_entity.FullUrl = strings.Join([]string{fileDomain, attachment_model.Path}, "/")
-		attachment_entity.FileType = attachment_model.FileType
+	for _, attachmentModel := range attachmentList {
+		attachmentEntity := new(attachment.AttachmentEntity)
+		attachmentEntity.ID = uint64(attachmentModel.ID)
+		attachmentEntity.CreatedAt = uint64(attachmentModel.CreatedAt)
+		attachmentEntity.UpdatedAt = uint64(attachmentModel.UpdatedAt)
+		attachmentEntity.Module = attachmentModel.Module
+		attachmentEntity.Path = attachmentModel.Path
+		attachmentEntity.Url = attachmentModel.Path
+		attachmentEntity.FullUrl = strings.Join([]string{fileDomain, attachmentModel.Path}, "/")
+		attachmentEntity.FileType = attachmentModel.FileType
 
-		attachment_entity_list[uint(attachment_entity.ID)] = attachment_entity
+		attachmentEntityList[uint(attachmentEntity.ID)] = attachmentEntity
 	}
 
 	return
@@ -56,48 +56,48 @@ func GetAttachmentImagesMap(ids []uint64) (attachment_entity_list map[uint]*atta
 
 //获取附件
 //返回切片
-func GetAttachmentImages(ids []uint64) (attachment_entity_list []*attachment.AttachmentEntity) {
-	attachment_list := getAttachmentByIds(ids)
-	if attachment_list == nil {
+func GetAttachmentImages(ids []uint64) (attachmentEntityList []*attachment.AttachmentEntity) {
+	attachmentList := getAttachmentByIds(ids)
+	if attachmentList == nil {
 		return
 	}
 
-	if len(attachment_list) <= 0 {
+	if len(attachmentList) <= 0 {
 		return
 	}
 
-	attachment_entity_list = make([]*attachment.AttachmentEntity, len(attachment_list))
+	attachmentEntityList = make([]*attachment.AttachmentEntity, len(attachmentList))
 
-	server_config, _ := config.GetConfig("server")
-	server_info := server_config.GetStringMap("servier")
-	domain := server_info["domain"].(string)
+	serverConfig, _ := config.GetConfig("server")
+	serverInfo := serverConfig.GetStringMap("servier")
+	fileDomain := serverInfo["file_domain"].(string)
 
-	for index, attachment_model := range attachment_list {
-		attachment_entity := new(attachment.AttachmentEntity)
-		attachment_entity.ID = uint64(attachment_model.ID)
-		attachment_entity.CreatedAt = uint64(attachment_model.CreatedAt)
-		attachment_entity.UpdatedAt = uint64(attachment_model.UpdatedAt)
-		attachment_entity.Module = attachment_model.Module
-		attachment_entity.Path = attachment_model.Path
-		attachment_entity.Url = attachment_model.Path
-		attachment_entity.FullUrl = strings.Join([]string{domain, attachment_model.Path}, "/")
-		attachment_entity.FileType = attachment_model.FileType
+	for index, attachmentModel := range attachmentList {
+		attachmentEntity := new(attachment.AttachmentEntity)
+		attachmentEntity.ID = uint64(attachmentModel.ID)
+		attachmentEntity.CreatedAt = uint64(attachmentModel.CreatedAt)
+		attachmentEntity.UpdatedAt = uint64(attachmentModel.UpdatedAt)
+		attachmentEntity.Module = attachmentModel.Module
+		attachmentEntity.Path = attachmentModel.Path
+		attachmentEntity.Url = attachmentModel.Path
+		attachmentEntity.FullUrl = strings.Join([]string{fileDomain, attachmentModel.Path}, "/")
+		attachmentEntity.FileType = attachmentModel.FileType
 
-		attachment_entity_list[index] = attachment_entity
+		attachmentEntityList[index] = attachmentEntity
 	}
 
 	return
 }
 
 //获取附件
-func getAttachmentByIds(ids []uint64) (attachment_list []model.AttachmentModel) {
+func getAttachmentByIds(ids []uint64) (attachmentList []model.AttachmentModel) {
 
 	if ids == nil {
 		return
 	}
 
 	db := mysql.GetDefaultDBConnect()
-	db.Where("id IN (?)", ids).Find(&attachment_list)
+	db.Where("id IN (?)", ids).Find(&attachmentList)
 
 	return
 }
@@ -107,41 +107,41 @@ type AttachmentBaseService struct {
 }
 
 //保存到数据库
-func (s *AttachmentBaseService) saveToDB(dst string, module, file_type int64) (attachment_model *model.AttachmentModel) {
+func (s *AttachmentBaseService) saveToDB(dst string, module, fileType int64) (attachmentModel *model.AttachmentModel) {
 
 	db := mysql.GetDefaultDBConnect()
-	attachment_model = new(model.AttachmentModel)
-	attachment_model.Path = dst
-	attachment_model.CreatedAt = time.Now().Unix()
-	attachment_model.UpdatedAt = time.Now().Unix()
-	attachment_model.Module = module
-	attachment_model.FileType = file_type
+	attachmentModel = new(model.AttachmentModel)
+	attachmentModel.Path = dst
+	attachmentModel.CreatedAt = time.Now().Unix()
+	attachmentModel.UpdatedAt = time.Now().Unix()
+	attachmentModel.Module = module
+	attachmentModel.FileType = fileType
 
-	sql_exec_result := db.Create(attachment_model)
+	sqlExecResult := db.Create(attachmentModel)
 
-	if sql_exec_result.Error != nil {
-		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("新增失败:%s", sql_exec_result.Error)))
+	if sqlExecResult.Error != nil {
+		panic(exception.NewException(exception.DATA_BASE_ERROR_EXEC, fmt.Sprintf("新增失败:%s", sqlExecResult.Error)))
 	}
 
-	return attachment_model
+	return attachmentModel
 }
 
 //重命名文件名
 //file_name_list 一批文件名
-func (s *AttachmentBaseService) renameFileName(file_name_list []string) (new_file_name_list []string) {
+func (s *AttachmentBaseService) renameFileName(fileNameList []string) (newFileNameList []string) {
 
 	rand.Seed(time.Now().UnixNano())
 
-	if file_name_list == nil || len(file_name_list) == 0 {
+	if fileNameList == nil || len(fileNameList) == 0 {
 		return nil
 	}
 
-	new_file_name_list = make([]string, len(file_name_list))
-	for index, file_name := range file_name_list {
-		new_file_name_list[index] = fmt.Sprintf("%d-%d-%d%s", time.Now().UnixNano(), rand.Int63(), index, path.Ext(file_name))
+	newFileNameList = make([]string, len(fileNameList))
+	for index, fileName := range fileNameList {
+		newFileNameList[index] = fmt.Sprintf("%d-%d-%d%s", time.Now().UnixNano(), rand.Int63(), index, path.Ext(fileName))
 	}
 
-	return new_file_name_list
+	return newFileNameList
 }
 
 //创建博客功能点静态资源存放的目录

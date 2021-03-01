@@ -1,3 +1,3 @@
 servier:
   port: 8083
-  fileDomain: 127.0.0.1
+  file_domain: 127.0.0.1
