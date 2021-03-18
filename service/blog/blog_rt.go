@@ -150,8 +150,6 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 	}
 
 	db.Count(&count)
-	//var cc int64
-	//log.Println("将要执行的sql语句", db.Count(&cc).Statement.SQL.String())
 
 	rows, err := db.Select(strings.Join(blogFelid, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Rows()
 
