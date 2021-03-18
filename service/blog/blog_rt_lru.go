@@ -32,9 +32,9 @@ func init() {
 	}
 }
 
-//添加缓存到lru
-func AddBlogToLru(key lru.Key, value interface{}) {
-	search_blog_lru.Add(key, value)
+//添加缓存到lru,过期时间
+func AddBlogToLru(key lru.Key, value interface{},expires time.Duration) {
+	search_blog_lru.Add(key, value,expires)
 }
 
 //从缓冲中获取lru

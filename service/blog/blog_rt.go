@@ -11,6 +11,7 @@ import (
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
 	"strings"
+	"time"
 )
 
 //搜索等级
@@ -321,9 +322,8 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 	if list != nil {
 
 		//加入lru缓存
-		AddBlogToLru(keyword, list)
+		AddBlogToLru(keyword, list, 5*time.Second)
 	}
-
 
 	return result
 }

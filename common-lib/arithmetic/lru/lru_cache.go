@@ -12,7 +12,7 @@ type Key interface{}
 type entry struct {
 	key    Key
 	value  interface{}
-	expire time.Time //过期时间
+	expire *time.Time //过期时间
 }
 
 const (
@@ -49,8 +49,8 @@ func New(maxEntries int) *LruCache {
 	}
 }
 
-//向cache中插入一个K=>V
-func (c *LruCache) Add(key Key, value interface{}) {
+//向cache中插入一个K=>V,
+func (c *LruCache) Add(key Key, value interface{},expires time.Duration) {
 	if c.cache == nil {
 		c.MaxEntries = DefaultMaxEntries
 		c.cache = make(map[interface{}]*list.Element)
@@ -65,7 +65,14 @@ func (c *LruCache) Add(key Key, value interface{}) {
 	}
 
 	//元素第一次访问,进入缓存
-	ele := c.ll.PushFront(&entry{key, value, time.Now().Add(1 * time.Minute)})
+	var ele *list.Element
+	if expires != 0 {
+		//有过期时间，设计过期时间
+		expiresTime := time.Now().Add(expires)
+		ele = c.ll.PushFront(&entry{key, value,&expiresTime})
+	}else{
+		ele = c.ll.PushFront(&entry{key:key, value:value,expire:nil})
+	}
 	c.cache[key] = ele
 
 	if c.MaxEntries != 0 && c.ll.Len() > c.MaxEntries {
@@ -77,16 +84,21 @@ func (c *LruCache) Add(key Key, value interface{}) {
 
 //传入一个 key，返回一个是否有该 key 以及对应 value
 func (c *LruCache) Get(key Key) (value interface{}, ok bool) {
+
 	if c.cache == nil {
-		return
+		return nil,false
 	}
 
 	if ele, hit := c.cache[key]; hit {
 		c.ll.MoveToFront(ele)
+
+		//删除一些过期的数据
+		c.RemoveExpire()
+
 		return ele.Value.(*entry).value, true
 	}
 
-	return
+	return nil,false
 }
 
 //从 Cache 中删除一个 KV
@@ -132,8 +144,10 @@ func (c *LruCache) RemoveExpire() {
 	now_time := time.Now()
 	for key, e := range c.cache {
 		kv := e.Value.(*entry)
-		if now_time.After(kv.expire) {
-			c.removeElement(c.cache[key])
+		if kv.expire != nil {
+			if now_time.After(*kv.expire) {
+				c.removeElement(c.cache[key])
+			}
 		}
 	}
 }
