@@ -287,7 +287,7 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 	//var count int64
 
 	//如果存在缓存，先从缓冲中取
-	lruCacheList, ok := GetBlogByLru(keyword)
+	lruCacheList, ok := SearchBlgLru.Get(keyword)
 	if ok {
 		//构建结果返回
 		result = new(entity.ListResponseEntity)
@@ -322,7 +322,7 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 	if list != nil {
 
 		//加入lru缓存
-		AddBlogToLru(keyword, list, 5*time.Second)
+		SearchBlgLru.Add(keyword, list, 5*time.Second)
 	}
 
 	return result

@@ -8,11 +8,15 @@ import (
 //前端博客lru缓存的一些搜索
 
 //用于搜索框的lru缓存
-var search_blog_lru *lru.LruCache
+var isInit bool
+var SearchBlgLru *lru.LruCache
+var ListBlogLru *lru.LruCache
 
 func init() {
-	if search_blog_lru == nil {
-		search_blog_lru = lru.New(30)
+	if isInit == false {
+		isInit = true
+		SearchBlgLru = lru.New(30)
+		ListBlogLru = lru.New(30)
 
 		//定时清除lru到期的key
 		go func() {
@@ -22,7 +26,8 @@ func init() {
 			for {
 				select {
 				case <-ticker.C:
-					search_blog_lru.RemoveExpire()
+					SearchBlgLru.RemoveExpire()
+					ListBlogLru.RemoveExpire()
 				default:
 
 				}
@@ -30,14 +35,4 @@ func init() {
 		}()
 
 	}
-}
-
-//添加缓存到lru,过期时间
-func AddBlogToLru(key lru.Key, value interface{},expires time.Duration) {
-	search_blog_lru.Add(key, value,expires)
-}
-
-//从缓冲中获取lru
-func GetBlogByLru(key lru.Key) (value interface{}, ok bool) {
-	return search_blog_lru.Get(key)
 }
