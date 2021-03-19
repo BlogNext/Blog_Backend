@@ -11,6 +11,7 @@ import (
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
+	"log"
 	"strings"
 	"time"
 )
@@ -144,13 +145,28 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 	//sql
 	db = db.Table(blogTableName)
 
-	db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 	//过滤分类id过滤
 	if filter["blog_type_id"] != "" {
-		db = db.Where("blog_type_id = ?", filter["blog_type_id"])
+		db.Where("blog_type_id = ?", filter["blog_type_id"])
 	}
 
+	db.DryRun = true
+	statement :=db.Count(&count).Statement
+	cacheKey := db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
+	db.DryRun = false
 	db.Count(&count)
+	//如果存在缓存，先从缓冲中取
+	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
+	if ok {
+		//有缓存
+		//构建结果返回
+		log.Println("缓存取得")
+		result = new(entity.ListResponseEntity)
+		json.Unmarshal(lruCacheList.([]uint8),result)
+		return result
+	}
+
 
 	rows, err := db.Select(strings.Join(blogFelid, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Rows()
 
@@ -205,6 +221,10 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 	result.SetCount(count)
 	result.SetPerPage(perPage)
 	result.SetList(queryResult)
+
+	//加入缓存
+	jsonCache,_ := json.Marshal(result)
+	BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
 
 	return
 }
