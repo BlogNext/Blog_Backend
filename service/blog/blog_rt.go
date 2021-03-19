@@ -154,6 +154,7 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 	db.DryRun = true
 	statement :=db.Count(&count).Statement
 	cacheKey := db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
+	cacheKey = "list_" + cacheKey
 	db.DryRun = false
 	db.Count(&count)
 	//如果存在缓存，先从缓冲中取
@@ -339,6 +340,7 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 	db.DryRun = true
 	statement := db.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&blogModelList).Statement
 	cacheKey := db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
+	cacheKey = "search_"+cacheKey
 	//如果存在缓存，先从缓冲中取
 	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
 	if ok {
