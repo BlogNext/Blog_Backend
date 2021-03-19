@@ -116,6 +116,74 @@ server
 }
 ```
 
+## 国内服务器的nginx配置参考demo
+```shell script
+#http 
+server {
+    listen 80;
+    server_name laughingzhu.cn;
+    
+    
+    gzip on;
+    gzip_min_length 1k;
+    gzip_buffers 4 16k;
+    gzip_comp_level 2;
+    gzip_types application/javascript  text/plain application/x-javascript text/css application/xml text/javascript application/x-httpd-php image/jpeg image/gif image/png;
+    gzip_vary off;
+
+    expires 30s;
+
+    root /home/xiaochen/blog/project/Blog_Next/Blog_Front/dist;
+
+    location /upload/ {
+        expires 30s;
+        root /home/xiaochen/blog/project/Blog_Next/Blog_Backend;
+   }
+
+
+   location / {
+      index index.html;
+    }
+} 
+
+server
+ {
+     
+    
+    server_name laughingzhu.cn;
+    listen       443 ssl http2;
+
+    #静态资源压缩
+    gzip on;
+    gzip_min_length 1k;
+    gzip_buffers 4 16k;
+    gzip_comp_level 2;
+    gzip_types application/javascript  text/plain application/x-javascript text/css application/xml text/javascript application/x-httpd-php image/jpeg image/gif image/png;
+    gzip_vary off;
+     
+    #静态资源设置缓存
+    expires 30s;
+
+
+    ssl_certificate    /etc/letsencrypt/live/laughingzhu.cn/fullchain.pem;
+    ssl_certificate_key  /etc/letsencrypt/live/laughingzhu.cn/privkey.pem;
+
+    
+
+   root /home/xiaochen/blog/project/Blog_Next/Blog_Front/dist;
+
+   location /upload/ {
+        expires 30s;
+        root /home/xiaochen/blog/project/Blog_Next/Blog_Backend;
+   }
+
+
+   location / {
+      index index.html;
+    }
+  
+```
+
 
 - /home/xiaochen/BlogNext/nginx/htpasswd文件的生成
 
