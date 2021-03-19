@@ -1,11 +1,13 @@
 package blog
 
 import (
+	"encoding/json"
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/model"
 	"strings"
+	"time"
 )
 
 //博客类型前台服务
@@ -54,6 +56,20 @@ func (s *BlogTypeRtService) GetList(perPage, page int) (result *entity.ListRespo
 	var count int64
 	db = db.Model(&model.BlogTypeModel{})
 
+	db.DryRun = true
+	statement := db.Count(&count).Statement
+	db.DryRun = false
+	cacheKey := "blog_type_list" + db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
+	//如果存在缓存，先从缓冲中取
+	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
+	if ok {
+		//有缓存
+		//构建结果返回
+		result = new(entity.ListResponseEntity)
+		json.Unmarshal(lruCacheList.([]uint8),result)
+		return result
+	}
+
 	db.Count(&count)
 
 	rows, _ := db.Select("id, yuque_name, yuque_id, created_at, updated_at").
@@ -87,6 +103,12 @@ func (s *BlogTypeRtService) GetList(perPage, page int) (result *entity.ListRespo
 	result.SetCount(count)
 	result.SetPerPage(perPage)
 	result.SetList(blogTypeModelList)
+
+
+
+	//加入缓存
+	jsonCache,_ := json.Marshal(result)
+	BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Minute)
 
 	return
 }
