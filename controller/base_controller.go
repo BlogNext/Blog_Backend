@@ -35,8 +35,8 @@ func NewController(execController Controller) func(*gin.Context) {
 					//自定义异常，返回200,自定义的错误码
 					help.Gin200ErrorResponse(context, err.(exception.MyException).GetErrorCode(), err.(exception.MyException).Error(), nil)
 				default:
-					//非自定义异常，返回500错误
-					help.Gin500ErrorResponse(context, err.(error), nil) //500响应
+					//非自定义异常，返回500错误,往上抛，让gin当前运行的协程自己捕获，输出堆栈信息
+					panic(err)
 				}
 
 			}

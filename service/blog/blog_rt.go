@@ -1,6 +1,7 @@
 package blog
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/blog_backend/common-lib/db/mysql"
@@ -283,30 +284,32 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, perPage, 
 //mysql等级搜索博客
 func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) (result *entity.ListResponseEntity) {
 
-	var blogModelList []*model.BlogModel
-	//var count int64
-
-	//如果存在缓存，先从缓冲中取
-	lruCacheList, ok := SearchBlgLru.Get(keyword)
-	if ok {
-		//构建结果返回
-		result = new(entity.ListResponseEntity)
-		result.SetCount(0)
-		result.SetPerPage(perPage)
-		result.SetList(lruCacheList.([]*blog.BlogListEntity))
-		return result
-	}
-
 	//缓存没有，数据库取
 	db := mysql.GetDefaultDBConnect()
 	db = db.Table(model.BlogModel{}.TableName())
-
-	db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 	if keyword != "" {
-		db = db.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
+		db.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
 	}
 
-	//db.Count(&count)
+	var blogModelList []*model.BlogModel
+
+	//先看看有没有缓存
+	db.DryRun = true
+	statement := db.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&blogModelList).Statement
+	cacheKey := db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
+	//如果存在缓存，先从缓冲中取
+	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
+	if ok {
+		//有缓存
+		//构建结果返回
+		result = new(entity.ListResponseEntity)
+		json.Unmarshal(lruCacheList.([]uint8),result)
+		return result
+	}
+
+	//没有缓存
+	db.DryRun = false
 	db.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&blogModelList)
 
 	//转化为传输层的对象
@@ -314,15 +317,14 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 
 	//构建结果返回
 	result = new(entity.ListResponseEntity)
-
 	result.SetCount(0)
 	result.SetPerPage(perPage)
 	result.SetList(list)
 
 	if list != nil {
-
 		//加入lru缓存
-		SearchBlgLru.Add(keyword, list, 5*time.Second)
+		jsonCache,_ := json.Marshal(result)
+		BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
 	}
 
 	return result
