@@ -380,16 +380,24 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 
 	db := mysql.GetDefaultDBConnect()
 
+	cacheKey := "stat_cache"
+	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
+	if ok {
+		result = new(entity.ListResponseEntity)
+		json.Unmarshal(lruCacheList.([]uint8),result)
+		return result
+	}
+
 	blogTableName := model.BlogModel{}.TableName()
 	db = db.Table(blogTableName)
-	db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 
 	//文章总数
 	{
 		var count int64
 		//sql
-		countDb := db.Select("id")
-		countDb.Count(&count)
+		db.Select("id")
+		db.Count(&count)
 		response["blog_total"] = uint(count)
 	}
 
@@ -415,6 +423,10 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 	result = new(entity.ListResponseEntity)
 
 	result.SetList(response)
+
+
+	jsonCache,_ := json.Marshal(result)
+	BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
 
 	return result
 }
