@@ -11,6 +11,7 @@ import (
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
+	"log"
 	"strings"
 	"time"
 )
@@ -233,19 +234,37 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 
 	db := mysql.GetDefaultDBConnect()
 	var blogModelList []*model.BlogModel
+	var cacheKey string
 	//查询
 	switch sortDimension {
 	case "browse_total":
-		db = db.Table(model.BlogModel{}.TableName())
-		db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
-		db.Order("browse_total DESC").Limit(perPage).Find(&blogModelList)
 	case "created_at":
-		db = db.Table(model.BlogModel{}.TableName())
-		db = db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
-		db.Order("created_at DESC").Limit(perPage).Find(&blogModelList)
 	default:
 		exception.NewException(exception.VALIDATE_ERR, "非法的sort_dimension")
 	}
+
+	db = db.Table(model.BlogModel{}.TableName())
+	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+	db.DryRun = true
+	//排序字段
+	orderBySql := fmt.Sprintf("%s DESC",sortDimension)
+	statement := db.Order(orderBySql).Limit(perPage).Find(&blogModelList).Statement
+	cacheKey = db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
+	cacheKey = "sort_"+ cacheKey
+	log.Println("缓存key",cacheKey)
+	db.DryRun = false
+	//如果存在缓存，先从缓冲中取
+	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
+	if ok {
+		//有缓存
+		//构建结果返回
+		result = new(entity.ListResponseEntity)
+		json.Unmarshal(lruCacheList.([]uint8),result)
+		return result
+	}
+
+	//获取数据
+	db.Order(orderBySql).Limit(perPage).Find(&blogModelList)
 
 	//转化为传输层的对象
 	blogSortEntityList := ChangeBlogSortEntityByList(blogModelList)
@@ -272,6 +291,10 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 	result.SetCount(int64(perPage))
 	result.SetPerPage(perPage)
 	result.SetList(blogSortEntityList)
+
+	//加入缓存
+	jsonCache,_ := json.Marshal(result)
+	BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
 
 	return result
 }
