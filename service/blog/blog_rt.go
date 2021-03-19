@@ -11,7 +11,6 @@ import (
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
-	"log"
 	"strings"
 	"time"
 )
@@ -161,7 +160,6 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 	if ok {
 		//有缓存
 		//构建结果返回
-		log.Println("缓存取得")
 		result = new(entity.ListResponseEntity)
 		json.Unmarshal(lruCacheList.([]uint8),result)
 		return result
