@@ -11,7 +11,6 @@ import (
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/model"
 	"gorm.io/gorm"
-	"log"
 	"strings"
 	"time"
 )
@@ -252,7 +251,6 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 	statement := db.Order(orderBySql).Limit(perPage).Find(&blogModelList).Statement
 	cacheKey = db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
 	cacheKey = "sort_"+ cacheKey
-	log.Println("缓存key",cacheKey)
 	db.DryRun = false
 	//如果存在缓存，先从缓冲中取
 	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
