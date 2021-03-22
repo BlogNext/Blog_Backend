@@ -37,17 +37,17 @@ func loadConfig() {
 }
 
 func loadDB() {
-	db_config, _ := config.GetConfig("db")
-	db_map := db_config.GetStringMap("mysql")
-	db_map_size := len(db_map)
-	db_info_list := make(map[string]db.DBInfo, db_map_size)
-	for key, item := range db_map {
-		db_info_list[key] = db.DBInfo{
+	dbConfig, _ := config.GetConfig("db")
+	dbMap := dbConfig.GetStringMap("mysql")
+	dbMapSize := len(dbMap)
+	dbInfoList := make(map[string]db.DBInfo, dbMapSize)
+	for key, item := range dbMap {
+		dbInfoList[key] = db.DBInfo{
 			Key: key,
 			Dsn: item.(map[string]interface{})["dsn"].(string),
 		}
 	}
-	mysql.InitDBConnect(db_info_list)
+	mysql.InitDBConnect(dbInfoList)
 }
 
 func init() {
@@ -84,12 +84,12 @@ func main() {
 	//ginpprof.Wrapper(router)
 
 	//运行服务器
-	server_config, err := config.GetConfig("server")
+	serverConfig, err := config.GetConfig("server")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	server_info := server_config.GetStringMap("servier")
+	serverInfo := serverConfig.GetStringMap("servier")
 	//gin的路由
 	r := router.RunRouter()
 	//url := ginSwagger.URL("http://localhost:8083/swagger/doc.json") // The url pointing to API definition
@@ -98,7 +98,7 @@ func main() {
 
 
 	//用了golang github官网的包限制tcp同一时刻的连接数，这个包没有纳入基础库中，目前不知道有什么用，随便加来玩
-	l,err := net.Listen("tcp",fmt.Sprintf(":%d", server_info["port"].(int)))
+	l,err := net.Listen("tcp",fmt.Sprintf(":%d", serverInfo["port"].(int)))
 	if err != nil {
 		log.Fatalln(err)
 	}
