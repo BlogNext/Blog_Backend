@@ -272,6 +272,35 @@ Swap:         2.3Gi       528Mi       1.7Gi
 
 
 
+## git hook简单的脚本
+
+```shell script
+#!/bin/sh
+#
+# An example hook script to prepare a packed repository for use over
+# dumb transports.
+#
+# To enable this hook, rename this file to "post-update".
+
+
+
+echo success push
+
+cd /home/xiaochen/blog/project/Blog_Next/Blog_Backend
+
+path=`pwd`
+
+echo ${path}
+# 不知道为什么一定要 env -i 在前面
+env -i git pull origin master
+
+sudo docker-compose -f build-docker-compose.yml down
+
+sudo docker-compose -f build-docker-compose.yml up -d
+
+
+```
+
 ## 总结一下
 
 - 对于killer掉程序，在没有任何的报错信息的前提下，可以通过 dmesg | grep -i -B100 'killed process'看原因
