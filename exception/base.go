@@ -2,35 +2,35 @@ package exception
 
 type MyException interface {
 	error
-	SetErrorCode(error_code int)
-	SetErrorMsg(err_msg string)
+	SetErrorCode(errorCode int)
+	SetErrorMsg(errMsg string)
 	GetErrorCode() int
 }
 
 type BaseException struct {
-	error_msg  string
-	error_code int
+	errorMsg  string
+	errorCode int
 }
 
-func NewException(error_code int, error_msg string) *BaseException {
+func NewException(errorCode int, errorMsg string) *BaseException {
 	return &BaseException{
-		error_msg:  error_msg,
-		error_code: error_code,
+		errorMsg:  errorMsg,
+		errorCode: errorCode,
 	}
 }
 
-func (b *BaseException) SetErrorCode(error_code int) {
-	b.error_code = error_code
+func (b *BaseException) SetErrorCode(errorCode int) {
+	b.errorCode = errorCode
 }
 
-func (b *BaseException) SetErrorMsg(err_msg string) {
-	b.error_msg = err_msg
+func (b *BaseException) SetErrorMsg(errorMsg string) {
+	b.errorMsg = errorMsg
 }
 
 func (b *BaseException) GetErrorCode() int {
-	return b.error_code
+	return b.errorCode
 }
 
 func (b *BaseException) Error() string {
-	return b.error_msg
+	return b.errorMsg
 }
