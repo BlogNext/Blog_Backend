@@ -73,6 +73,15 @@ max-binlog-size = 500M
 
 ### 1  主库、从库，导入上面的配置,然后重启mysql；主库开启binlog，从库开启relay-log
 
+主要是开启主库的binlog和从库的relay-log
+
+
+注意：
+
+- docker环境搭建的，从库一定要配置relay-log,不然docker重启，relay-log的命名会不一样
+
+
+
 ### 2 主库
 
 #### 2.1 创建slave用户
@@ -88,7 +97,22 @@ GRANT REPLICATION SLAVE ON *.* TO 'slave_account'@'%';
 
 #### 2.2 主库进行 FLUSH TABLES WITH READ LOCK; 锁表
 
+```
+
+//锁表,全局的，所有数据库，所有表
+FLUSH TABLES WITH READ LOCK;
+
+```
+
 #### 2.3 导出要备份的数据库sql结构和数据；（mysqldump或者navicat右键）
+
+导出数据方案
+
+- mysqldump进行导出数据
+- navicat右键导出数据和结构
+
+
+
 
 #### 2.4 SHOW MASTER STATUS; 获取当前binlog文件和位置
 
@@ -107,11 +131,31 @@ mysql> SHOW MASTER STATUS;
 
 #### 2.5 unlock tables;  释放锁表
 
+```
+//释放锁表
+unlock tables;
+```
+
+
 
 ### 3 从库
 
 #### 3.1 创建对应的数据库(navicat或者自己执行命令)
-#### 3.2 导入主库导出的数据库sql数据
+
+
+```
+CREATE DATABASE 数据库名;
+
+```
+
+
+#### 3.2 从库导入主库导出的数据库sql数据
+
+导入数据方案
+
+- mysqldump进行导入数据
+- navicat右键导入数据和结构
+
 #### 3.3 配置主库的信息
 
 ```
@@ -141,7 +185,7 @@ show slave status;
 *************************** 1. row ***************************
                #这个是指slave 连接到master的状态。
                Slave_IO_State: Waiting for master to send event
-                  Master_Host: 154.8.142.48
+                  Master_Host: 154.8.162.38
                   # 这个是master上面的一个用户。用来负责主从复制的用户 ，创建主从复制的时候建立的（具有reolication slave权限）
                   Master_User: slave_account
                   #master服务器的端口
@@ -218,9 +262,25 @@ Master_SSL_Verify_Server_Cert: No
 
 ### 1. 主库选择数据库blog_ly
 
+```
+CREATE DATABASE 数据库名;
+```
+
 #### 1.1 进行锁表 FLUSH TABLES WITH READ LOCK;
 
+
+```
+//锁表,全局的，所有数据库，所有表
+FLUSH TABLES WITH READ LOCK;
+```
+
 #### 1.2 导出sql数据
+
+导出数据方案
+
+- mysqldump进行导出数据
+- navicat右键导出数据和结构
+
 
 #### 1.3 SHOW MASTER STATUS; 查看binlog当前的文件名已经当前的位置
 
@@ -238,7 +298,18 @@ mysql> SHOW MASTER STATUS;
 
 #### 1.4 释放表unlock tables;
 
+```
+//释放锁表，全局，所有数据库，所有表
+unlock tables;
+```
+
 ### 2. 从库创建数据库，导入sql文件
+
+导入数据方案
+
+- mysqldump进行导入数据
+- navicat右键导入数据和结构
+
 
 #### 2.1 停止之前的slave
 
