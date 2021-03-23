@@ -89,10 +89,12 @@ max-binlog-size = 500M
 ```
 //创建用户
 CREATE USER 'slave_account'@'%' IDENTIFIED BY 'admin123';
-//授权用户为slave用户
 
+//授权用户为slave用户
 GRANT REPLICATION SLAVE ON *.* TO 'slave_account'@'%';
 
+//刷新权限
+flush privileges;
 ```
 
 #### 2.2 主库进行 FLUSH TABLES WITH READ LOCK; 锁表
