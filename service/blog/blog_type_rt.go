@@ -22,7 +22,7 @@ func (s *BlogTypeRtService) getListByids(ids []uint64) (result map[uint64]*blog.
 	rows, err := db.Table(tableName).
 		Select(strings.Join(selectFelid, ", ")).Where("id IN (?)", ids).Rows()
 
-	if err != nil {
+	if err != nil || rows == nil{
 		return nil
 	}
 
