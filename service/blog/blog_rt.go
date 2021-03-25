@@ -35,9 +35,11 @@ func (s *BlogRtService) IncBrowse(id uint64) {
 func (s *BlogRtService) Detail(id uint64) *blog.BlogEntity {
 	db := mysql.GetDefaultDBConnect()
 	blogModel := new(model.BlogModel)
-	queryResult := db.First(blogModel, id)
+	db = db.Where("id = ?",id)
+	db.DryRun = false
+	db.First(blogModel, id)
 
-	find := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
+	find := errors.Is(db.Error, gorm.ErrRecordNotFound)
 	if find {
 		panic(fmt.Sprintf("找不到博客:%d", id))
 	}
