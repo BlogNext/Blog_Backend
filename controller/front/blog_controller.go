@@ -22,7 +22,7 @@ type BlogController struct {
 func (c *BlogController) Detail() {
 	//必填字段
 	type searchRequest struct {
-		ID uint `form:"id" binding:"required"`
+		ID uint64 `form:"id" binding:"required"`
 	}
 
 	var sq searchRequest

@@ -26,13 +26,13 @@ type BlogRtService struct {
 }
 
 //浏览量自增
-func (s *BlogRtService) IncBrowse(id uint) {
+func (s *BlogRtService) IncBrowse(id uint64) {
 	db := mysql.GetDefaultDBConnect()
 	db.Model(model.BlogModel{}).Where("id = ?", id).UpdateColumn("browse_total", gorm.Expr("browse_total + ?", 1))
 }
 
 //博客详情
-func (s *BlogRtService) Detail(id uint) *blog.BlogEntity {
+func (s *BlogRtService) Detail(id uint64) *blog.BlogEntity {
 	db := mysql.GetDefaultDBConnect()
 	blogModel := new(model.BlogModel)
 	queryResult := db.First(blogModel, id)
