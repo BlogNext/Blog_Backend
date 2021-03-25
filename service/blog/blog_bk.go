@@ -54,27 +54,27 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 //doc 语雀结构体
 //user_id 用户id
 //blog_type_id 博客分类
-func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializer, user_id, blog_type_id uint) {
+func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializer, userId, blogTypeId uint64) {
 	db := mysql.GetDefaultDBConnect()
 	//查找用户
-	user_model := new(model.UserModel)
-	query_result := db.First(user_model, user_id)
-	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	userModel := new(model.UserModel)
+	queryResult := db.First(userModel, userId)
+	find := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
 	if find {
-		panic(fmt.Sprintf("找不到用户id:%d", user_id))
+		panic(fmt.Sprintf("找不到用户id:%d", userId))
 	}
 
 	//查找博客分类id
-	blog_type_model := new(model.BlogTypeModel)
-	query_result = db.First(blog_type_model, blog_type_id)
-	find = errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	blogTypeModel := new(model.BlogTypeModel)
+	queryResult = db.First(blogTypeModel, blogTypeId)
+	find = errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
 	if find {
-		panic(fmt.Sprintf("找不到博客分类blog_type_id:%d", blog_type_id))
+		panic(fmt.Sprintf("找不到博客分类blog_type_id:%d", blogTypeId))
 	}
 
-	blog_model := new(model.BlogModel)
-	query_result = db.Where("yuque_id = ?", doc.ID).First(blog_model)
-	find = errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	blogModel := new(model.BlogModel)
+	queryResult = db.Where("yuque_id = ?", doc.ID).First(blogModel)
+	find = errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
 	if !find {
 		log.Println(fmt.Sprintf("博客已存在yuque_id:%d", doc.ID))
 		panic(fmt.Sprintf("博客已存在yuque_id:%d", doc.ID))
@@ -85,28 +85,28 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	DocIntor := front.GetDocIntorSerializer(doc.Slug, doc.BookId)
 	log.Println("下载不了封面图和摘要")
 	//下载封面图
-	attachment_service := new(attachment.AttachmentRtService)
-	attachment_entity_list := attachment_service.DownloadBlogImage(DocIntor.Data.Cover, model.ATTACHMENT_BLOG_Module, model.ATTACHMENT_FILE_TYPE_IMAGE)
-	if attachment_entity_list == nil {
+	attachmentService := new(attachment.AttachmentRtService)
+	attachmentEntityList := attachmentService.DownloadBlogImage(DocIntor.Data.Cover, model.ATTACHMENT_BLOG_Module, model.ATTACHMENT_FILE_TYPE_IMAGE)
+	if attachmentEntityList == nil {
 		panic("下载封面图失败")
 	}
 
 	//创建文档
 	//语雀数据
-	blog_model.YuqueId = doc.ID
-	blog_model.YuqueSlug = doc.Slug
-	blog_model.YuqueFormat = doc.Format
-	blog_model.YuqueLake = doc.BodyLake
-	blog_model.YuquePublic = int(doc.Public)
-	blog_model.Title = doc.Title
-	blog_model.Content = doc.Body
-	blog_model.Abstract = DocIntor.Data.CustomDescription        // 摘要
-	blog_model.CoverPlanId = int64(attachment_entity_list[0].ID) //封面图
+	blogModel.YuqueId = doc.ID
+	blogModel.YuqueSlug = doc.Slug
+	blogModel.YuqueFormat = doc.Format
+	blogModel.YuqueLake = doc.BodyLake
+	blogModel.YuquePublic = int(doc.Public)
+	blogModel.Title = doc.Title
+	blogModel.Content = doc.Body
+	blogModel.Abstract = DocIntor.Data.CustomDescription // 摘要
+	blogModel.CoverPlanId = attachmentEntityList[0].ID   //封面图
 	//系统的数据
-	blog_model.UserID = user_model.ID                 //用户id
-	blog_model.BlogTypeId = int64(blog_type_model.ID) //文章分类id
+	blogModel.UserID = userModel.ID         //用户id
+	blogModel.BlogTypeId = blogTypeModel.ID //文章分类id
 
-	result := db.Create(blog_model)
+	result := db.Create(blogModel)
 	if result.Error != nil {
 		panic(result.Error)
 	}

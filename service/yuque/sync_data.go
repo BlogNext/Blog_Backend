@@ -34,7 +34,7 @@ func SyncData(serializer *response.ResponseDocDetailSerializer, token string) {
 }
 
 //同步用户
-func syncUserData(user *response.UserSerializer) (userId uint) {
+func syncUserData(user *response.UserSerializer) (userId uint64) {
 	var userModel *model.UserModel
 
 	db := mysql.GetDefaultDBConnect()
@@ -54,7 +54,7 @@ func syncUserData(user *response.UserSerializer) (userId uint) {
 }
 
 //同步知识库（博客类型）
-func syncBlogType(book *response.BookSerializer) (blogTypeId uint) {
+func syncBlogType(book *response.BookSerializer) (blogTypeId uint64) {
 	db := mysql.GetDefaultDBConnect()
 	blogTypeModel := new(model.BlogTypeModel)
 	queryResult := db.Where("yuque_id = ?", book.ID).First(blogTypeModel)
@@ -72,7 +72,7 @@ func syncBlogType(book *response.BookSerializer) (blogTypeId uint) {
 }
 
 //同步博客
-func syncBlog(doc *response.DocDetailSerializer, userId, blogTypeId uint) {
+func syncBlog(doc *response.DocDetailSerializer, userId, blogTypeId uint64) {
 	db := mysql.GetDefaultDBConnect()
 	blogModel := new(model.BlogModel)
 	queryResult := db.Where("yuque_id = ?", doc.ID).First(blogModel)

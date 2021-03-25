@@ -91,7 +91,7 @@ func (s *UserBkService) CreateUserByYuqueWebHook(user *response.UserSerializer) 
 		}
 
 		//创建语雀用户
-		user_yuque_model.ID = uint(user.ID)
+		user_yuque_model.ID = uint64(user.ID)
 		user_yuque_model.Login = user.Login
 		user_yuque_model.Name = user.Name
 		user_yuque_model.AvatarUrl = user.AvatarUrl

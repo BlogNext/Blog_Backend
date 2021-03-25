@@ -7,7 +7,7 @@ import (
 )
 
 //通过用户ids获取UserModel
-func GetUserByUserIds(ids []uint) (user_model_list []*model.UserModel) {
+func GetUserByUserIds(ids []uint64) (user_model_list []*model.UserModel) {
 	if ids == nil {
 		panic("ids不能为空")
 	}
@@ -20,13 +20,13 @@ func GetUserByUserIds(ids []uint) (user_model_list []*model.UserModel) {
 }
 
 //通过用户ids获取UserEntity
-func GetUserEntityByUserIds(ids []uint) (user_entity_list map[uint]*user.UserEntity) {
+func GetUserEntityByUserIds(ids []uint64) (user_entity_list map[uint64]*user.UserEntity) {
 	user_model_list := GetUserByUserIds(ids)
 	if user_model_list == nil || len(user_model_list) <= 0 {
 		return nil
 	}
 
-	user_entity_list = make(map[uint]*user.UserEntity, len(user_model_list))
+	user_entity_list = make(map[uint64]*user.UserEntity, len(user_model_list))
 
 	for _, user_model := range user_model_list {
 		user_entity := new(user.UserEntity)

@@ -80,11 +80,11 @@ func (s *BlogRtService) GetListByPerson(perPage, page int) (result *entity.ListR
 
 	coverPlanIds := make([]uint64, 0)
 	blogTypeIds := make([]uint64, 0)
-	userIdIds := make([]uint, 0)
+	userIdIds := make([]uint64, 0)
 
 	for rows.Next() {
 		var id uint64
-		var userId uint
+		var userId uint64
 		var blogTypeId uint64
 		var coverPlanId uint64
 		var title string
@@ -97,7 +97,7 @@ func (s *BlogRtService) GetListByPerson(perPage, page int) (result *entity.ListR
 		//博客实体
 		blogEntity := new(blog.BlogListEntity)
 		blogEntity.ID = id
-		blogEntity.UserId = uint64(userId)
+		blogEntity.UserId = userId
 		blogEntity.BlogTypeId = blogTypeId
 		blogEntity.CoverPlanId = coverPlanId
 		blogEntity.Title = title
@@ -177,11 +177,11 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 
 	coverPlanIds := make([]uint64, 0)
 	blogTypeIds := make([]uint64, 0)
-	userIdIds := make([]uint, 0)
+	userIdIds := make([]uint64, 0)
 
 	for rows.Next() {
 		var id uint64
-		var userId uint
+		var userId uint64
 		var blogTypeId uint64
 		var coverPlanId uint64
 		var title string
