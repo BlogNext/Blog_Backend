@@ -16,7 +16,7 @@ type BlogTypeRtService struct {
 
 //通过博客ids获取blogTypeEntity
 func (s *BlogTypeRtService) getListByids(ids []uint64) (result map[uint64]*blog.BlogTypeEntity) {
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	tableName := model.BlogTypeModel{}.TableName()
 	selectFelid := []string{"id", "yuque_name", "created_at", "updated_at"}
 	rows, err := db.Table(tableName).
@@ -51,15 +51,15 @@ func (s *BlogTypeRtService) getListByids(ids []uint64) (result map[uint64]*blog.
 
 //获取分类列表
 func (s *BlogTypeRtService) GetList(perPage, page int) (result *entity.ListResponseEntity) {
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
+	dbDryRun := mysql.GetNewDB(true)
 
 	var count int64
-	db = db.Model(&model.BlogTypeModel{})
+	db.Model(&model.BlogTypeModel{})
+	dbDryRun.Model(&model.BlogTypeModel{})
 
-	db.DryRun = true
-	statement := db.Count(&count).Statement
-	db.DryRun = false
-	cacheKey := "blog_type_list" + db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
+	statement := dbDryRun.Count(&count).Statement
+	cacheKey := "blog_type_list" + dbDryRun.Dialector.Explain(statement.SQL.String(),statement.Vars...)
 	//如果存在缓存，先从缓冲中取
 	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
 	if ok {

@@ -53,7 +53,7 @@ func (u *LoginRtService) IsLogin(loginToken string, loginEntity *front.LoginEnti
 //login语雀的login
 //password登录密码
 func (u *LoginRtService) LoginByYuque(login, password string) (loginToken string) {
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	userYuQueModel := new(model.UserYuQueModel)
 	queryResult := db.Where("login = ?", login).First(userYuQueModel)
 	find := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)

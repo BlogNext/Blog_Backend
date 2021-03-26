@@ -82,6 +82,24 @@ func InitDBConnect(db_info map[string]db.DBInfo) {
 	log.Println(fmt.Sprintf("g_db初始化完成 v=%v ,t=%T, p=%p", g_db, g_db, g_db))
 }
 
-func GetDefaultDBConnect() *gorm.DB {
-	return g_db
+//func GetDefaultDBConnect() *gorm.DB {
+//	return g_db
+//}
+
+
+//获取一个新DB连接
+//DryRun true测试只生成sql，false跑sql，得到实例
+func GetNewDB(DryRun bool) *gorm.DB{
+	
+	return g_db.Session(&gorm.Session{
+		DryRun:                 DryRun,
+		PrepareStmt:            false,
+		WithConditions:         false,
+		SkipDefaultTransaction: false,
+		AllowGlobalUpdate:      false,
+		Context:                nil,
+		Logger:                 nil,
+		NowFunc:                nil,
+	})
+
 }

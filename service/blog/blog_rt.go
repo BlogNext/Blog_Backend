@@ -27,16 +27,15 @@ type BlogRtService struct {
 
 //浏览量自增
 func (s *BlogRtService) IncBrowse(id uint64) {
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	db.Model(model.BlogModel{}).Where("id = ?", id).UpdateColumn("browse_total", gorm.Expr("browse_total + ?", 1))
 }
 
 //博客详情
 func (s *BlogRtService) Detail(id uint64) *blog.BlogEntity {
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	blogModel := new(model.BlogModel)
-	db = db.Where("id = ?",id)
-	db.DryRun = false
+	db = db.Where("id = ?", id)
 	db.First(blogModel, id)
 
 	find := errors.Is(db.Error, gorm.ErrRecordNotFound)
@@ -52,7 +51,7 @@ func (s *BlogRtService) Detail(id uint64) *blog.BlogEntity {
 
 //获取博客列表，用于私人空间
 func (s *BlogRtService) GetListByPerson(perPage, page int) (result *entity.ListResponseEntity) {
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 
 	blogTableName := model.BlogModel{}.TableName()
 
@@ -131,7 +130,9 @@ func (s *BlogRtService) GetListByPerson(perPage, page int) (result *entity.ListR
 
 //列表页
 func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (result *entity.ListResponseEntity) {
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
+	//获取执行的sql，不执行sql
+	dbDryRun := mysql.GetNewDB(true)
 
 	blogTableName := model.BlogModel{}.TableName()
 
@@ -144,30 +145,34 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 
 	var count int64
 	//sql
-	db = db.Table(blogTableName)
+	db.Table(blogTableName)
+	dbDryRun.Table(blogTableName)
 
 	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+	dbDryRun.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 	//过滤分类id过滤
 	if filter["blog_type_id"] != "" {
 		db.Where("blog_type_id = ?", filter["blog_type_id"])
+		dbDryRun.Where("blog_type_id = ?", filter["blog_type_id"])
 	}
 
-	db.DryRun = true
-	statement :=db.Count(&count).Statement
-	cacheKey := db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
+	//缓存
+	statement := dbDryRun.Count(&count).Statement
+	cacheKey := dbDryRun.Dialector.Explain(statement.SQL.String(), statement.Vars...)
 	cacheKey = "list_" + cacheKey
-	db.DryRun = false
-	db.Count(&count)
+
 	//如果存在缓存，先从缓冲中取
 	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
 	if ok {
 		//有缓存
 		//构建结果返回
 		result = new(entity.ListResponseEntity)
-		json.Unmarshal(lruCacheList.([]uint8),result)
+		json.Unmarshal(lruCacheList.([]uint8), result)
 		return result
 	}
 
+	//真正执行sql
+	db.Count(&count)
 
 	rows, err := db.Select(strings.Join(blogFelid, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Rows()
 
@@ -224,7 +229,7 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 	result.SetList(queryResult)
 
 	//加入缓存
-	jsonCache,_ := json.Marshal(result)
+	jsonCache, _ := json.Marshal(result)
 	BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
 
 	return
@@ -234,7 +239,10 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 //per_page 每页多少条
 func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result *entity.ListResponseEntity) {
 
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
+	//获取执行的sql，不执行sql
+	dbDryRun := mysql.GetNewDB(true)
+
 	var blogModelList []*model.BlogModel
 	var cacheKey string
 	//查询
@@ -245,22 +253,24 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 		exception.NewException(exception.VALIDATE_ERR, "非法的sort_dimension")
 	}
 
-	db = db.Table(model.BlogModel{}.TableName())
+	db.Table(model.BlogModel{}.TableName())
+	dbDryRun.Table(model.BlogModel{}.TableName())
 	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
-	db.DryRun = true
+	dbDryRun.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+
 	//排序字段
-	orderBySql := fmt.Sprintf("%s DESC",sortDimension)
-	statement := db.Order(orderBySql).Limit(perPage).Find(&blogModelList).Statement
-	cacheKey = db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
-	cacheKey = "sort_"+ cacheKey
-	db.DryRun = false
+	orderBySql := fmt.Sprintf("%s DESC", sortDimension)
+	statement := dbDryRun.Order(orderBySql).Limit(perPage).Find(&blogModelList).Statement
+	cacheKey = db.Dialector.Explain(statement.SQL.String(), statement.Vars...)
+	cacheKey = "sort_" + cacheKey
+
 	//如果存在缓存，先从缓冲中取
 	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
 	if ok {
 		//有缓存
 		//构建结果返回
 		result = new(entity.ListResponseEntity)
-		json.Unmarshal(lruCacheList.([]uint8),result)
+		json.Unmarshal(lruCacheList.([]uint8), result)
 		return result
 	}
 
@@ -294,7 +304,7 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 	result.SetList(blogSortEntityList)
 
 	//加入缓存
-	jsonCache,_ := json.Marshal(result)
+	jsonCache, _ := json.Marshal(result)
 	BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
 
 	return result
@@ -327,32 +337,35 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, perPage, 
 func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) (result *entity.ListResponseEntity) {
 
 	//缓存没有，数据库取
-	db := mysql.GetDefaultDBConnect()
-	db = db.Table(model.BlogModel{}.TableName())
+	db := mysql.GetNewDB(false)
+	dbDryRun := mysql.GetNewDB(true)
+
+	db.Table(model.BlogModel{}.TableName())
+	dbDryRun.Table(model.BlogModel{}.TableName())
 	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+	dbDryRun.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 	if keyword != "" {
 		db.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
+		dbDryRun.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
 	}
 
 	var blogModelList []*model.BlogModel
 
 	//先看看有没有缓存
-	db.DryRun = true
-	statement := db.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&blogModelList).Statement
-	cacheKey := db.Dialector.Explain(statement.SQL.String(),statement.Vars...)
-	cacheKey = "search_"+cacheKey
+	statement := dbDryRun.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&blogModelList).Statement
+	cacheKey := dbDryRun.Dialector.Explain(statement.SQL.String(), statement.Vars...)
+	cacheKey = "search_" + cacheKey
 	//如果存在缓存，先从缓冲中取
 	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
 	if ok {
 		//有缓存
 		//构建结果返回
 		result = new(entity.ListResponseEntity)
-		json.Unmarshal(lruCacheList.([]uint8),result)
+		json.Unmarshal(lruCacheList.([]uint8), result)
 		return result
 	}
 
 	//没有缓存
-	db.DryRun = false
 	db.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&blogModelList)
 
 	//转化为传输层的对象
@@ -366,7 +379,7 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 
 	if list != nil {
 		//加入lru缓存
-		jsonCache,_ := json.Marshal(result)
+		jsonCache, _ := json.Marshal(result)
 		BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
 	}
 
@@ -378,18 +391,19 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 
 	response := make(map[string]uint, 3)
 
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 
 	cacheKey := "stat_cache"
 	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
 	if ok {
 		result = new(entity.ListResponseEntity)
-		json.Unmarshal(lruCacheList.([]uint8),result)
+		json.Unmarshal(lruCacheList.([]uint8), result)
 		return result
 	}
 
 	blogTableName := model.BlogModel{}.TableName()
-	db = db.Table(blogTableName)
+
+	db.Table(blogTableName)
 	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 
 	//文章总数
@@ -411,7 +425,7 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 
 		//最老的博客时间
 		var firstCreateAt uint
-		firstCreateAtDb := mysql.GetDefaultDBConnect()
+		firstCreateAtDb := mysql.GetNewDB(false)
 		firstCreateAtRow := firstCreateAtDb.Table(blogTableName).Select("created_at").
 			Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1).
 			Order("id ASC").Limit(1).Row()
@@ -424,8 +438,7 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 
 	result.SetList(response)
 
-
-	jsonCache,_ := json.Marshal(result)
+	jsonCache, _ := json.Marshal(result)
 	BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
 
 	return result

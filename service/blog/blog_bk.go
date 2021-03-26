@@ -19,21 +19,21 @@ type BlogBkService struct {
 //通过yuquewebhook更新博客
 //doc 语雀结构体
 func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializer) {
-	db := mysql.GetDefaultDBConnect()
-	blog_model := new(model.BlogModel)
-	query_result := db.Where("yuque_id = ?", doc.ID).First(blog_model)
-	find := errors.Is(query_result.Error, gorm.ErrRecordNotFound)
+	db := mysql.GetNewDB(false)
+	blogModel := new(model.BlogModel)
+	queryResult := db.Where("yuque_id = ?", doc.ID).First(blogModel)
+	find := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
 	if find {
 		panic(fmt.Sprintf("博客未创建yuque_id:%d", doc.ID))
 	}
 
-	blog_model.YuqueFormat = doc.Format
-	blog_model.YuquePublic = int(doc.Public)
-	blog_model.YuqueLake = doc.BodyLake
-	blog_model.Title = doc.Title
-	blog_model.Content = doc.Body
+	blogModel.YuqueFormat = doc.Format
+	blogModel.YuquePublic = int(doc.Public)
+	blogModel.YuqueLake = doc.BodyLake
+	blogModel.Title = doc.Title
+	blogModel.Content = doc.Body
 
-	result := db.Save(blog_model)
+	result := db.Save(blogModel)
 
 	if result.Error != nil {
 		panic(result.Error)
@@ -55,7 +55,7 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 //user_id 用户id
 //blog_type_id 博客分类
 func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializer, userId, blogTypeId uint64) {
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	//查找用户
 	userModel := new(model.UserModel)
 	queryResult := db.First(userModel, userId)

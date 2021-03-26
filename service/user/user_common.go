@@ -7,34 +7,34 @@ import (
 )
 
 //通过用户ids获取UserModel
-func GetUserByUserIds(ids []uint64) (user_model_list []*model.UserModel) {
+func GetUserByUserIds(ids []uint64) (userModelList []*model.UserModel) {
 	if ids == nil {
 		panic("ids不能为空")
 	}
 
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	db = db.Table(model.UserModel{}.TableName())
-	db.Where("id IN ?", ids).Find(&user_model_list)
+	db.Where("id IN ?", ids).Find(&userModelList)
 
-	return user_model_list
+	return userModelList
 }
 
 //通过用户ids获取UserEntity
-func GetUserEntityByUserIds(ids []uint64) (user_entity_list map[uint64]*user.UserEntity) {
-	user_model_list := GetUserByUserIds(ids)
-	if user_model_list == nil || len(user_model_list) <= 0 {
+func GetUserEntityByUserIds(ids []uint64) (userEntityList map[uint64]*user.UserEntity) {
+	userModelList := GetUserByUserIds(ids)
+	if userModelList == nil || len(userModelList) <= 0 {
 		return nil
 	}
 
-	user_entity_list = make(map[uint64]*user.UserEntity, len(user_model_list))
+	userEntityList = make(map[uint64]*user.UserEntity, len(userModelList))
 
-	for _, user_model := range user_model_list {
-		user_entity := new(user.UserEntity)
-		user_entity.ID = uint64(user_model.ID)
-		user_entity.Nickname = user_model.Nickname
+	for _, userModel := range userModelList {
+		userEntity := new(user.UserEntity)
+		userEntity.ID = userModel.ID
+		userEntity.Nickname = userModel.Nickname
 
-		user_entity_list[user_model.ID] = user_entity
+		userEntityList[userModel.ID] = userEntity
 	}
 
-	return user_entity_list
+	return userEntityList
 }

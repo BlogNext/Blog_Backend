@@ -37,7 +37,7 @@ func SyncData(serializer *response.ResponseDocDetailSerializer, token string) {
 func syncUserData(user *response.UserSerializer) (userId uint64) {
 	var userModel *model.UserModel
 
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	userYuqueModel := new(model.UserYuQueModel)
 	queryResult := db.First(userYuqueModel, user.ID)
 	find := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
@@ -55,7 +55,7 @@ func syncUserData(user *response.UserSerializer) (userId uint64) {
 
 //同步知识库（博客类型）
 func syncBlogType(book *response.BookSerializer) (blogTypeId uint64) {
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	blogTypeModel := new(model.BlogTypeModel)
 	queryResult := db.Where("yuque_id = ?", book.ID).First(blogTypeModel)
 	find := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
@@ -73,7 +73,7 @@ func syncBlogType(book *response.BookSerializer) (blogTypeId uint64) {
 
 //同步博客
 func syncBlog(doc *response.DocDetailSerializer, userId, blogTypeId uint64) {
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	blogModel := new(model.BlogModel)
 	queryResult := db.Where("yuque_id = ?", doc.ID).First(blogModel)
 	find := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)

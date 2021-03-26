@@ -96,7 +96,7 @@ func getAttachmentByIds(ids []uint64) (attachmentList []model.AttachmentModel) {
 		return
 	}
 
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	db.Where("id IN (?)", ids).Find(&attachmentList)
 
 	return
@@ -109,7 +109,7 @@ type AttachmentBaseService struct {
 //保存到数据库
 func (s *AttachmentBaseService) saveToDB(dst string, module, fileType int64) (attachmentModel *model.AttachmentModel) {
 
-	db := mysql.GetDefaultDBConnect()
+	db := mysql.GetNewDB(false)
 	attachmentModel = new(model.AttachmentModel)
 	attachmentModel.Path = dst
 	attachmentModel.CreatedAt = time.Now().Unix()
