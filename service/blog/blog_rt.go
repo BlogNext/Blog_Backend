@@ -248,9 +248,8 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 		var count int64
 		db.Count(&count)
 		result.SetCount(count)
+		result.SetPerPage(perPage)
 	})
-
-	result.SetPerPage(perPage)
 
 	//走到这里，说明是第一次进入，没有缓存的情况下
 	BlgLruUnsafety.Add(cacheKey, result, 10*time.Second)
@@ -327,12 +326,10 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 		result.SetList(blogSortEntityList)
 	})
 
-
 	if existCache {
 		//存在缓存直接返回
 		return result
 	}
-
 
 	result.SetFilter([]help.Filter{
 		help.Filter{
@@ -383,52 +380,79 @@ func (s *BlogRtService) SearchBlog(searchLevel string, keyword string, perPage, 
 //mysql等级搜索博客
 func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) (result *entity.ListResponseEntity) {
 
-	//缓存没有，数据库取
-	db := mysql.GetNewDB(false)
-	dbDryRun := mysql.GetNewDB(true)
+	myDBProxy := my_db_proxy.NewMyDBProxy()
 
-	db.Table(model.BlogModel{}.TableName())
-	dbDryRun.Table(model.BlogModel{}.TableName())
-	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
-	dbDryRun.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
-	if keyword != "" {
-		db.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
-		dbDryRun.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
-	}
+	//表名
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		*db = *db.Table(model.BlogModel{}.TableName())
+		*dbDryRun = *dbDryRun.Table(model.BlogModel{}.TableName())
+	})
 
-	var blogModelList []*model.BlogModel
+	//过滤
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
 
-	//先看看有没有缓存
-	statement := dbDryRun.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&blogModelList).Statement
-	cacheKey := dbDryRun.Dialector.Explain(statement.SQL.String(), statement.Vars...)
-	cacheKey = "search_" + cacheKey
-	//如果存在缓存，先从缓冲中取
-	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
-	if ok {
-		//有缓存
-		//构建结果返回
-		result = new(entity.ListResponseEntity)
-		json.Unmarshal(lruCacheList.([]uint8), result)
+		db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+		dbDryRun.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+
+		if keyword != "" {
+			db.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
+			dbDryRun.Where("content like ? OR title like ?", "%"+keyword+"%", "%"+keyword+"%")
+		}
+	})
+
+	//排序和分页
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		db.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage)
+		dbDryRun.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage)
+
+	})
+
+	//获取数据
+
+	result = new(entity.ListResponseEntity)
+	//是否存在缓存
+	var existCache bool
+	cachePreFix := "rtSearchBlogMysqlLevel_"
+	var cacheKey string
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		//如果存在缓存，先从缓冲中取
+		//先看有没有缓存
+		dbDryRun.Find(nil)
+		cacheKey = myDBProxy.BuildCacheKey(cachePreFix)
+		resultCache, ok := BlgLruUnsafety.Get(cacheKey)
+		if ok {
+			//有缓存
+			result = resultCache.(*entity.ListResponseEntity)
+			existCache = true
+
+			return
+		}
+
+		//没有缓存
+		var blogModelList []*model.BlogModel
+		db.Find(&blogModelList)
+
+		//转化为传输层的对象
+		list := ChangeToBlogListEntityList(blogModelList)
+
+		result.SetList(list)
+	})
+
+	if existCache {
+		//存在缓存直接返回
 		return result
 	}
 
-	//没有缓存
-	db.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(&blogModelList)
+	//没有缓存的情况下，继续计算count值，然后设置count
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		var count int64
+		db.Count(&count)
+		result.SetCount(count)
+		result.SetPerPage(perPage)
+	})
 
-	//转化为传输层的对象
-	list := ChangeToBlogListEntityList(blogModelList)
-
-	//构建结果返回
-	result = new(entity.ListResponseEntity)
-	result.SetCount(0)
-	result.SetPerPage(perPage)
-	result.SetList(list)
-
-	if list != nil {
-		//加入lru缓存
-		jsonCache, _ := json.Marshal(result)
-		BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
-	}
+	//第一次进来，添加缓存
+	BlgLruUnsafety.Add(cacheKey, result, 10*time.Second)
 
 	return result
 }
