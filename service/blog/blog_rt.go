@@ -1,7 +1,6 @@
 package blog
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/blog_backend/common-lib/db/mysql"
@@ -464,17 +463,18 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 
 	db := mysql.GetNewDB(false)
 
+	result = new(entity.ListResponseEntity)
+
 	cacheKey := "stat_cache"
-	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
+	resultCache, ok := BlgLruUnsafety.Get(cacheKey)
 	if ok {
-		result = new(entity.ListResponseEntity)
-		json.Unmarshal(lruCacheList.([]uint8), result)
+		result = resultCache.(*entity.ListResponseEntity)
 		return result
 	}
 
 	blogTableName := model.BlogModel{}.TableName()
 
-	db.Table(blogTableName)
+	db = db.Table(blogTableName)
 	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 
 	//文章总数
@@ -505,12 +505,10 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 	}
 
 	//构建结果返回
-	result = new(entity.ListResponseEntity)
 
 	result.SetList(response)
 
-	jsonCache, _ := json.Marshal(result)
-	BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
+	BlgLruUnsafety.Add(cacheKey, result, 30*time.Second)
 
 	return result
 }
