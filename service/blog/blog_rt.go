@@ -264,7 +264,7 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 	case "browse_total":
 	case "created_at":
 	default:
-		exception.NewException(exception.VALIDATE_ERR, "非法的sort_dimension")
+		panic(exception.NewException(exception.VALIDATE_ERR, "非法的sort_dimension"))
 	}
 
 	myDBProxy := my_db_proxy.NewMyDBProxy()
@@ -331,15 +331,15 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 	}
 
 	result.SetFilter([]help.Filter{
-		help.Filter{
+		{
 			Label: "排序维度",
 			Field: "sort_dimension",
 			Options: []help.Option{
-				help.Option{
+				{
 					Label: "浏览量",
 					Value: "browse_total",
 				},
-				help.Option{
+				{
 					Label: "创建时间",
 					Value: "created_at",
 				},
