@@ -167,45 +167,24 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 
 	//返回结果
 	result = new(entity.ListResponseEntity)
-
-	//计算count
-	var count int64
-	rtListCountPrefix := "rtListCount"
-	var rtListCountCacheKey string
-
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
-		//先看缓存是否存在
-		dbDryRun.Count(&count)
-		rtListCountCacheKey = myDBProxy.BuildCacheKey(rtListCountPrefix)
-		//如果存在缓存，先从缓冲中取
-		countCache, ok := BlgLruUnsafety.Get(rtListCountCacheKey)
-		if ok {
-			//有缓存
-			result.SetCount(countCache.(int64))
-			return
-		}
-
-		//没有缓存,查询数据库
-		db.Count(&count)
-		result.SetCount(count)
-		BlgLruUnsafety.Add(rtListCountCacheKey, count, 10*time.Second)
-	})
-
-	//获取结果
-	rtListPrefix := "rtList"
-	var rtListCacheKey string
+	//是否存在缓存
+	var existCache bool
+	cachePreFix := "rtBlogList_"
+	var cacheKey string
 
 	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
 
 		//查看缓存是否存在数据
-		dbDryRun.Select(strings.Join(blogField, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage)
-		rtListCacheKey = myDBProxy.BuildCacheKey(rtListPrefix)
+		dbDryRun.Select(strings.Join(blogField, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(nil)
+		cacheKey = myDBProxy.BuildCacheKey(cachePreFix)
 
 		//如果存在缓存，先从缓冲中取
-		rtListCache, ok := BlgLruUnsafety.Get(rtListCacheKey)
+		resultCache, ok := BlgLruUnsafety.Get(cacheKey)
+
 		if ok {
-			//有缓存
-			result.SetList(rtListCache)
+			//有缓存,直接返回缓存对象
+			result = resultCache.(*entity.ListResponseEntity)
+			existCache = true
 			return
 		}
 
@@ -256,12 +235,26 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 
 		result.SetList(queryResult)
 
-		//加入缓存
-		BlgLruUnsafety.Add(rtListCacheKey, queryResult, 10*time.Second)
+		return
+	})
 
+	if existCache {
+		//存在缓存直接返回
+		return result
+	}
+
+	//没有缓存的情况下，继续计算count值，然后设置count
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		var count int64
+		db.Count(&count)
+		result.SetCount(count)
 	})
 
 	result.SetPerPage(perPage)
+
+	//走到这里，说明是第一次进入，没有缓存的情况下
+	BlgLruUnsafety.Add(cacheKey, result, 10*time.Second)
+
 	return result
 }
 
@@ -269,13 +262,6 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 //per_page 每页多少条
 func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result *entity.ListResponseEntity) {
 
-	db := mysql.GetNewDB(false)
-	//获取执行的sql，不执行sql
-	dbDryRun := mysql.GetNewDB(true)
-
-	var blogModelList []*model.BlogModel
-	var cacheKey string
-	//查询
 	switch sortDimension {
 	case "browse_total":
 	case "created_at":
@@ -283,36 +269,72 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 		exception.NewException(exception.VALIDATE_ERR, "非法的sort_dimension")
 	}
 
-	db.Table(model.BlogModel{}.TableName())
-	dbDryRun.Table(model.BlogModel{}.TableName())
-	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
-	dbDryRun.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+	myDBProxy := my_db_proxy.NewMyDBProxy()
 
-	//排序字段
-	orderBySql := fmt.Sprintf("%s DESC", sortDimension)
-	statement := dbDryRun.Order(orderBySql).Limit(perPage).Find(&blogModelList).Statement
-	cacheKey = db.Dialector.Explain(statement.SQL.String(), statement.Vars...)
-	cacheKey = "sort_" + cacheKey
+	//表字，得到db
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
 
-	//如果存在缓存，先从缓冲中取
-	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
-	if ok {
-		//有缓存
-		//构建结果返回
-		result = new(entity.ListResponseEntity)
-		json.Unmarshal(lruCacheList.([]uint8), result)
+		*db = *db.Table(model.BlogModel{}.TableName())
+		*dbDryRun = *dbDryRun.Table(model.BlogModel{}.TableName())
+	})
+
+	//过滤
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+		dbDryRun.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+	})
+
+	//排序
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		db.Order(fmt.Sprintf("%s DESC", sortDimension))
+		dbDryRun.Order(fmt.Sprintf("%s DESC", sortDimension))
+	})
+
+	//分页
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		db.Limit(perPage)
+		dbDryRun.Limit(perPage)
+	})
+
+	//获取数据
+	result = new(entity.ListResponseEntity)
+
+	//是否存在缓存
+	var existCache bool
+	cachePreFix := "rtGetListBySort_"
+	var cacheKey string
+
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		//先看有没有缓存
+		dbDryRun.Find(nil)
+		cacheKey = myDBProxy.BuildCacheKey(cachePreFix)
+		//如果存在缓存，先从缓冲中取
+		resultCache, ok := BlgLruUnsafety.Get(cacheKey)
+
+		if ok {
+			//有缓存,直接返回缓存对象
+			result = resultCache.(*entity.ListResponseEntity)
+			existCache = true
+			return
+		}
+
+		var blogModelList []*model.BlogModel
+		db.Find(&blogModelList)
+
+		//转化为传输层的对象
+		blogSortEntityList := ChangeBlogSortEntityByList(blogModelList)
+
+		result.SetList(blogSortEntityList)
+	})
+
+
+	if existCache {
+		//存在缓存直接返回
 		return result
 	}
 
-	//获取数据
-	db.Order(orderBySql).Limit(perPage).Find(&blogModelList)
 
-	//转化为传输层的对象
-	blogSortEntityList := ChangeBlogSortEntityByList(blogModelList)
-
-	//构建结果返回
-	result = new(entity.ListResponseEntity)
-	filterList := []help.Filter{
+	result.SetFilter([]help.Filter{
 		help.Filter{
 			Label: "排序维度",
 			Field: "sort_dimension",
@@ -327,15 +349,10 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 				},
 			},
 		},
-	}
-	result.SetFilter(filterList)
+	})
 	result.SetCount(int64(perPage))
 	result.SetPerPage(perPage)
-	result.SetList(blogSortEntityList)
-
-	//加入缓存
-	jsonCache, _ := json.Marshal(result)
-	BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
+	BlgLruUnsafety.Add(cacheKey, result, 10*time.Second)
 
 	return result
 }

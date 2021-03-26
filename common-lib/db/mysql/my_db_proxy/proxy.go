@@ -26,8 +26,10 @@ func NewMyDBProxy() *MyDBProxy {
 }
 
 //执行一个代理
-func (m *MyDBProxy) ExecProxy(proxy Proxy) {
-	proxy(m.db, m.dbDryRun)
+//返回一个interface
+func (m *MyDBProxy) ExecProxy(proxy Proxy){
+	 proxy(m.db, m.dbDryRun)
+	 return
 }
 
 //获取执行的sql
