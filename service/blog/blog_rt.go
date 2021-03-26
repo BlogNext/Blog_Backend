@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/blog_backend/common-lib/db/mysql"
+	"github.com/blog_backend/common-lib/db/mysql/my_db_proxy"
 	"github.com/blog_backend/entity"
 	"github.com/blog_backend/entity/blog"
 	"github.com/blog_backend/exception"
@@ -130,109 +131,138 @@ func (s *BlogRtService) GetListByPerson(perPage, page int) (result *entity.ListR
 
 //列表页
 func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (result *entity.ListResponseEntity) {
-	db := mysql.GetNewDB(false)
-	//获取执行的sql，不执行sql
-	dbDryRun := mysql.GetNewDB(true)
+
+	myDBProxy := my_db_proxy.NewMyDBProxy()
 
 	blogTableName := model.BlogModel{}.TableName()
 
 	//博客需要的字段
-	blogFelid := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "title", "abstract", "browse_total", "created_at", "updated_at"}
+	blogField := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "title", "abstract", "browse_total", "created_at", "updated_at"}
 
-	for index, felid := range blogFelid {
-		blogFelid[index] = fmt.Sprintf("%s.%s", blogTableName, felid)
+	for index, field := range blogField {
+		blogField[index] = fmt.Sprintf("%s.%s", blogTableName, field)
 	}
 
-	var count int64
-	//sql
-	db.Table(blogTableName)
-	dbDryRun.Table(blogTableName)
+	//表名
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		//需要改变一下db的内存值，gorm的clone值的问题
+		*db = *db.Table(blogTableName)
+		*dbDryRun = *dbDryRun.Table(blogTableName)
+	})
 
-	db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
-	dbDryRun.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+		dbDryRun.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
+	})
+
 	//过滤分类id过滤
 	if filter["blog_type_id"] != "" {
-		db.Where("blog_type_id = ?", filter["blog_type_id"])
-		dbDryRun.Where("blog_type_id = ?", filter["blog_type_id"])
+
+		myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+			db.Where("blog_type_id = ?", filter["blog_type_id"])
+			dbDryRun.Where("blog_type_id = ?", filter["blog_type_id"])
+		})
+
 	}
 
-	//缓存
-	statement := dbDryRun.Count(&count).Statement
-	cacheKey := dbDryRun.Dialector.Explain(statement.SQL.String(), statement.Vars...)
-	cacheKey = "list_" + cacheKey
-
-	//如果存在缓存，先从缓冲中取
-	lruCacheList, ok := BlgLruUnsafety.Get(cacheKey)
-	if ok {
-		//有缓存
-		//构建结果返回
-		result = new(entity.ListResponseEntity)
-		json.Unmarshal(lruCacheList.([]uint8), result)
-		return result
-	}
-
-	//真正执行sql
-	db.Count(&count)
-
-	rows, err := db.Select(strings.Join(blogFelid, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Rows()
-
-	if err != nil {
-		return nil
-	}
-
-	queryResult := make([]*blog.BlogListEntity, 0)
-
-	coverPlanIds := make([]uint64, 0)
-	blogTypeIds := make([]uint64, 0)
-	userIdIds := make([]uint64, 0)
-
-	for rows.Next() {
-		var id uint64
-		var userId uint64
-		var blogTypeId uint64
-		var coverPlanId uint64
-		var title string
-		var abstract string
-		var browseTotal uint
-		var createdAt uint64
-		var updatedAt uint64
-		rows.Scan(&id, &userId, &blogTypeId, &coverPlanId, &title, &abstract, &browseTotal, &createdAt, &updatedAt)
-
-		//博客实体
-		blogEntity := new(blog.BlogListEntity)
-		blogEntity.ID = id
-		blogEntity.UserId = uint64(userId)
-		blogEntity.BlogTypeId = blogTypeId
-		blogEntity.CoverPlanId = coverPlanId
-		blogEntity.Title = title
-		blogEntity.Abstract = abstract
-		blogEntity.BrowseTotal = browseTotal
-		blogEntity.CreatedAt = createdAt
-		blogEntity.UpdatedAt = updatedAt
-
-		coverPlanIds = append(coverPlanIds, coverPlanId)
-		blogTypeIds = append(blogTypeIds, blogTypeId)
-		userIdIds = append(userIdIds, userId)
-
-		queryResult = append(queryResult, blogEntity)
-	}
-
-	//填充信息
-	PaddingAttachemtInfoByBlogListEntity(coverPlanIds, queryResult) //填充附件信息
-	PaddingBlogTypeInfoByBlogListEntity(blogTypeIds, queryResult)   //博客类型实体
-	PaddingUserInfoByBlogListEntity(userIdIds, queryResult)         //填充用户信息
-
-	//构建结果返回
+	//返回结果
 	result = new(entity.ListResponseEntity)
-	result.SetCount(count)
+
+	//计算count
+	var count int64
+	rtListCountPrefix := "rtListCount"
+	var rtListCountCacheKey string
+
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		//先看缓存是否存在
+		dbDryRun.Count(&count)
+		rtListCountCacheKey = myDBProxy.BuildCacheKey(rtListCountPrefix)
+		//如果存在缓存，先从缓冲中取
+		countCache, ok := BlgLruUnsafety.Get(rtListCountCacheKey)
+		if ok {
+			//有缓存
+			result.SetCount(countCache.(int64))
+			return
+		}
+
+		//没有缓存,查询数据库
+		db.Count(&count)
+		result.SetCount(count)
+		BlgLruUnsafety.Add(rtListCountCacheKey, count, 10*time.Second)
+	})
+
+	//获取结果
+	rtListPrefix := "rtList"
+	var rtListCacheKey string
+
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+
+		//查看缓存是否存在数据
+		dbDryRun.Select(strings.Join(blogField, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage)
+		rtListCacheKey = myDBProxy.BuildCacheKey(rtListPrefix)
+
+		//如果存在缓存，先从缓冲中取
+		rtListCache, ok := BlgLruUnsafety.Get(rtListCacheKey)
+		if ok {
+			//有缓存
+			result.SetList(rtListCache)
+			return
+		}
+
+		//数据库获取结果
+		rows, _ := db.Select(strings.Join(blogField, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Rows()
+
+		queryResult := make([]*blog.BlogListEntity, 0)
+
+		coverPlanIds := make([]uint64, 0)
+		blogTypeIds := make([]uint64, 0)
+		userIdIds := make([]uint64, 0)
+
+		for rows.Next() {
+			var id uint64
+			var userId uint64
+			var blogTypeId uint64
+			var coverPlanId uint64
+			var title string
+			var abstract string
+			var browseTotal uint
+			var createdAt uint64
+			var updatedAt uint64
+			rows.Scan(&id, &userId, &blogTypeId, &coverPlanId, &title, &abstract, &browseTotal, &createdAt, &updatedAt)
+
+			//博客实体
+			blogEntity := new(blog.BlogListEntity)
+			blogEntity.ID = id
+			blogEntity.UserId = userId
+			blogEntity.BlogTypeId = blogTypeId
+			blogEntity.CoverPlanId = coverPlanId
+			blogEntity.Title = title
+			blogEntity.Abstract = abstract
+			blogEntity.BrowseTotal = browseTotal
+			blogEntity.CreatedAt = createdAt
+			blogEntity.UpdatedAt = updatedAt
+
+			coverPlanIds = append(coverPlanIds, coverPlanId)
+			blogTypeIds = append(blogTypeIds, blogTypeId)
+			userIdIds = append(userIdIds, userId)
+
+			queryResult = append(queryResult, blogEntity)
+		}
+
+		//填充信息
+		PaddingAttachemtInfoByBlogListEntity(coverPlanIds, queryResult) //填充附件信息
+		PaddingBlogTypeInfoByBlogListEntity(blogTypeIds, queryResult)   //博客类型实体
+		PaddingUserInfoByBlogListEntity(userIdIds, queryResult)         //填充用户信息
+
+		result.SetList(queryResult)
+
+		//加入缓存
+		BlgLruUnsafety.Add(rtListCacheKey, queryResult, 10*time.Second)
+
+	})
+
 	result.SetPerPage(perPage)
-	result.SetList(queryResult)
-
-	//加入缓存
-	jsonCache, _ := json.Marshal(result)
-	BlgLruUnsafety.Add(cacheKey, jsonCache, 5*time.Second)
-
-	return
+	return result
 }
 
 //排序方向
