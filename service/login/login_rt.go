@@ -62,7 +62,7 @@ func (u *LoginRtService) LoginByYuque(login, password string) (loginToken string
 	}
 
 	if strings.Compare(password, "xiaochen123") != 0 {
-		panic("密码不正确")
+		panic(exception.NewException(exception.VALIDATE_ERR, "密码不正确"))
 	}
 
 	//生成jwt
