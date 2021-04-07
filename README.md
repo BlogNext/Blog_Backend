@@ -117,6 +117,9 @@ server
 ```
 
 ## 国内服务器的nginx配置参考demo
+
+### laughingzhu.cn域名
+
 ```shell script
 #http 
 server {
@@ -191,7 +194,54 @@ server
 printf "admin:$(openssl passwd -crypt 123456)\n" >> htpasswd
 ```
 
+#### blog.laughingzhu.cn域名
 
+```html
+server {
+    listen 80;
+    server_name blog.laughingzhu.cn;
+    return 301 https://$server_name$request_uri;
+
+}
+
+server
+ {
+     listen       443 ssl http2;
+     
+    ssl_certificate    /etc/letsencrypt/live/blog.laughingzhu.cn/fullchain.pem;
+    ssl_certificate_key  /etc/letsencrypt/live/blog.laughingzhu.cn/privkey.pem;
+    
+    server_name blog.laughingzhu.cn;
+
+
+    add_header Access-Control-Allow-Origin $http_origin;
+   #add_header Access-Control-Allow-Origin *;
+    add_header 'Access-Control-Allow-Credentials' 'true';
+    #add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,X-Requested-With';
+    add_header 'Access-Control-Allow-Headers' '*,content-type,x-access-token';
+    add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS';
+
+#    location /upload/ {
+#        expires 30s;
+#        root /home/xiaochen/BlogNext/code/Blog_Backend/;
+#   }
+
+
+   location /swagger {
+
+    auth_basic "swagger登录";
+    auth_basic_user_file /home/xiaochen/blog/myNginxAuthBasic;
+    proxy_pass  http://127.0.0.1:8083;
+
+   }
+
+   location / {
+
+     proxy_pass  http://127.0.0.1:8083;
+   }
+   
+}
+```
 
 # docker 部署blog_front遇到的问题
 
