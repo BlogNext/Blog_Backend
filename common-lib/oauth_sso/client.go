@@ -8,13 +8,12 @@ import (
 	"net/http"
 )
 
-type RequestInitFunc func() (*http.Request, *Response)
+type RequestInitFunc func() (*http.Request, DataEntity)
 
 //发送请求
 func HttpDoRequest(requestInitFunc RequestInitFunc) {
 	//调用回调得到request和响应
-	request, entityResponse := requestInitFunc()
-
+	request, dataEntity := requestInitFunc()
 	//发送请求
 	client := &http.Client{}
 	res, err := client.Do(request)
@@ -28,6 +27,8 @@ func HttpDoRequest(requestInitFunc RequestInitFunc) {
 	}
 
 	//响应
+	entityResponse := new(Response)
+	entityResponse.SetData(dataEntity)
 	err = json.Unmarshal(data, entityResponse)
 	if err != nil {
 		//序列化失败

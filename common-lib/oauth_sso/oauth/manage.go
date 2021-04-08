@@ -11,9 +11,21 @@ type Manage struct {
 
 //创建预授权码
 func (m *Manage) CreatePreAuthCode(nickname, password, clientId, redirectUrl string, r *CreatePreAuthCodeResponse) oauth_sso.RequestInitFunc {
-	return func() (*http.Request, *oauth_sso.Response) {
-		response := new(oauth_sso.Response)
-		response.SetData(r)
-		return m.request.CreatePreAuthCode(nickname, password, clientId, redirectUrl), response
+	return func() (*http.Request, oauth_sso.DataEntity) {
+		return m.request.createPreAuthCode(nickname, password, clientId, redirectUrl), r
+	}
+}
+
+//预授权码换取token
+func (m *Manage) PreAuthCodeAccessToken(preAuthCode, clientId, clientSecret string, r *PreAuthCodeAccessTokenResponse) oauth_sso.RequestInitFunc {
+	return func() (*http.Request, oauth_sso.DataEntity) {
+		return m.request.preAuthCodeAccessToken(preAuthCode, clientId, clientSecret), r
+	}
+}
+
+//refreshToken刷新
+func (m *Manage) RefreshToken(refreshToken string, r *RefreshTokenResponse) oauth_sso.RequestInitFunc {
+	return func() (*http.Request, oauth_sso.DataEntity) {
+		return m.request.refreshToken(refreshToken), r
 	}
 }

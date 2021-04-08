@@ -13,7 +13,7 @@ type request struct {
 }
 
 //创建预授权码
-func (o *request) CreatePreAuthCode(nickname, password, clientId, redirectUrl string) *http.Request {
+func (o *request) createPreAuthCode(nickname, password, clientId, redirectUrl string) *http.Request {
 	values := url.Values{}
 	values.Set("nickname", nickname)
 	values.Set("password", password)
@@ -36,7 +36,7 @@ func (o *request) preAuthCodeAccessToken(preAuthCode, clientId, clientSecret str
 }
 
 //授权码换取accessToken
-func (o *request) RefreshToken(refreshToken string) *http.Request {
+func (o *request) refreshToken(refreshToken string) *http.Request {
 	values := url.Values{}
 	values.Set("refresh_token", refreshToken)
 	req, _ := http.NewRequest(http.MethodPost, o.url.GetUrl("api/oauth/refresh_token"), strings.NewReader(values.Encode()))
@@ -44,10 +44,3 @@ func (o *request) RefreshToken(refreshToken string) *http.Request {
 	return req
 }
 
-func (o *request) VerifyAccessToken(accessToken string) *http.Request {
-	values := url.Values{}
-	values.Set("access_token", accessToken)
-	req, _ := http.NewRequest(http.MethodPost, o.url.GetUrl("api/oauth/verify_access_token"), strings.NewReader(values.Encode()))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	return req
-}
