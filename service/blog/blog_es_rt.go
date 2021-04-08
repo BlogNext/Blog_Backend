@@ -8,7 +8,7 @@ package blog
 ////per_page 每页多少条
 ////page 第几页
 //
-//func (b *BlogEsRtService) SearchBlog(keyword string, per_page, page int) (result *entity.ListResponseEntity) {
+//func (b *BlogEsRtService) SearchBlog(keyword string, per_page, page int) (result *response.ListResponseEntity) {
 //
 //	search_result, err := b.BaseEsService.SearchDoc(func() es.Commend {
 //		return func(client *elastic.Client) (i interface{}, err error) {
@@ -41,7 +41,7 @@ package blog
 //	}
 //
 //	//构建结果返回
-//	result = new(entity.ListResponseEntity)
+//	result = new(response.ListResponseEntity)
 //	result.SetPerPage(per_page)
 //
 //	var blog_entity_list []*blog.BlogListEntity
