@@ -1,3 +1,6 @@
-servier:
+server:
   port: 8083
   file_domain: 127.0.0.1
+oauthSSO:
+  scheme: http
+  host: 127.0.0.1:8084

@@ -89,7 +89,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	serverInfo := serverConfig.GetStringMap("servier")
+	serverInfo := serverConfig.GetStringMap("server")
 	//gin的路由
 	r := router.RunRouter()
 	//url := ginSwagger.URL("http://localhost:8083/swagger/doc.json") // The url pointing to API definition

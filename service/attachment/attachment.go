@@ -69,7 +69,7 @@ func GetAttachmentImages(ids []uint64) (attachmentEntityList []*attachment.Attac
 	attachmentEntityList = make([]*attachment.AttachmentEntity, len(attachmentList))
 
 	serverConfig, _ := config.GetConfig("server")
-	serverInfo := serverConfig.GetStringMap("servier")
+	serverInfo := serverConfig.GetStringMap("server")
 	fileDomain := serverInfo["file_domain"].(string)
 
 	for index, attachmentModel := range attachmentList {
