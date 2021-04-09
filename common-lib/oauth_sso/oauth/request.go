@@ -1,7 +1,7 @@
 package oauth
 
 import (
-	"github.com/blog_backend/common-lib/oauth_sso"
+	"github.com/blog_backend/common-lib/oauth_sso/core"
 	"net/http"
 	"net/url"
 	"strings"
@@ -9,12 +9,12 @@ import (
 
 //协议
 type request struct {
-	url *oauth_sso.OauthSSOUrl
+	url *core.OauthSSOUrl
 }
 
 func newRequest() *request {
 	return &request{
-		url: oauth_sso.NewUrl(),
+		url: core.NewUrl(),
 	}
 }
 
@@ -44,8 +44,8 @@ func (r *request) preAuthCodeAccessToken(preAuthCode, clientId, clientSecret str
 //授权码换取accessToken
 func (r *request) refreshToken(refreshToken string) *http.Request {
 	values := url.Values{}
-	values.Set("token", refreshToken)
-	req, _ := http.NewRequest(http.MethodPost, r.url.GetUrl("api/oauth/token"), strings.NewReader(values.Encode()))
+	values.Set("refresh_token", refreshToken)
+	req, _ := http.NewRequest(http.MethodPost, r.url.GetUrl("api/oauth/refresh_token"), strings.NewReader(values.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	return req
 }

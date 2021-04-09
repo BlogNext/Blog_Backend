@@ -1,4 +1,4 @@
-package oauth_sso
+package core
 
 //数据
 type DataEntity interface {

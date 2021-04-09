@@ -1,15 +1,16 @@
-package oauth_sso
+package token
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/blog_backend/common-lib/oauth_sso/core"
 	"github.com/blog_backend/common-lib/oauth_sso/oauth"
 	"github.com/blog_backend/exception"
 	"io/ioutil"
 	"net/http"
 )
 
-type RequestInitFunc func(accessToken string) (*http.Request, DataEntity)
+type RequestInitFunc func(accessToken string) (*http.Request, core.DataEntity)
 
 //用户的token管理
 type TokenManage struct {
@@ -88,7 +89,7 @@ func (m *TokenManage) httpRequest(requestInitFunc RequestInitFunc) (err error) {
 	}
 
 	//响应
-	entityResponse := new(Response)
+	entityResponse := new(core.Response)
 	entityResponse.SetData(dataEntity)
 	err = json.Unmarshal(data, entityResponse)
 	if err != nil {

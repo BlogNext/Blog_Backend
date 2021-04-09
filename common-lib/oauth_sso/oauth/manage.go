@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/blog_backend/common-lib/oauth_sso"
+	"github.com/blog_backend/common-lib/oauth_sso/core"
 	"io/ioutil"
 	"net/http"
 )
 
-type ManageRequestInitFunc func() (*http.Request, oauth_sso.DataEntity)
+type ManageRequestInitFunc func() (*http.Request, core.DataEntity)
 
 //授权的服务
 type Manage struct {
@@ -31,21 +31,21 @@ func NewManage(clientId, clientSecret string) *Manage {
 
 //创建预授权码
 func (m *Manage) CreatePreAuthCode(nickname, password, redirectUrl string, r *CreatePreAuthCodeResponse) error {
-	return m.httpDoRequest(func() (*http.Request, oauth_sso.DataEntity) {
+	return m.httpDoRequest(func() (*http.Request, core.DataEntity) {
 		return m.request.createPreAuthCode(nickname, password, m.clientId, redirectUrl), r
 	})
 }
 
 //预授权码换取token
 func (m *Manage) PreAuthCodeAccessToken(preAuthCode string, r *PreAuthCodeAccessTokenResponse) error {
-	return m.httpDoRequest(func() (*http.Request, oauth_sso.DataEntity) {
+	return m.httpDoRequest(func() (*http.Request, core.DataEntity) {
 		return m.request.preAuthCodeAccessToken(preAuthCode, m.clientId, m.clientSecret), r
 	})
 }
 
 //refreshToken刷新
 func (m *Manage) RefreshToken(refreshToken string, r *RefreshTokenResponse) error {
-	return m.httpDoRequest(func() (*http.Request, oauth_sso.DataEntity) {
+	return m.httpDoRequest(func() (*http.Request, core.DataEntity) {
 		return m.request.refreshToken(refreshToken), r
 	})
 }
@@ -75,7 +75,7 @@ func (m *Manage) httpDoRequest(manageRequestInitFunc ManageRequestInitFunc) (err
 	}
 
 	//响应
-	entityResponse := new(oauth_sso.Response)
+	entityResponse := new(core.Response)
 	entityResponse.SetData(dataEntity)
 	err = json.Unmarshal(data, entityResponse)
 	if err != nil {
