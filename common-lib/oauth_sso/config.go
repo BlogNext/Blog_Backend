@@ -2,30 +2,28 @@ package oauth_sso
 
 import (
 	"fmt"
-	"github.com/blog_backend/common-lib/config"
-	"log"
 	"net/url"
 )
 
 //oauthSSO的服务器配置信息
 var oauthSSOConfig map[string]string
 
-func init() {
+func SetOauthSSoSchemeConfig(scheme string) {
+	oauthSSOConfig["scheme"] = scheme
+}
 
-	//导入配置
-	config.LoadConfig("server", "config", "yaml")
-	serverConfig, err := config.GetConfig("server")
-	if err != nil {
-		log.Println(err)
-	}
-	oauthSSOInfo := serverConfig.GetStringMap("oauthSSO")
+func SetOauthSSoHostConfig(host string) {
+	oauthSSOConfig["host"] = host
+}
+
+func init() {
 
 	if oauthSSOConfig == nil {
 		oauthSSOConfig = make(map[string]string)
 		//协议
-		oauthSSOConfig["scheme"] = oauthSSOInfo["scheme"].(string)
+		SetOauthSSoSchemeConfig("")
 		//地址
-		oauthSSOConfig["host"] = oauthSSOInfo["host"].(string)
+		SetOauthSSoHostConfig("")
 	}
 }
 

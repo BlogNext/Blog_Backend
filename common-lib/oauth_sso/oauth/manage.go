@@ -31,27 +31,27 @@ func NewManage(clientId, clientSecret string) *Manage {
 
 //创建预授权码
 func (m *Manage) CreatePreAuthCode(nickname, password, redirectUrl string, r *CreatePreAuthCodeResponse) error {
-	return m.HttpDoRequest(func() (*http.Request, oauth_sso.DataEntity) {
+	return m.httpDoRequest(func() (*http.Request, oauth_sso.DataEntity) {
 		return m.request.createPreAuthCode(nickname, password, m.clientId, redirectUrl), r
 	})
 }
 
 //预授权码换取token
 func (m *Manage) PreAuthCodeAccessToken(preAuthCode string, r *PreAuthCodeAccessTokenResponse) error {
-	return m.HttpDoRequest(func() (*http.Request, oauth_sso.DataEntity) {
+	return m.httpDoRequest(func() (*http.Request, oauth_sso.DataEntity) {
 		return m.request.preAuthCodeAccessToken(preAuthCode, m.clientId, m.clientSecret), r
 	})
 }
 
 //refreshToken刷新
 func (m *Manage) RefreshToken(refreshToken string, r *RefreshTokenResponse) error {
-	return m.HttpDoRequest(func() (*http.Request, oauth_sso.DataEntity) {
+	return m.httpDoRequest(func() (*http.Request, oauth_sso.DataEntity) {
 		return m.request.refreshToken(refreshToken), r
 	})
 }
 
 //http请求
-func (m *Manage) HttpDoRequest(manageRequestInitFunc ManageRequestInitFunc) (err error) {
+func (m *Manage) httpDoRequest(manageRequestInitFunc ManageRequestInitFunc) (err error) {
 
 	defer func() {
 		if myException := recover(); myException != nil {
