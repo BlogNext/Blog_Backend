@@ -2,10 +2,10 @@ package token
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/blog_backend/common-lib/oauth_sso/core"
 	"github.com/blog_backend/common-lib/oauth_sso/oauth"
-	"github.com/blog_backend/exception"
 	"io/ioutil"
 	"net/http"
 )
@@ -67,26 +67,16 @@ func (m *TokenManage) HttpDoRequest(requestInitFunc RequestInitFunc) error {
 //isResult true成功， false不成功
 func (m *TokenManage) httpRequest(requestInitFunc RequestInitFunc) (err error) {
 
-	defer func() {
-		if errPanic := recover(); errPanic != nil {
-			err = errPanic.(error)
-			return
-		}
-	}()
-
 	//调用回调得到request和响应
 	request, dataEntity := requestInitFunc(m.accessToken)
 	//发送请求
 	client := &http.Client{}
 	res, err := client.Do(request)
 	if err != nil {
-		panic(exception.NewException(exception.VALIDATE_ERR, err.Error()))
+		return err
 	}
 	defer res.Body.Close()
-	data, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		panic(err)
-	}
+	data, _ := ioutil.ReadAll(res.Body)
 
 	//响应
 	entityResponse := new(core.Response)
@@ -94,11 +84,11 @@ func (m *TokenManage) httpRequest(requestInitFunc RequestInitFunc) (err error) {
 	err = json.Unmarshal(data, entityResponse)
 	if err != nil {
 		//序列化失败
-		panic(err)
+		return err
 	}
 
 	if entityResponse.Code != 0 {
-		panic(exception.NewException(exception.VALIDATE_ERR, fmt.Sprintf("code:%d,错误信息:%s", entityResponse.Code, entityResponse.Msg)))
+		return errors.New(fmt.Sprintf("code:%d,错误信息:%s", entityResponse.Code, entityResponse.Msg))
 	}
 
 	return nil

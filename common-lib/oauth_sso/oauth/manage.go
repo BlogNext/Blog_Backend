@@ -53,13 +53,6 @@ func (m *Manage) RefreshToken(refreshToken string, r *RefreshTokenResponse) erro
 //http请求
 func (m *Manage) httpDoRequest(manageRequestInitFunc ManageRequestInitFunc) (err error) {
 
-	defer func() {
-		if myException := recover(); myException != nil {
-			err = myException.(error)
-			return
-		}
-	}()
-
 	//调用回调得到request和响应
 	request, dataEntity := manageRequestInitFunc()
 	//发送请求
