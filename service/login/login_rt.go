@@ -41,7 +41,7 @@ func init() {
 		//运行服务器
 		serverConfig, err := config.GetConfig("server")
 		if err != nil {
-			log.Fatalln(err,"配置信息加载失败")
+			log.Fatalln(err, "配置信息加载失败")
 		}
 
 		oauthSSOMapConfig := serverConfig.GetStringMap("oauthSSO")
@@ -55,7 +55,6 @@ func init() {
 		oauthSSOClientConfig = make(map[string]string)
 		oauthSSOClientConfig["clientId"] = oauthSSOMapConfig["client_id"].(string)
 		oauthSSOClientConfig["clientSecret"] = oauthSSOMapConfig["client_secret"].(string)
-
 
 	}
 
@@ -80,7 +79,7 @@ func (u *LoginRtService) IsLogin(loginToken string, loginEntity *front.LoginEnti
 	})
 
 	if err != nil {
-		panic(err)
+		return false
 	}
 
 	if _, ok := token.Claims.(*front.LoginEntity); ok && token.Valid {
