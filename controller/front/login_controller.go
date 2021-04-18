@@ -58,3 +58,29 @@ func (u *LoginController) IsLogin() {
 	help.Gin200SuccessResponse(u.Ctx, "成功", result)
 	return
 }
+
+// @oauthSSo单点登录
+// @Description 基于BlogNext的用户体系和oauth协议做的预授权码单点登录
+// @Tags 前台-登录
+// @Accept  application/x-www-form-urlencoded
+// @Produce  json
+// @Param   pre_code  query   string     true        "预授权码"
+// @Success 200 {object} interface{}	"json格式"
+// @Router /front/login/login_blog_next_pre_code [post]
+func (u *LoginController) LoginBlogNextPreCode() {
+
+	var request front.BlogNextPreCodeRequest
+
+	err := u.Ctx.ShouldBind(&request)
+
+	if err != nil {
+		help.Gin200ErrorResponse(u.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
+		return
+	}
+
+	service := new(login.LoginRtService)
+	response := service.BlogNextPreCode(&request)
+
+	help.Gin200SuccessResponse(u.Ctx, "成功", response)
+	return
+}

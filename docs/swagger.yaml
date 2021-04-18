@@ -182,6 +182,26 @@ paths:
             type: object
       tags:
       - 前台-登录
+  /front/login/login_blog_next_pre_code:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: 基于BlogNext的用户体系和oauth协议做的预授权码单点登录
+      parameters:
+      - description: 预授权码
+        in: query
+        name: pre_code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: json格式
+          schema:
+            type: object
+      tags:
+      - 前台-登录
   /front/person/blog_list:
     get:
       consumes:

@@ -4,3 +4,5 @@ server:
 oauthSSO:
   scheme: http
   host: 127.0.0.1:8084
+  clientId: xxxxxxxxx
+  clientSecret: xxxxxxx

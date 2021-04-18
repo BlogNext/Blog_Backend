@@ -277,6 +277,37 @@
                 }
             }
         },
+        "/front/login/login_blog_next_pre_code": {
+            "post": {
+                "description": "基于BlogNext的用户体系和oauth协议做的预授权码单点登录",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "前台-登录"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "预授权码",
+                        "name": "pre_code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "json格式",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/front/person/blog_list": {
             "get": {
                 "security": [

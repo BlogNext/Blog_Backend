@@ -10,3 +10,4 @@ type LoginEntity struct {
 	jwt.StandardClaims
 	UserFrontEntity user.UserFrontEntity `json:"user_front_entity"`
 }
+
