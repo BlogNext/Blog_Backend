@@ -71,7 +71,7 @@ func (u *LoginController) LoginBlogNextPreCode() {
 
 	var request front.BlogNextPreCodeRequest
 
-	err := u.Ctx.ShouldBind(&request)
+	err := u.Ctx.ShouldBindJSON(&request)
 
 	if err != nil {
 		help.Gin200ErrorResponse(u.Ctx, exception.VALIDATE_ERR, err.Error(), nil)
