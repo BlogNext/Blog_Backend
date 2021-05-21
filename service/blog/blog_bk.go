@@ -22,8 +22,8 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	db := mysql.GetNewDB(false)
 	blogModel := new(model.BlogModel)
 	queryResult := db.Where("yuque_id = ?", doc.ID).First(blogModel)
-	find := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
-	if find {
+	notFund := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
+	if notFund {
 		panic(fmt.Sprintf("博客未创建yuque_id:%d", doc.ID))
 	}
 
@@ -116,4 +116,23 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 	//blog_es_service := new(BlogEsBkService)
 	//blog_es_service.AddDoc(blog_list_entity)
 
+}
+
+
+//通过语雀webHook删除博客
+func(s BlogBkService) DeleteBlogByYuQueWebHook(doc *response.DocDetailSerializer){
+	db := mysql.GetNewDB(false)
+	blogModel := new(model.BlogModel)
+	queryResult := db.Where("yuque_id = ?", doc.ID).First(blogModel)
+	notFund := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
+	if notFund {
+		panic(fmt.Sprintf("博客未创建yuque_id:%d", doc.ID))
+	}
+
+	//删除博客中的文件
+	attachmentService := new(attachment.AttachmentRtService)
+	attachmentService.DeleteAttachmentById(blogModel.CoverPlanId)
+
+	//删除博客
+	db.Delete(blogModel)
 }

@@ -82,6 +82,13 @@ func syncBlog(doc *response.DocDetailSerializer, userId, blogTypeId uint64) {
 		//获取博客的封面图和摘要
 		blogService.CreateBlogByYuQueWebHook(doc, userId, blogTypeId)
 	} else {
+
+		if doc.DeletedAt != "" {
+			//删除文档
+			blogService.DeleteBlogByYuQueWebHook(doc)
+			return
+		}
+
 		//更新文档
 		blogService.UpdateBlogByYuQueWebHook(doc)
 	}

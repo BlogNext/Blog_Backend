@@ -1,12 +1,15 @@
 package attachment
 
 import (
+	"errors"
 	"fmt"
 	"github.com/blog_backend/common-lib/config"
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/entity/attachment"
 	"github.com/blog_backend/exception"
 	"github.com/blog_backend/model"
+	"gorm.io/gorm"
+	"log"
 	"math/rand"
 	"os"
 	"path"
@@ -104,6 +107,25 @@ func getAttachmentByIds(ids []uint64) (attachmentList []model.AttachmentModel) {
 
 //附件服务
 type AttachmentBaseService struct {
+}
+
+//删除文件
+func (s *AttachmentBaseService) DeleteAttachmentById(id uint64){
+	db := mysql.GetNewDB(false)
+	attachmentModel := new(model.AttachmentModel)
+	queryResult := db.Where("id = ?", id).First(attachmentModel)
+	notFund := errors.Is(queryResult.Error, gorm.ErrRecordNotFound)
+	if notFund {
+		return
+	}
+	//删除文件
+	err := os.Remove(attachmentModel.Path)
+	if err != nil {
+		log.Println("删除文件失败",err)
+		return
+	}
+
+	db.Delete(attachmentModel)
 }
 
 //保存到数据库
