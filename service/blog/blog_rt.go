@@ -187,6 +187,22 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 			return
 		}
 
+	})
+
+	if existCache {
+		//存在缓存直接返回
+		return result
+	}
+
+	//没有缓存的情况下，继续计算count值，然后设置count
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		var count int64
+		db.Count(&count)
+		result.SetCount(count)
+		result.SetPerPage(perPage)
+	})
+
+	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
 		//数据库获取结果
 		rows, _ := db.Select(strings.Join(blogField, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Rows()
 
@@ -235,19 +251,6 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 		result.SetList(queryResult)
 
 		return
-	})
-
-	if existCache {
-		//存在缓存直接返回
-		return result
-	}
-
-	//没有缓存的情况下，继续计算count值，然后设置count
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
-		var count int64
-		db.Count(&count)
-		result.SetCount(count)
-		result.SetPerPage(perPage)
 	})
 
 	//走到这里，说明是第一次进入，没有缓存的情况下
