@@ -7,8 +7,8 @@ import (
 	"github.com/blog_backend/common-lib/db/mysql"
 	_ "github.com/blog_backend/docs"
 	my_router "github.com/blog_backend/router"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"golang.org/x/net/netutil"
 	"log"
 	"net"
@@ -104,8 +104,9 @@ func main() {
 	}
 	defer l.Close()
 	netutil.LimitListener(l,1000)   //最多同时只能有1000个链接，防止压垮服务器
-	http.Serve(l,r)
+	//http.Serve(l,r)
 
-
+	h2 := serverInfo["h2"].(map[string]interface{})
+	http.ServeTLS(l,r, h2["certificate"].(string),h2["certificate_key"].(string))
 	//http.ListenAndServe(fmt.Sprintf(":%d", server_info["port"].(int)), r)
 }
