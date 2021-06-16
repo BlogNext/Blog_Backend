@@ -1,8 +1,11 @@
 server:
   port: 8083
   file_domain: 127.0.0.1
+  h2:
+    certificate: config/fullchain.pem
+    certificate_key: config/privkey.pem
 oauthSSO:
   scheme: http
   host: 127.0.0.1:8084
-  clientId: xxxxxxxxx
-  clientSecret: xxxxxxx
+  client_id: xxxxxxxxx
+  client_secret: xxxxxxx
