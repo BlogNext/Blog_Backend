@@ -9,19 +9,21 @@ services:
       #工作目录空间
     working_dir: /go/src/github.com/blog_backend
     volumes:
-    #jenkins执行的时候，   ./是项目的路径
-    - ./:/go/src/github.com/blog_backend
-    - ./upload:/go/bin/upload
-    - ./config/:/go/bin/config
+      #jenkins执行的时候，   ./是项目的路径
+      - ./:/go/src/github.com/blog_backend
+      - ./upload:/go/bin/upload
+      - ./config/:/go/bin/config
+      - /etc/letsencrypt/live/blog.laughingzhu.cn/fullchain.pem:/go/bin/config/fullchain.pem
+      - /etc/letsencrypt/live/blog.laughingzhu.cn/privkey.pem:/go/bin/config/privkey.pem
     command: /bin/bash -c "go install -v ./ && /go/bin/blog_backend"
     #设置环境变量
     environment:
       - GIN_MODE=release
       - GOPROXY=https://mirrors.aliyun.com/goproxy/
     ports:
-    - "8083:8083"
+      - "8083:8083"
     networks:
-    - custom_net
+      - custom_net
 networks:
   #自定义网络
   custom_net:
