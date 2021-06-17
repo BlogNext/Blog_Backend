@@ -86,8 +86,9 @@ func (c *BlogController) GetList() {
 	filter["blog_type_id"] = c.Ctx.DefaultQuery("blog_type_id", "") //分类id过滤
 
 	sort := c.Ctx.DefaultQuery("sort", "DESC")
-	if !strings.EqualFold(sort, "DESC") || !strings.EqualFold(sort, "ASC") {
+	if !strings.EqualFold(sort, "DESC") && !strings.EqualFold(sort, "ASC") {
 		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, "ASC|DESC选其一", nil)
+		return
 	}
 
 	service := new(blog.BlogRtService)
