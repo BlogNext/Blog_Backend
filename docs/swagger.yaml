@@ -53,6 +53,10 @@ paths:
         in: query
         name: blog_type_id
         type: integer
+      - description: 排序
+        in: query
+        name: sort
+        type: string
       produces:
       - application/json
       responses:

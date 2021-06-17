@@ -96,6 +96,12 @@ var doc = `{
                         "description": "博客分类",
                         "name": "blog_type_id",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "排序",
+                        "name": "sort",
+                        "in": "query"
                     }
                 ],
                 "responses": {
