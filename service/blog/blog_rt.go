@@ -129,7 +129,7 @@ func (s *BlogRtService) GetListByPerson(perPage, page int) (result *entity.ListR
 }
 
 //列表页
-func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (result *entity.ListResponseEntity) {
+func (s *BlogRtService) GetList(filter map[string]string, perPage, page int, sort string) (result *entity.ListResponseEntity) {
 
 	myDBProxy := my_db_proxy.NewMyDBProxy()
 
@@ -174,7 +174,9 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
 
 		//查看缓存是否存在数据
-		dbDryRun.Select(strings.Join(blogField, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Find(nil)
+		dbDryRun.Select(strings.Join(blogField, ", ")).Order(fmt.Sprintf("created_at %s", sort)).
+			Limit(perPage).Offset((page - 1) * perPage).Find(nil)
+
 		cacheKey = myDBProxy.BuildCacheKey(cachePreFix)
 
 		//如果存在缓存，先从缓冲中取
@@ -204,7 +206,8 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int) (re
 
 	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
 		//数据库获取结果
-		rows, _ := db.Select(strings.Join(blogField, ", ")).Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage).Rows()
+		rows, _ := db.Select(strings.Join(blogField, ", ")).Order(fmt.Sprintf("created_at %s", sort)).
+			Limit(perPage).Offset((page - 1) * perPage).Rows()
 
 		queryResult := make([]*blog.BlogListEntity, 0)
 

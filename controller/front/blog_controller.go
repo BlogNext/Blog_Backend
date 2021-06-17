@@ -54,6 +54,7 @@ func (c *BlogController) Detail() {
 // @Param   per_page     query    int     true    "一页多少条"
 // @Param   page     query    int     true        "第几页"
 // @Param   blog_type_id     query    int     false        "博客分类"
+// @Param   sort          query   string  false    "排序"
 // @Success 200 {object} interface{}	"json格式"
 // @Router /front/blog/get_list [get]
 func (c *BlogController) GetList() {
@@ -84,8 +85,13 @@ func (c *BlogController) GetList() {
 	filter := make(map[string]string)
 	filter["blog_type_id"] = c.Ctx.DefaultQuery("blog_type_id", "") //分类id过滤
 
+	sort := c.Ctx.DefaultQuery("sort", "DESC")
+	if !strings.EqualFold(sort, "DESC") || !strings.EqualFold(sort, "ASC") {
+		help.Gin200ErrorResponse(c.Ctx, exception.VALIDATE_ERR, "ASC|DESC选其一", nil)
+	}
+
 	service := new(blog.BlogRtService)
-	result := service.GetList(filter, sr.PerPage, sr.Page)
+	result := service.GetList(filter, sr.PerPage, sr.Page,sort)
 
 	help.Gin200SuccessResponse(c.Ctx, "成功", result)
 }
