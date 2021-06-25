@@ -64,7 +64,7 @@ func (s *BlogTypeRtService) GetList(perPage, page int) (result *entity.ListRespo
 		return result
 	}
 
-	myDBProxy := my_db_proxy.NewMyDBProxyByTable(model.BlogTypeModel.TableName())
+	myDBProxy := my_db_proxy.NewMyDBProxyByTable(model.BlogTypeModel{}.TableName())
 
 	//返回结果
 	result = new(entity.ListResponseEntity)
