@@ -1,6 +1,7 @@
 package blog
 
 import (
+	"github.com/blog_backend/common-lib/arithmetic/lru"
 	"github.com/blog_backend/common-lib/db/mysql"
 	"github.com/blog_backend/common-lib/db/mysql/my_db_proxy"
 	"github.com/blog_backend/entity"
@@ -53,40 +54,30 @@ func (s *BlogTypeRtService) getListByids(ids []uint64) (result map[uint64]*blog.
 //获取分类列表
 func (s *BlogTypeRtService) GetList(perPage, page int) (result *entity.ListResponseEntity) {
 
+	cacheKey := lru.GenerateCacheKey(perPage, page)
+
+	resultCache, ok := BlgLruUnsafety.Get(cacheKey)
+
+	if ok {
+		//有缓存,直接返回缓存对象
+		result = resultCache.(*entity.ListResponseEntity)
+		return result
+	}
+
 	myDBProxy := my_db_proxy.NewMyDBProxy()
 
 	//表名
 	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
 		//需要改变一下db的内存值，gorm的clone值的问题
 		*db = *db.Model(&model.BlogTypeModel{})
-		*dbDryRun = *dbDryRun.Model(&model.BlogTypeModel{})
 	})
 
 	//返回结果
 	result = new(entity.ListResponseEntity)
-	//是否存在缓存
-	var existCache bool
-	cachePreFix := "blogTypeList_"
-	var cacheKey string
 
+	//没有缓存，获取数据集
 	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
 
-		//如果存在缓存，先从缓冲中取
-		dbDryRun.Select("id, yuque_name, yuque_id, created_at, updated_at").
-			Limit(perPage).Offset((page - 1) * perPage).Find(nil)
-
-		cacheKey = myDBProxy.BuildCacheKey(cachePreFix)
-
-		resultCache, ok := BlgLruUnsafety.Get(cacheKey)
-
-		if ok {
-			//有缓存,直接返回缓存对象
-			result = resultCache.(*entity.ListResponseEntity)
-			existCache = true
-			return
-		}
-
-		//没有缓存，获取数据集
 		rows, _ := db.Select("id, yuque_name, yuque_id, created_at, updated_at").
 			Limit(perPage).Offset((page - 1) * perPage).Rows()
 
@@ -114,11 +105,6 @@ func (s *BlogTypeRtService) GetList(perPage, page int) (result *entity.ListRespo
 
 		result.SetList(blogTypeModelList)
 	})
-
-	if existCache {
-		//存在缓存直接返回
-		return result
-	}
 
 	//没有缓存的情况下，继续计算count值，然后设置count
 	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
