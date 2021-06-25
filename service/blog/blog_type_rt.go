@@ -64,19 +64,13 @@ func (s *BlogTypeRtService) GetList(perPage, page int) (result *entity.ListRespo
 		return result
 	}
 
-	myDBProxy := my_db_proxy.NewMyDBProxy()
-
-	//表名
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
-		//需要改变一下db的内存值，gorm的clone值的问题
-		*db = *db.Model(&model.BlogTypeModel{})
-	})
+	myDBProxy := my_db_proxy.NewMyDBProxyByTable(model.BlogTypeModel.TableName())
 
 	//返回结果
 	result = new(entity.ListResponseEntity)
 
 	//没有缓存，获取数据集
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 
 		rows, _ := db.Select("id, yuque_name, yuque_id, created_at, updated_at").
 			Limit(perPage).Offset((page - 1) * perPage).Rows()
@@ -107,7 +101,7 @@ func (s *BlogTypeRtService) GetList(perPage, page int) (result *entity.ListRespo
 	})
 
 	//没有缓存的情况下，继续计算count值，然后设置count
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		var count int64
 		db.Count(&count)
 		result.SetCount(count)

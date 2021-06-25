@@ -144,31 +144,23 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int, sor
 		return result
 	}
 
-	myDBProxy := my_db_proxy.NewMyDBProxy()
-
-	blogTableName := model.BlogModel{}.TableName()
+	myDBProxy := my_db_proxy.NewMyDBProxyByTable(model.BlogModel{}.TableName())
 
 	//博客需要的字段
 	blogField := []string{"id", "user_id", "blog_type_id", "cover_plan_id", "title", "abstract", "browse_total", "created_at", "updated_at"}
 
 	for index, field := range blogField {
-		blogField[index] = fmt.Sprintf("%s.%s", blogTableName, field)
+		blogField[index] = fmt.Sprintf("%s.%s", model.BlogModel{}.TableName(), field)
 	}
 
-	//表名
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
-		//需要改变一下db的内存值，gorm的clone值的问题
-		*db = *db.Table(blogTableName)
-	})
-
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 	})
 
 	//过滤分类id过滤
 	if filter["blog_type_id"] != "" {
 
-		myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+		myDBProxy.ExecProxy(func(db *gorm.DB) {
 			db.Where("blog_type_id = ?", filter["blog_type_id"])
 		})
 
@@ -178,14 +170,14 @@ func (s *BlogRtService) GetList(filter map[string]string, perPage, page int, sor
 	result = new(entity.ListResponseEntity)
 
 	//没有缓存的情况下，继续计算count值，然后设置count
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		var count int64
 		db.Count(&count)
 		result.SetCount(count)
 		result.SetPerPage(perPage)
 	})
 
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		//数据库获取结果
 		rows, _ := db.Select(strings.Join(blogField, ", ")).Order(fmt.Sprintf("created_at %s", sort)).
 			Limit(perPage).Offset((page - 1) * perPage).Rows()
@@ -265,26 +257,20 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 		return result
 	}
 
-	myDBProxy := my_db_proxy.NewMyDBProxy()
-
-	//表字，得到db
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
-
-		*db = *db.Table(model.BlogModel{}.TableName())
-	})
+	myDBProxy := my_db_proxy.NewMyDBProxyByTable(model.BlogModel{}.TableName())
 
 	//过滤
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 	})
 
 	//排序
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		db.Order(fmt.Sprintf("%s DESC", sortDimension))
 	})
 
 	//分页
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		db.Limit(perPage)
 	})
 
@@ -351,15 +337,10 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 		return result
 	}
 
-	myDBProxy := my_db_proxy.NewMyDBProxy()
-
-	//表名
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
-		*db = *db.Table(model.BlogModel{}.TableName())
-	})
+	myDBProxy := my_db_proxy.NewMyDBProxyByTable(model.BlogModel{}.TableName())
 
 	//过滤
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 
 		db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
 
@@ -369,7 +350,7 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 	})
 
 	//排序和分页
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		db.Order("created_at DESC").Limit(perPage).Offset((page - 1) * perPage)
 
 	})
@@ -377,7 +358,7 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 	//获取数据
 	result = new(entity.ListResponseEntity)
 	//没有缓存的情况下，继续计算count值，然后设置count
-	myDBProxy.ExecProxy(func(db *gorm.DB, dbDryRun *gorm.DB) {
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		var count int64
 		db.Count(&count)
 		result.SetCount(count)
@@ -404,7 +385,7 @@ func (s *BlogRtService) GetStat() (result *entity.ListResponseEntity) {
 
 	result = new(entity.ListResponseEntity)
 	response := make(map[string]uint, 3)
-	
+
 	blogTableName := model.BlogModel{}.TableName()
 
 	db = db.Table(blogTableName)

@@ -7,38 +7,35 @@ import (
 
 //我的链接代理
 //db *gorm.DB  执行sql的
-//dbDryRun *gorm.DB 获取将要执行的sql的
-type Proxy func(db *gorm.DB, dbDryRun *gorm.DB)
+type Proxy func(db *gorm.DB)
 
 type MyDBProxy struct {
 	//执行sql
 	db *gorm.DB
-	//只是得到sql，不真正执行
-	dbDryRun *gorm.DB
 }
 
 //创建一个代理
 func NewMyDBProxy() *MyDBProxy {
-	return &MyDBProxy{
-		db:       mysql.GetNewDB(false),
-		dbDryRun: mysql.GetNewDB(true),
+	proxy := &MyDBProxy{
+		db: mysql.GetNewDB(false),
 	}
+
+	return proxy
+}
+
+//创建代理
+func NewMyDBProxyByTable(table string) *MyDBProxy {
+	proxy := NewMyDBProxy()
+	proxy.ExecProxy(func(db *gorm.DB) {
+		//需要改变一下db的内存值，gorm的clone值的问题
+		*db = *db.Table(table)
+	})
+	return proxy
 }
 
 //执行一个代理
 //返回一个interface
-func (m *MyDBProxy) ExecProxy(proxy Proxy){
-	 proxy(m.db, m.dbDryRun)
-	 return
-}
-
-//获取执行的sql
-func (m *MyDBProxy) GetExecSql() string {
-	statement := m.dbDryRun.Statement
-	return m.dbDryRun.Dialector.Explain(statement.SQL.String(), statement.Vars...)
-}
-
-//生成缓存的key，缓存key生成规则:  prefix + 当前执行的sql语句
-func (m *MyDBProxy) BuildCacheKey(prefix string) string {
-	return prefix + m.GetExecSql()
+func (m *MyDBProxy) ExecProxy(proxy Proxy) {
+	proxy(m.db)
+	return
 }
