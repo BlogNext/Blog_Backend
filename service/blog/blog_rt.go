@@ -259,6 +259,10 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 
 	myDBProxy := my_db_proxy.NewMyDBProxyByTable(model.BlogModel{}.TableName())
 
+
+	//获取数据
+	result = new(entity.ListResponseEntity)
+
 	//过滤
 	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		db.Where("yuque_public = ?", model.BLOG_MODEL_YUQUE_PUBLIC_1)
@@ -274,8 +278,17 @@ func (s *BlogRtService) GetListBySort(sortDimension string, perPage int) (result
 		db.Limit(perPage)
 	})
 
-	//获取数据
-	result = new(entity.ListResponseEntity)
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
+
+
+		var blogModelList []*model.BlogModel
+		db.Find(&blogModelList)
+
+		//转化为传输层的对象
+		blogSortEntityList := ChangeBlogSortEntityByList(blogModelList)
+
+		result.SetList(blogSortEntityList)
+	})
 
 	result.SetFilter([]help.Filter{
 		{

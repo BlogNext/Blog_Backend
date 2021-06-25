@@ -33,6 +33,16 @@ func NewMyDBProxyByTable(table string) *MyDBProxy {
 	return proxy
 }
 
+//创建代理
+//func NewMyDBProxyByModel(model interface{}) *MyDBProxy {
+//	proxy := NewMyDBProxy()
+//	proxy.ExecProxy(func(db *gorm.DB) {
+//		//需要改变一下db的内存值，gorm的clone值的问题
+//		*db = *db.Model(model)
+//	})
+//	return proxy
+//}
+
 //执行一个代理
 //返回一个interface
 func (m *MyDBProxy) ExecProxy(proxy Proxy) {
