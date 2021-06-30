@@ -13,6 +13,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	_ "net/http/pprof"
 )
 
 //加载各种配置文件
