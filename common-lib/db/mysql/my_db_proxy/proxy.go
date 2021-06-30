@@ -1,6 +1,7 @@
 package my_db_proxy
 
 import (
+	"github.com/blog_backend/common-lib/db/mysql"
 	"gorm.io/gorm"
 )
 
@@ -15,12 +16,11 @@ type MyDBProxy struct {
 
 //创建一个代理
 func NewMyDBProxy() *MyDBProxy {
-	return nil
-	//proxy := &MyDBProxy{
-	//	db: mysql.GetNewDB(false),
-	//}
-	//
-	//return proxy
+	proxy := &MyDBProxy{
+		db: mysql.GetNewDB(false),
+	}
+
+	return proxy
 }
 
 //创建代理
