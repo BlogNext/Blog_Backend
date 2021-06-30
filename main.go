@@ -7,13 +7,13 @@ import (
 	"github.com/blog_backend/common-lib/db/mysql"
 	_ "github.com/blog_backend/docs"
 	my_router "github.com/blog_backend/router"
+	"github.com/gin-contrib/pprof"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	"golang.org/x/net/netutil"
 	"log"
 	"net"
 	"net/http"
-	_ "net/http/pprof"
 )
 
 //加载各种配置文件
@@ -79,10 +79,7 @@ func main() {
 
 
 	router := new(my_router.MyRouter)
-	
 
-	//goin的性能分析
-	//ginpprof.Wrapper(router)
 
 	//运行服务器
 	serverConfig, err := config.GetConfig("server")
@@ -93,6 +90,11 @@ func main() {
 	serverInfo := serverConfig.GetStringMap("server")
 	//gin的路由
 	r := router.RunRouter()
+
+
+	//goin的性能分析
+	pprof.Register(r)
+
 	//url := ginSwagger.URL("http://localhost:8083/swagger/doc.json") // The url pointing to API definition
 	//r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -105,9 +107,9 @@ func main() {
 	}
 	defer l.Close()
 	netutil.LimitListener(l,1000)   //最多同时只能有1000个链接，防止压垮服务器
-	http.Serve(l,r)
+	//http.Serve(l,r)
 
-	//h2 := serverInfo["h2"].(map[string]interface{})
-	//http.ServeTLS(l,r, h2["certificate"].(string),h2["certificate_key"].(string))
+	h2 := serverInfo["h2"].(map[string]interface{})
+	http.ServeTLS(l,r, h2["certificate"].(string),h2["certificate_key"].(string))
 
 }
