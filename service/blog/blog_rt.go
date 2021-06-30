@@ -368,14 +368,28 @@ func (s *BlogRtService) SearchBlogMysqlLevel(keyword string, perPage, page int) 
 
 	})
 
+
 	//获取数据
 	result = new(entity.ListResponseEntity)
 	//没有缓存的情况下，继续计算count值，然后设置count
+
+
 	myDBProxy.ExecProxy(func(db *gorm.DB) {
 		var count int64
 		db.Count(&count)
 		result.SetCount(count)
 		result.SetPerPage(perPage)
+	})
+
+
+	myDBProxy.ExecProxy(func(db *gorm.DB) {
+		var blogModelList []*model.BlogModel
+		db.Find(&blogModelList)
+
+		//转化为传输层的对象
+		list := ChangeToBlogListEntityList(blogModelList)
+
+		result.SetList(list)
 	})
 
 	//第一次进来，添加缓存
