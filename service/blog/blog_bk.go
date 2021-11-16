@@ -6,6 +6,7 @@ import (
 	"github.com/FlashFeiFei/yuque/request/front"
 	"github.com/FlashFeiFei/yuque/response"
 	"github.com/blog_backend/common-lib/db/mysql"
+	entityAttachment "github.com/blog_backend/entity/attachment"
 	"github.com/blog_backend/model"
 	"github.com/blog_backend/service/attachment"
 	"gorm.io/gorm"
@@ -14,6 +15,18 @@ import (
 
 //博客后台服务
 type BlogBkService struct {
+}
+
+//下载封面图
+func (s *BlogBkService) downloadBlogImage(cover string) *entityAttachment.AttachmentEntity {
+
+	//下载封面图
+	attachmentService := new(attachment.AttachmentRtService)
+	attachmentEntityList := attachmentService.DownloadBlogImage(cover, model.ATTACHMENT_BLOG_Module, model.ATTACHMENT_FILE_TYPE_IMAGE)
+	if attachmentEntityList == nil {
+		panic("下载封面图失败")
+	}
+	return attachmentEntityList[0]
 }
 
 //通过yuquewebhook更新博客
@@ -27,11 +40,26 @@ func (s *BlogBkService) UpdateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 		panic(fmt.Sprintf("博客未创建yuque_id:%d", doc.ID))
 	}
 
+
+	//删除原来的封面图
+	attachmentService := new(attachment.AttachmentRtService)
+	attachmentService.DeleteAttachmentById(blogModel.CoverPlanId)
+
+
+
+	//获取封面图和摘要
+	DocIntor := front.GetDocIntorSerializer(doc.Slug, doc.BookId)
+
+	//下载封面图
+	image := s.downloadBlogImage(DocIntor.Data.Cover)
+
 	blogModel.YuqueFormat = doc.Format
 	blogModel.YuquePublic = int(doc.Public)
 	blogModel.YuqueLake = doc.BodyLake
 	blogModel.Title = doc.Title
 	blogModel.Content = doc.Body
+	blogModel.CoverPlanId = image.ID                     //封面图
+	blogModel.Abstract = DocIntor.Data.CustomDescription // 摘要
 
 	result := db.Save(blogModel)
 
@@ -118,9 +146,8 @@ func (s *BlogBkService) CreateBlogByYuQueWebHook(doc *response.DocDetailSerializ
 
 }
 
-
 //通过语雀webHook删除博客
-func(s BlogBkService) DeleteBlogByYuQueWebHook(doc *response.DocDetailSerializer){
+func (s BlogBkService) DeleteBlogByYuQueWebHook(doc *response.DocDetailSerializer) {
 	db := mysql.GetNewDB(false)
 	blogModel := new(model.BlogModel)
 	queryResult := db.Where("yuque_id = ?", doc.ID).First(blogModel)
