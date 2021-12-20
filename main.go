@@ -59,6 +59,7 @@ func init() {
 }
 
 //go:generate swag init
+//go:generate go run main.go
 // @title 晓琛博客
 // @version 1.0
 // @description 改swagger用于和前端联调用的，正在努力的测试中，目前的测试securityDefinitions.apikey ApiKeyAuth只能带一个请求头
