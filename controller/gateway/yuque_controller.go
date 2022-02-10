@@ -9,6 +9,7 @@ import (
 	"github.com/blog_backend/help"
 	"github.com/blog_backend/service/yuque"
 	"io/ioutil"
+	"log"
 )
 
 type YuqueController struct {
@@ -20,6 +21,8 @@ func (c *YuqueController) WebHook() {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Println("语雀同步过来的数据", string(data))
 
 	//数据解码
 	yuqueWebhookData := new(response.ResponseDocDetailSerializer)
